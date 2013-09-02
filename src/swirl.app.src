@@ -1,0 +1,11 @@
+{application, swirl, [
+  {description, "lightweight distributed stream processor"},
+  {vsn, "0.1"},
+  {registered, []},
+  {applications, [
+    kernel,
+    stdlib
+  ]},
+  {mod, {swirl, []}},
+  {env, []}
+]}.
