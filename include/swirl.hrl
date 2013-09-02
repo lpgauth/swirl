@@ -3,7 +3,8 @@
 -define(L(Key, List), swirl_utils:lookup(Key, List)).
 -define(L(Key, List, Default), swirl_utils:lookup(Key, List, Default)).
 
--define(DEFAULT_FLUSH, timer:seconds(1)).
+-define(DEFAULT_MAPPER_FLUSH, timer:seconds(1)).
+-define(DEFAULT_REDUCER_FLUSH, timer:seconds(1)).
 -define(NULL, undefined).
 
 %% types

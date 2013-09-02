@@ -85,7 +85,7 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
         flush_tstamp = Tstamp
     } = State) ->
 
-    {NewTstamp, TimerRef} = swirl_utils:new_timer(?DEFAULT_FLUSH, flush_counters),
+    {NewTstamp, TimerRef} = swirl_utils:new_timer(?DEFAULT_REDUCER_FLUSH, flush_counters),
     flush_counters(ReduceMod, ReducerOpts, Tstamp, NewTstamp, TableId),
 
     {noreply, State#state {

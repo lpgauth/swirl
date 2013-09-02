@@ -6,9 +6,14 @@
     lookup/1,
     register/4,
     start/3,
+    start/4,
     start/6,
     unregister/2
 ]).
+
+%% callback
+-callback map(atom(), event(), term()) -> {update, tuple(), tuple()} | ignore.
+-callback reduce(pos_integer(), pos_integer(), term(), term()) -> ok.
 
 %% public
 lookup(StreamName) ->
@@ -25,6 +30,11 @@ start(MapperMod, MapperOpts, MapperNodes) ->
     FlowId = swirl_utils:uuid(),
     swirl_tracker:start_mappers(FlowId, MapperMod, MapperOpts, MapperNodes, node()),
     swirl_reducer:register(FlowId).
+
+start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
+    FlowId = swirl_utils:uuid(),
+    swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
+    swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode).
 
 start(MapperMod, MapperOpts, MapperNodes, ReducerMod, ReducerOpts, ReducerNode) ->
     FlowId = swirl_utils:uuid(),

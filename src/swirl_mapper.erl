@@ -94,7 +94,7 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
     } = State) ->
 
     swirl_flow:register(FlowId, MapperMod, MapperOpts, NewTableId),
-    {NewTstamp, TimerRef} = swirl_utils:new_timer(?DEFAULT_FLUSH, flush_counters),
+    {NewTstamp, TimerRef} = swirl_utils:new_timer(?DEFAULT_MAPPER_FLUSH, flush_counters),
     flush_counters(FlowId, Tstamp, NewTstamp, TableId, ReducerNode),
 
     {noreply, State#state {
