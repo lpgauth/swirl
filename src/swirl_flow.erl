@@ -55,4 +55,5 @@ key(FlowId, StreamName) ->
     {flow, FlowId, StreamName}.
 
 match_spec(StreamName) ->
-    [{{{flow, '_', StreamName}, {'$1','$2','$3','$4'}}, [], [{{'$1','$2','$3','$4'}}]}].
+    [{{{flow, '_', '$1'}, {'$2','$3','$4','$5'}}, [{'orelse' ,{'=:=', '$1', StreamName},
+        {'=:=', '$1', undefined}}], [{{'$2','$3','$4','$5'}}]}].

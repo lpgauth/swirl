@@ -40,9 +40,6 @@
     timer_ref
 }).
 
-%% callback
--callback map(atom(), event(), term()) -> {update, tuple(), tuple()} | ignore.
-
 %% public
 map(MapperMod, MapperOpts, StreamName, Event, TableId) ->
     case MapperMod:map(StreamName, Event, MapperOpts) of
@@ -84,6 +81,9 @@ handle_cast(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
+handle_info(flush_counters, State) ->
+    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
+    {noreply, State};
 handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}}, #state {
         flow_id = FlowId,
         mapper_tid = TableId,
@@ -102,9 +102,6 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
         flush_tstamp = NewTstamp,
         timer_ref = TimerRef
     }};
-handle_info(flush_counters, State) ->
-    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
-    {noreply, State};
 handle_info(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.

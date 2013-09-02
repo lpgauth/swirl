@@ -40,9 +40,6 @@
     timer_ref
 }).
 
-%% callback
--callback reduce(pos_integer(), pos_integer(), term(), term()) -> ok.
-
 %% public
 lookup(FlowId) ->
     swirl_tracker:lookup({reducer, FlowId}).
@@ -78,6 +75,15 @@ handle_cast(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
+handle_info(flush_counters, State) ->
+    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
+    {noreply, State};
+handle_info({flush_counters, _FlowId, _Tstamp, _NewTstamp, CountersList}, #state {
+        reducer_tid = TableId
+    } = State) ->
+
+    map_counters(CountersList, TableId),
+    {noreply, State};
 handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}}, #state {
         reducer_module = ReduceMod,
         reducer_options = ReducerOpts,
@@ -93,15 +99,6 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
         flush_tstamp = NewTstamp,
         timer_ref = TimerRef
     }};
-handle_info(flush_counters, State) ->
-    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
-    {noreply, State};
-handle_info({flush_counters, _FlowId, _Tstamp, _NewTstamp, CountersList}, #state {
-        reducer_tid = TableId
-    } = State) ->
-
-    map_counters(CountersList, TableId),
-    {noreply, State};
 handle_info(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.

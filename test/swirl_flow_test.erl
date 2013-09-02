@@ -14,10 +14,17 @@ test_swirl_flow() ->
     ], [node()], node()),
 
     timer:sleep(timer:seconds(1)),
+    swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
+    swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 1}]),
     swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 10}]),
 
     Counters = receive_loop(),
-    ?assert_equal([{{delivery, 3, 10}, 1, 10}], Counters).
+    Expected = [
+        {{delivery,3,1},1,10},
+        {{delivery,3,10},1,10}
+    ],
+
+    ?assert_equal(Expected, Counters).
 
 receive_loop() ->
     receive
