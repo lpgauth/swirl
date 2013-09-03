@@ -37,24 +37,30 @@
 -record(state, {}).
 
 %% public
+-spec lookup(tuple()) -> term().
 lookup(Key) ->
     [{_, Value} | _] = ets:lookup(?TABLE_NAME, Key),
     Value.
 
+-spec message(node(), term()) -> ok.
 message(Node, Msg) ->
     {swirl_tracker, Node} ! Msg.
 
+-spec register(tuple(), term()) -> true.
 register(Key, Value) ->
     ets:insert(?TABLE_NAME, {Key, Value}).
 
+-spec start_mappers(binary(), atom(), [flow_opts()], [node()], node()) -> [ok].
 start_mappers(FlowId, MapperMod, MapperOpts, MapperNodes, ReducerNode) ->
     Msg = {start_mapper, FlowId, MapperMod, MapperOpts, ReducerNode},
     [swirl_tracker:message(Node, Msg) || Node <- MapperNodes].
 
+-spec start_reducer(binary(), atom(), [flow_opts()], node()) -> ok.
 start_reducer(FlowId, ReducerMod, ReducerOpts, ReducerNode) ->
     Msg = {start_reducer, FlowId, ReducerMod, ReducerOpts},
     swirl_tracker:message(ReducerNode, Msg).
 
+-spec unregister(tuple()) -> true.
 unregister(Key) ->
     ets:delete(?TABLE_NAME, Key).
 

@@ -41,12 +41,15 @@
 }).
 
 %% public
+-spec lookup(binary()) -> list(tuple()).
 lookup(FlowId) ->
     swirl_tracker:lookup({reducer, FlowId}).
 
+-spec register(binary()) -> true.
 register(FlowId) ->
     swirl_tracker:register({reducer, FlowId}, self()).
 
+-spec unregister(binary()) -> true.
 unregister(FlowId) ->
     swirl_tracker:unregister({reducer, FlowId}).
 

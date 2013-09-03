@@ -16,9 +16,11 @@
 -callback reduce(pos_integer(), pos_integer(), term(), term()) -> ok.
 
 %% public
+-spec lookup(atom()) -> [tuple()].
 lookup(StreamName) ->
     ets:select(registry, match_spec(StreamName)).
 
+-spec register(binary(), atom(), [flow_opts()], pos_integer()) -> true.
 register(FlowId, MapperMod, MapperOpts, TableId) ->
     StreamName = ?L(stream_name, MapperOpts),
     StreamFilter = ?L(stream_filter, MapperOpts),
@@ -26,21 +28,26 @@ register(FlowId, MapperMod, MapperOpts, TableId) ->
     Value = {ExpTree, MapperMod, MapperOpts, TableId},
     swirl_tracker:register(key(FlowId, StreamName), Value).
 
+-spec start(atom(), [flow_opts()], [node()]) -> ok.
 start(MapperMod, MapperOpts, MapperNodes) ->
     FlowId = swirl_utils:uuid(),
     swirl_tracker:start_mappers(FlowId, MapperMod, MapperOpts, MapperNodes, node()),
-    swirl_reducer:register(FlowId).
+    swirl_reducer:register(FlowId),
+    ok.
 
+-spec start(atom(), [flow_opts()], [node()], node()) -> ok.
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     FlowId = swirl_utils:uuid(),
     swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode).
 
+-spec start(atom(), [flow_opts()], [node()], atom(), [flow_opts()], node()) -> ok.
 start(MapperMod, MapperOpts, MapperNodes, ReducerMod, ReducerOpts, ReducerNode) ->
     FlowId = swirl_utils:uuid(),
     swirl_tracker:start_mappers(FlowId, MapperMod, MapperOpts, MapperNodes, ReducerNode),
     swirl_tracker:start_reducer(FlowId, ReducerMod, ReducerOpts, ReducerNode).
 
+-spec unregister(binary(), atom()) -> true.
 unregister(FlowId, StreamName) ->
     swirl_tracker:unregister(key(FlowId, StreamName)).
 

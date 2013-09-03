@@ -3,8 +3,6 @@
 
 %% public
 -export([
-    new_table/2,
-    table/2,
     new_table/3,
     table/3
 ]).
@@ -31,15 +29,11 @@
 }).
 
 %% public
-new_table(Name, Server) ->
-    new_table(Name, [], Server).
-
-table(Name, Server) ->
-    table(Name, [], Server).
-
+-spec new_table(atom(), list(atom() | tuple()), atom() | pid()) -> ok.
 new_table(Name, Options, Server) ->
     gen_server:cast(?SERVER, {new_table, {Name, Options, Server}}).
 
+-spec table(atom(), list(atom() | tuple()), atom() | pid()) -> ok.
 table(Name, Options, Server) ->
     gen_server:cast(?SERVER, {table, {Name, Options, Server}}).
 

@@ -9,7 +9,7 @@
 
 %% types
 -type event() :: [{atom(), value()}].
--type mapper_opts() :: {stream_name, atom()} | {stream_filter, string()}.
+-type flow_opts() :: {stream_name, atom()} | {stream_filter, string()}.
 
 -type boolean_op() :: 'and' | 'or'.
 -type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.

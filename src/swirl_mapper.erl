@@ -41,6 +41,7 @@
 }).
 
 %% public
+-spec map(atom(), [flow_opts()], atom(), event(), pos_integer()) -> ok.
 map(MapperMod, MapperOpts, StreamName, Event, TableId) ->
     case MapperMod:map(StreamName, Event, MapperOpts) of
         {update, Key, Counters} ->
@@ -51,9 +52,11 @@ map(MapperMod, MapperOpts, StreamName, Event, TableId) ->
             ok
     end.
 
+-spec register(binary()) -> true.
 register(FlowId) ->
     swirl_tracker:register(key(FlowId), self()).
 
+-spec unregister(binary()) -> true.
 unregister(FlowId) ->
     swirl_tracker:unregister(key(FlowId)).
 
