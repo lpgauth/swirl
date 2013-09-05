@@ -4,13 +4,12 @@
 -behavior(swirl_flow).
 -export([
     map/3,
-    reduce/4
+    reduce/3
 ]).
 
-%% swirl_mapper callbacks
-map(StreamName, Event, _Opts) ->
+%% swirl_flow callbacks
+map(StreamName, Event, _MapperOpts) ->
     {update, {StreamName, ?L(exchange_id, Event), ?L(bidder_id, Event)}, {1, 10}}.
 
-%% swirl_reducer callbacks
-reduce(_Tstamp, _Tstamp2, Counters, Opts) ->
-    ?L(send_to , Opts) ! Counters.
+reduce(_Period, Counters, ReducerOpts) ->
+    ?L(send_to , ReducerOpts) ! Counters.

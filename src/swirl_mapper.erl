@@ -1,5 +1,3 @@
-%% TODO: make flush configurable
-
 -module(swirl_mapper).
 -include("swirl.hrl").
 -compile({no_auto_import, [unregister/1]}).
@@ -32,22 +30,22 @@
 
 -record(state, {
     flow_id,
-    mapper_module,
-    mapper_options,
-    mapper_tid,
+    flow_mod,
+    flow_opts,
+    table_id,
     reducer_node,
-    flush_tstamp,
+    last_flush,
     timer_ref
 }).
 
 %% public
--spec map(atom(), [flow_opts()], atom(), event(), pos_integer()) -> ok.
-map(MapperMod, MapperOpts, StreamName, Event, TableId) ->
-    case MapperMod:map(StreamName, Event, MapperOpts) of
+-spec map(atom(), atom(), event(), term(), pos_integer()) -> ok.
+map(FlowMod, StreamName, Event, MapperOpts, TableId) ->
+    case FlowMod:map(StreamName, Event, MapperOpts) of
         {update, Key, Counters} ->
             UpdateOp = swirl_utils:update_op(Counters),
             NumCounters = tuple_size(Counters),
-            swirl_utils:increment(Key, UpdateOp, TableId, NumCounters);
+            swirl_utils:increment(Key, UpdateOp, NumCounters, TableId);
         ignore ->
             ok
     end.
@@ -61,18 +59,18 @@ unregister(FlowId) ->
     swirl_tracker:unregister(key(FlowId)).
 
 %% internal
-start_link(FlowId, MapperMod, MapperOpts, ReducerNode) ->
-    gen_server:start_link(?MODULE, {FlowId, MapperMod, MapperOpts, ReducerNode}, []).
+start_link(FlowId, FlowMod, FlowOpts, ReducerNode) ->
+    gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts, ReducerNode}, []).
 
 %% gen_server callbacks
-init({FlowId, MapperMod, MapperOpts, ReducerNode}) ->
+init({FlowId, FlowMod, FlowOpts, ReducerNode}) ->
     process_flag(trap_exit, true),
     register(FlowId),
     swirl_ets_manager:table(?TABLE_NAME, ?TABLE_OPTS, self()),
     {ok, #state {
         flow_id = FlowId,
-        mapper_module = MapperMod,
-        mapper_options = MapperOpts,
+        flow_mod = FlowMod,
+        flow_opts = FlowOpts,
         reducer_node = ReducerNode
     }}.
 
@@ -84,38 +82,40 @@ handle_cast(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
-handle_info(flush_counters, State) ->
-    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
-    {noreply, State};
 handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}}, #state {
         flow_id = FlowId,
-        mapper_tid = TableId,
-        mapper_module = MapperMod,
-        mapper_options = MapperOpts,
+        table_id = TableId,
+        flow_mod = FlowMod,
+        flow_opts = FlowOpts,
         reducer_node = ReducerNode,
-        flush_tstamp = Tstamp
+        last_flush = Timestamp
     } = State) ->
 
-    swirl_flow:register(FlowId, MapperMod, MapperOpts, NewTableId),
-    {NewTstamp, TimerRef} = swirl_utils:new_timer(?DEFAULT_MAPPER_FLUSH, flush_counters),
-    flush_counters(FlowId, Tstamp, NewTstamp, TableId, ReducerNode),
+    swirl_flow:register(FlowId, FlowMod, FlowOpts, NewTableId),
+    MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
+    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
+    Period = #period {start_at = Timestamp, end_at = Timestamp2},
+    flush_counters(FlowId, Period, TableId, ReducerNode),
 
     {noreply, State#state {
-        mapper_tid = NewTableId,
-        flush_tstamp = NewTstamp,
+        table_id = NewTableId,
+        last_flush = Timestamp2,
         timer_ref = TimerRef
     }};
+handle_info(flush, State) ->
+    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
+    {noreply, State};
 handle_info(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
 terminate(_Reason, #state {
         flow_id = FlowId,
-        mapper_options = MapperOpts,
+        flow_opts = FlowOpts,
         timer_ref = TimerRef
     }) ->
 
-    StreamName = ?L(stream_name, MapperOpts),
+    StreamName = ?L(stream_name, FlowOpts),
     swirl_flow:unregister(FlowId, StreamName),
     unregister(FlowId),
     timer:cancel(TimerRef),
@@ -125,12 +125,12 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-flush_counters(_FlowId, _Tstamp, _NewTstamp, undefined, _ReducerNode) ->
+flush_counters(_FlowId, _Period, undefined, _ReducerNode) ->
     ok;
-flush_counters(FlowId, Tstamp, NewTstamp, TableId, ReducerNode) ->
+flush_counters(FlowId, Period, TableId, ReducerNode) ->
     CountersList = ets:tab2list(TableId),
     true = ets:delete(TableId),
-    swirl_tracker:message(ReducerNode, {flush_counters, FlowId, Tstamp, NewTstamp, CountersList}).
+    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, CountersList}).
 
 key(FlowId) ->
     {mapper, FlowId}.

@@ -1,15 +1,28 @@
 %% macros
+-define(NULL, undefined).
+
+-define(DEFAULT_MAPPER_FLUSH, timer:seconds(1)).
+-define(DEFAULT_REDUCER_FLUSH, timer:seconds(1)).
+
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 -define(L(Key, List), swirl_utils:lookup(Key, List)).
 -define(L(Key, List, Default), swirl_utils:lookup(Key, List, Default)).
 
--define(DEFAULT_MAPPER_FLUSH, timer:seconds(1)).
--define(DEFAULT_REDUCER_FLUSH, timer:seconds(1)).
--define(NULL, undefined).
+%% records
+-record(period, {
+    start_at,
+    end_at
+}).
 
 %% types
 -type event() :: [{atom(), value()}].
--type flow_opts() :: {stream_name, atom()} | {stream_filter, string()}.
+-type period() :: #period {}.
+-type flow_opts() :: {stream_name, atom()} |
+                     {stream_filter, string()} |
+                     {mapper_flush, pos_integer()} |
+                     {mapper_opts, term()} |
+                     {reducer_flush, pos_integer()} |
+                     {reducer_opts, term()}.
 
 -type boolean_op() :: 'and' | 'or'.
 -type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.

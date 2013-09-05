@@ -20,7 +20,7 @@ epoch_ms() ->
     {Mega, Sec, Micro} = os:timestamp(),
     (Mega * 1000000000 + Sec * 1000) + trunc(Micro / 1000).
 
-increment(Key, UpdateOp, TableId, NumCounters) ->
+increment(Key, UpdateOp, NumCounters, TableId) ->
     try ets:update_counter(TableId, Key, UpdateOp)
     catch
         error:badarg ->

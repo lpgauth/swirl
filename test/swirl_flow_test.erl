@@ -10,10 +10,15 @@ test_swirl_flow() ->
     swirl_flow:start(swirl_flow_example, [
         {stream_name, delivery},
         {stream_filter, "exchange_id = 3"},
-        {send_to, self()}
+        {mapper_flush, timer:seconds(1)},
+        {reducer_flush, timer:seconds(1)},
+        {reducer_opts, [
+          {send_to, self()}
+        ]}
     ], [node()], node()),
 
     timer:sleep(timer:seconds(1)),
+
     swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
     swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 1}]),
     swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 10}]),
