@@ -21,6 +21,7 @@ lookup(StreamName) ->
 
 -spec register(binary(), atom(), [flow_opts()], pos_integer()) -> true.
 register(FlowId, FlowMod, FlowOpts, TableId) ->
+    verify_options(FlowOpts, []),
     StreamName = ?L(stream_name, FlowOpts),
     StreamFilter = ?L(stream_filter, FlowOpts),
     ExpTree = expression_tree(StreamFilter),
@@ -59,3 +60,30 @@ key(FlowId, StreamName) ->
 match_spec(StreamName) ->
     [{{{flow, '_', '$1'}, {'$2','$3','$4','$5'}}, [{'orelse' ,{'=:=', '$1', StreamName},
         {'=:=', '$1', undefined}}], [{{'$2','$3','$4','$5'}}]}].
+
+verify_options([{mapper_flush, MapperFlush} | Options], Errors)
+    when is_integer(MapperFlush) ->
+        verify_options(Options, Errors);
+verify_options([{mapper_opts, _} | Options], Errors) ->
+    verify_options(Options, Errors);
+verify_options([{reducer_flush, ReducerFlush} | Options], Errors)
+    when is_integer(ReducerFlush) ->
+        verify_options(Options, Errors);
+verify_options([{reducer_opts, _} | Options], Errors) ->
+    verify_options(Options, Errors);
+verify_options([{stream_filter, StreamFilter} = Option | Options], Errors) ->
+    case swirl_ql:parse(StreamFilter) of
+        {ok, _ExpTree} ->
+            verify_options(Options, Errors);
+        {error, _Reason} ->
+            verify_options(Options, [Option | Errors])
+    end;
+verify_options([{stream_name, StreamName} | Options], Errors)
+    when is_atom(StreamName)->
+        verify_options(Options, Errors);
+verify_options([Option | Options], Errors) ->
+    verify_options(Options, [Option | Errors]);
+verify_options([], []) ->
+    ok;
+verify_options([], Errors) ->
+    erlang:error({bad_options, Errors}).
