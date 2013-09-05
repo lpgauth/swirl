@@ -1,5 +1,6 @@
 .eunit
-deps
-*.o
 *.beam
-*.plt
+deps
+ebin
+swirl_ql_lexer.erl
+swirl_ql_parser.erl
