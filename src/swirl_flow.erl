@@ -7,7 +7,7 @@
     register/4,
     start/3,
     start/4,
-    unregister/2
+    unregister/3
 ]).
 
 %% callback
@@ -17,7 +17,7 @@
 %% public
 -spec lookup(atom()) -> [tuple()].
 lookup(StreamName) ->
-    ets:select(registry, match_spec(StreamName)).
+    ets:select(registry, match_lookup_spec(StreamName)).
 
 -spec register(binary(), atom(), [flow_opts()], pos_integer()) -> true.
 register(FlowId, FlowMod, FlowOpts, TableId) ->
@@ -43,9 +43,9 @@ start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode),
     ok.
 
--spec unregister(binary(), atom()) -> true.
-unregister(FlowId, StreamName) ->
-    swirl_tracker:unregister(key(FlowId, StreamName)).
+-spec unregister(binary(), atom(), pos_integer()) -> true.
+unregister(FlowId, StreamName, TableId) ->
+   ets:match_delete(registry, match_delete_spec(FlowId, StreamName, TableId)).
 
 %% private
 expression_tree(undefined) ->
@@ -57,9 +57,12 @@ expression_tree(StreamFilter) ->
 key(FlowId, StreamName) ->
     {flow, FlowId, StreamName}.
 
-match_spec(StreamName) ->
-    [{{{flow, '_', '$1'}, {'$2','$3','$4','$5'}}, [{'orelse' ,{'=:=', '$1', StreamName},
-        {'=:=', '$1', undefined}}], [{{'$2','$3','$4','$5'}}]}].
+match_lookup_spec(StreamName) ->
+    [{{{flow, '_', '$1'}, {'$2', '$3', '$4', '$5'}}, [{'orelse' , {'=:=', '$1', StreamName},
+        {'=:=', '$1', undefined}}], [{{'$2', '$3', '$4', '$5'}}]}].
+
+match_delete_spec(FlowId, StreamName, TableId) ->
+    [{{{flow, FlowId, StreamName}, {'_', '_', '_', TableId}}, [], []}].
 
 verify_options([{mapper_flush, MapperFlush} | Options], Errors)
     when is_integer(MapperFlush) ->

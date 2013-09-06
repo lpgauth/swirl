@@ -92,6 +92,8 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
     } = State) ->
 
     swirl_flow:register(FlowId, FlowMod, FlowOpts, NewTableId),
+    StreamName = ?L(stream_name, FlowOpts),
+    swirl_flow:unregister(FlowId, StreamName, TableId),
     MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
     {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
     Period = #period {start_at = Timestamp, end_at = Timestamp2},
@@ -111,12 +113,13 @@ handle_info(Msg, State) ->
 
 terminate(_Reason, #state {
         flow_id = FlowId,
+        table_id = TableId,
         flow_opts = FlowOpts,
         timer_ref = TimerRef
     }) ->
 
     StreamName = ?L(stream_name, FlowOpts),
-    swirl_flow:unregister(FlowId, StreamName),
+    swirl_flow:unregister(FlowId, StreamName, TableId),
     unregister(FlowId),
     timer:cancel(TimerRef),
     ok.
@@ -129,8 +132,10 @@ flush_counters(_FlowId, _Period, undefined, _ReducerNode) ->
     ok;
 flush_counters(FlowId, Period, TableId, ReducerNode) ->
     CountersList = ets:tab2list(TableId),
-    true = ets:delete(TableId),
-    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, CountersList}).
+    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, CountersList}),
+    % to prevent unregister race condition
+    timer:sleep(100),
+    true = ets:delete(TableId).
 
 key(FlowId) ->
     {mapper, FlowId}.
