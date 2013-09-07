@@ -5,8 +5,8 @@
 -export([
     lookup/1,
     register/4,
-    start/3,
     start/4,
+    stop/3,
     unregister/3
 ]).
 
@@ -29,18 +29,17 @@ register(FlowId, FlowMod, FlowOpts, TableId) ->
     Value = {ExpTree, FlowMod, MapperOpts, TableId},
     swirl_tracker:register(key(FlowId, StreamName), Value).
 
--spec start(atom(), [flow_opts()], [node()]) -> ok.
-start(FlowMod, FlowOpts, MapperNodes) ->
-    FlowId = swirl_utils:uuid(),
-    swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, node()),
-    swirl_reducer:register(FlowId),
-    ok.
-
--spec start(atom(), [flow_opts()], [node()], node()) -> ok.
+-spec start(atom(), [flow_opts()], [node()], node()) -> binary().
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     FlowId = swirl_utils:uuid(),
     swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode),
+    FlowId.
+
+-spec stop(binary(), [node()], node()) -> ok.
+stop(FlowId, MapperNodes, ReducerNode) ->
+    swirl_tracker:stop_mappers(FlowId, MapperNodes),
+    swirl_tracker:stop_reducer(FlowId, ReducerNode),
     ok.
 
 -spec unregister(binary(), atom(), pos_integer()) -> true.

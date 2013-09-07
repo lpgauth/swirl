@@ -41,15 +41,15 @@
 %% public
 -spec lookup(binary()) -> list(tuple()).
 lookup(FlowId) ->
-    swirl_tracker:lookup({reducer, FlowId}).
+    swirl_tracker:lookup(key(FlowId)).
 
 -spec register(binary()) -> true.
 register(FlowId) ->
-    swirl_tracker:register({reducer, FlowId}, self()).
+    swirl_tracker:register(key(FlowId), self()).
 
 -spec unregister(binary()) -> true.
 unregister(FlowId) ->
-    swirl_tracker:unregister({reducer, FlowId}).
+    swirl_tracker:unregister(key(FlowId)).
 
 %% internal
 reduce(FlowMod, FlowOpts, Period, CountersList) ->
@@ -96,6 +96,8 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
 handle_info(flush, State) ->
     swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
     {noreply, State};
+handle_info(stop, State) ->
+    {stop, normal, State};
 handle_info({mapper_flush, Period, CountersList}, #state {
         table_id = TableId
     } = State) ->
@@ -119,6 +121,9 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
+key(FlowId) ->
+    {reducer, FlowId}.
+
 flush_counters(_FlowMod, _FlowOpts, _Period, undefined) ->
     ok;
 flush_counters(FlowMod, FlowOpts, Period, TableId) ->

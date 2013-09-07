@@ -7,7 +7,7 @@ before_suite() ->
     application:start(swirl).
 
 test_swirl_flow() ->
-    swirl_flow:start(swirl_flow_example, [
+    FlowId = swirl_flow:start(swirl_flow_example, [
         {stream_name, delivery},
         {stream_filter, "exchange_id = 3"},
         {mapper_flush, timer:seconds(1)},
@@ -29,7 +29,8 @@ test_swirl_flow() ->
         {{delivery,3,10},1,10}
     ],
 
-    ?assert_equal(Expected, Counters).
+    ?assert_equal(Expected, Counters),
+    swirl_flow:stop(FlowId, [node()], node()).
 
 receive_loop() ->
     receive
