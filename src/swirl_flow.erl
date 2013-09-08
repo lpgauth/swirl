@@ -25,7 +25,7 @@ register(FlowId, FlowMod, FlowOpts, TableId) ->
     StreamName = ?L(stream_name, FlowOpts),
     StreamFilter = ?L(stream_filter, FlowOpts),
     ExpTree = expression_tree(StreamFilter),
-    MapperOpts = ?L(mapper_opts, FlowOpts),
+    MapperOpts = ?L(mapper_opts, FlowOpts, []),
     Value = {ExpTree, FlowMod, MapperOpts, TableId},
     swirl_tracker:register(key(FlowId, StreamName), Value).
 

@@ -53,7 +53,7 @@ unregister(FlowId) ->
 
 %% internal
 reduce(FlowMod, FlowOpts, Period, CountersList) ->
-    FlowMod:reduce(Period, CountersList, ?L(reducer_opts, FlowOpts)).
+    FlowMod:reduce(Period, CountersList, ?L(reducer_opts, FlowOpts, [])).
 
 start_link(FlowId, FlowMod, FlowOpts) ->
     gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts}, []).
@@ -137,6 +137,5 @@ map_counters(Period, [H | T], TableId) ->
     [Tuple| Counters] = tuple_to_list(H),
     {Key, _} = Tuple,
     UpdateOp = swirl_utils:update_op(Counters),
-    NumCounters = length(Counters),
-    swirl_utils:safe_ets_increment(Key, UpdateOp, NumCounters, TableId),
+    swirl_utils:safe_ets_increment(TableId, Key, UpdateOp),
     map_counters(Period, T, TableId).
