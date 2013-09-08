@@ -4,13 +4,12 @@
 %% public
 -export([
     epoch_ms/0,
-    increment/4,
     lookup/2,
     lookup/3,
     new_timer/2,
     new_timer/3,
     safe_dict_fetch/2,
-    safe_ets_increment/2,
+    safe_ets_increment/4,
     update_op/1,
     uuid/0
 ]).
@@ -19,15 +18,6 @@
 epoch_ms() ->
     {Mega, Sec, Micro} = os:timestamp(),
     (Mega * 1000000000 + Sec * 1000) + trunc(Micro / 1000).
-
-increment(Key, UpdateOp, NumCounters, TableId) ->
-    try ets:update_counter(TableId, Key, UpdateOp)
-    catch
-        error:badarg ->
-            New = list_to_tuple([Key] ++ [0 || _ <- lists:seq(1, NumCounters)]),
-            ets:insert(TableId, New),
-            ets:update_counter(TableId, Key, UpdateOp)
-    end.
 
 lookup(Key, List) ->
     lookup(Key, List, undefined).
@@ -53,13 +43,13 @@ safe_dict_fetch(Key, Dict) ->
         error:badarg -> undefined
     end.
 
-safe_ets_increment(Tid, Key) ->
-    try
-        ets:update_counter(Tid, Key, 1)
+safe_ets_increment(Key, UpdateOp, NumCounters, TableId) ->
+    try ets:update_counter(TableId, Key, UpdateOp)
     catch
         error:badarg ->
-            ets:insert(Tid, {Key, 0}),
-            safe_ets_increment(Tid, Key)
+            New = list_to_tuple([Key] ++ [0 || _ <- lists:seq(1, NumCounters)]),
+            ets:insert(TableId, New),
+            ets:update_counter(TableId, Key, UpdateOp)
     end.
 
 update_op(Counters) when is_tuple(Counters) ->
@@ -68,7 +58,7 @@ update_op(Counters) when is_list(Counters) ->
     update_op(Counters, 2).
 
 uuid() ->
-    uuid:uuid_to_string(uuid:get_v1(uuid:new(self(), os))).
+    uuid:get_v1(uuid:new(self(), os)).
 
 %% private
 update_op([], _Pos) ->

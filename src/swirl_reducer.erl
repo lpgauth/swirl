@@ -134,8 +134,9 @@ flush_counters(FlowMod, FlowOpts, Period, TableId) ->
 map_counters(_Period, [], _TableId) ->
     ok;
 map_counters(Period, [H | T], TableId) ->
-    [Key| Counters] = tuple_to_list(H),
+    [Tuple| Counters] = tuple_to_list(H),
+    {Key, _} = Tuple,
     UpdateOp = swirl_utils:update_op(Counters),
     NumCounters = length(Counters),
-    swirl_utils:increment(Key, UpdateOp, NumCounters, TableId),
+    swirl_utils:safe_ets_increment(Key, UpdateOp, NumCounters, TableId),
     map_counters(Period, T, TableId).

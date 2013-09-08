@@ -28,6 +28,7 @@
 -define(TABLE_NAME, counters).
 -define(TABLE_OPTS, [public, {write_concurrency, true}]).
 -define(SERVER, ?MODULE).
+-define(WIDTH, 16).
 
 -record(state, {
     flow_id,
@@ -48,9 +49,10 @@ lookup(FlowId) ->
 map(FlowMod, StreamName, Event, MapperOpts, TableId) ->
     case FlowMod:map(StreamName, Event, MapperOpts) of
         {update, Key, Counters} ->
+            Rnd = erlang:system_info(scheduler_id) band (?WIDTH-1),
             UpdateOp = swirl_utils:update_op(Counters),
             NumCounters = tuple_size(Counters),
-            swirl_utils:increment(Key, UpdateOp, NumCounters, TableId);
+            swirl_utils:safe_ets_increment({Key, Rnd}, UpdateOp, NumCounters, TableId);
         ignore ->
             ok
     end.
