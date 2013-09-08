@@ -44,7 +44,7 @@ stop(FlowId, MapperNodes, ReducerNode) ->
 
 -spec unregister(binary(), atom(), pos_integer()) -> true.
 unregister(FlowId, StreamName, TableId) ->
-   ets:match_delete(registry, match_delete_spec(FlowId, StreamName, TableId)).
+    ets:select_delete(registry, match_delete_spec(FlowId, StreamName, TableId)).
 
 %% private
 expression_tree(undefined) ->
@@ -61,7 +61,7 @@ match_lookup_spec(StreamName) ->
         {'=:=', '$1', undefined}}], [{{'$2', '$3', '$4', '$5'}}]}].
 
 match_delete_spec(FlowId, StreamName, TableId) ->
-    [{{{flow, FlowId, StreamName}, {'_', '_', '_', TableId}}, [], []}].
+    [{{{flow, FlowId, StreamName}, {'_', '_', '_', TableId}}, [], [true]}].
 
 verify_options([{mapper_flush, MapperFlush} | Options], Errors)
     when is_integer(MapperFlush) ->
