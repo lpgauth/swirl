@@ -1,6 +1,6 @@
 -module(swirl_reducer).
 -include("swirl.hrl").
--compile({no_auto_import,[unregister/1]}).
+-compile({no_auto_import, [unregister/1]}).
 
 %% public
 -export([
@@ -62,7 +62,8 @@ start_link(FlowId, FlowMod, FlowOpts) ->
 init({FlowId, FlowMod, FlowOpts}) ->
     process_flag(trap_exit, true),
     register(FlowId),
-    swirl_ets_manager:table(?TABLE_NAME, ?TABLE_OPTS, self()),
+    self() ! flush,
+
     {ok, #state {
         flow_id = FlowId,
         flow_mod = FlowMod,
@@ -76,7 +77,7 @@ handle_cast(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
-handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}}, #state {
+handle_info(flush, #state {
         flow_mod = FlowMod,
         flow_opts = FlowOpts,
         table_id = TableId,
@@ -85,24 +86,24 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
 
     ReducerFlush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
     {Timstamp2, TimerRef} = swirl_utils:new_timer(ReducerFlush, flush),
+
+    NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
+
     Period = #period {start_at = Timstamp, end_at = Timstamp2},
-    flush_counters(FlowMod, FlowOpts, Period, TableId),
+    spawn(fun() -> flush_counters(FlowMod, FlowOpts, Period, TableId) end),
 
     {noreply, State#state {
         table_id = NewTableId,
         last_flush = Timstamp2,
         timer_ref = TimerRef
     }};
-handle_info(flush, State) ->
-    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
-    {noreply, State};
 handle_info(stop, State) ->
     {stop, normal, State};
 handle_info({mapper_flush, Period, CountersList}, #state {
         table_id = TableId
     } = State) ->
 
-    map_counters(Period, CountersList, TableId),
+    spawn(fun() -> map_counters(Period, CountersList, TableId) end),
     {noreply, State};
 handle_info(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
@@ -134,8 +135,7 @@ flush_counters(FlowMod, FlowOpts, Period, TableId) ->
 map_counters(_Period, [], _TableId) ->
     ok;
 map_counters(Period, [H | T], TableId) ->
-    [Tuple| Counters] = tuple_to_list(H),
-    {Key, _} = Tuple,
+    [{Key, _} | Counters] = tuple_to_list(H),
     UpdateOp = swirl_utils:update_op(Counters),
     swirl_utils:safe_ets_increment(TableId, Key, UpdateOp),
     map_counters(Period, T, TableId).

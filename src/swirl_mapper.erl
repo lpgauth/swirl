@@ -72,7 +72,8 @@ start_link(FlowId, FlowMod, FlowOpts, ReducerNode) ->
 init({FlowId, FlowMod, FlowOpts, ReducerNode}) ->
     process_flag(trap_exit, true),
     register(FlowId),
-    swirl_ets_manager:table(?TABLE_NAME, ?TABLE_OPTS, self()),
+    self() ! flush,
+
     {ok, #state {
         flow_id = FlowId,
         flow_mod = FlowMod,
@@ -88,7 +89,7 @@ handle_cast(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
-handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}}, #state {
+handle_info(flush, #state {
         flow_id = FlowId,
         table_id = TableId,
         flow_mod = FlowMod,
@@ -97,22 +98,22 @@ handle_info({'ETS-TRANSFER', NewTableId, _Pid,  {?TABLE_NAME, _Options, _Self}},
         last_flush = Timestamp
     } = State) ->
 
+    MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
+    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
+
+    NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     swirl_flow:register(FlowId, FlowMod, FlowOpts, NewTableId),
     StreamName = ?L(stream_name, FlowOpts),
     swirl_flow:unregister(FlowId, StreamName, TableId),
-    MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
-    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
+
     Period = #period {start_at = Timestamp, end_at = Timestamp2},
-    flush_counters(FlowId, Period, TableId, ReducerNode),
+    spawn(fun() -> flush_counters(FlowId, Period, TableId, ReducerNode) end),
 
     {noreply, State#state {
         table_id = NewTableId,
         last_flush = Timestamp2,
         timer_ref = TimerRef
     }};
-handle_info(flush, State) ->
-    swirl_ets_manager:new_table(?TABLE_NAME, ?TABLE_OPTS, self()),
-    {noreply, State};
 handle_info(stop, State) ->
     {stop, normal, State};
 handle_info(Msg, State) ->
@@ -142,7 +143,7 @@ flush_counters(FlowId, Period, TableId, ReducerNode) ->
     CountersList = ets:tab2list(TableId),
     swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, CountersList}),
     % to prevent unregister race condition
-    timer:sleep(100),
+    timer:sleep(500),
     true = ets:delete(TableId).
 
 key(FlowId) ->
