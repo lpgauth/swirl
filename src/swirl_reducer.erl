@@ -86,9 +86,7 @@ handle_info(flush, #state {
 
     ReducerFlush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
     {Timstamp2, TimerRef} = swirl_utils:new_timer(ReducerFlush, flush),
-
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
-
     Period = #period {start_at = Timstamp, end_at = Timstamp2},
     spawn(fun() -> flush_counters(FlowMod, FlowOpts, Period, TableId) end),
 

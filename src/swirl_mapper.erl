@@ -99,11 +99,11 @@ handle_info(flush, #state {
     } = State) ->
 
     MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
-    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
+    StreamName = ?L(stream_name, FlowOpts),
 
+    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     swirl_flow:register(FlowId, FlowMod, FlowOpts, NewTableId),
-    StreamName = ?L(stream_name, FlowOpts),
     swirl_flow:unregister(FlowId, StreamName, TableId),
 
     Period = #period {start_at = Timestamp, end_at = Timestamp2},
@@ -144,7 +144,7 @@ flush_counters(FlowId, Period, TableId, ReducerNode) ->
     swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, CountersList}),
     % to prevent unregister race condition
     timer:sleep(500),
-    true = ets:delete(TableId).
+    swirl_utils:safe_ets_delete(TableId).
 
 key(FlowId) ->
     {mapper, FlowId}.
