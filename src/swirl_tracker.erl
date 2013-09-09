@@ -41,8 +41,10 @@
 %% public
 -spec lookup(tuple()) -> term().
 lookup(Key) ->
-    [{_, Value} | _] = ets:lookup(?TABLE_NAME, Key),
-    Value.
+    case ets:lookup(?TABLE_NAME, Key) of
+        [{_, Value} | _] -> Value;
+        [] -> undefined
+    end.
 
 -spec message(node(), binary(), term()) -> ok.
 message(Node, FlowId, Msg) ->
