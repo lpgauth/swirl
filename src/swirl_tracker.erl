@@ -12,6 +12,8 @@
     register/2,
     start_mappers/5,
     start_reducer/4,
+    stop_mappers/2,
+    stop_reducer/2,
     unregister/1
 ]).
 
@@ -62,6 +64,18 @@ start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode) ->
     Msg = {start_reducer, FlowMod, FlowOpts},
     swirl_tracker:message(ReducerNode, FlowId, Msg).
 
+-spec stop_mappers(binary(), [node()]) -> ok.
+stop_mappers(FlowId, MapperNodes) ->
+    Msg = {stop_mapper, FlowId},
+    [swirl_tracker:message(Node, FlowId, Msg) || Node <- MapperNodes],
+    ok.
+
+-spec stop_reducer(binary(), node()) -> ok.
+stop_reducer(FlowId, ReducerNode) ->
+    Msg = {stop_reducer, FlowId},
+    swirl_tracker:message(ReducerNode, FlowId, Msg),
+    ok.
+
 -spec unregister(tuple()) -> true.
 unregister(Key) ->
     ets:delete(?TABLE_NAME, Key).
@@ -86,6 +100,8 @@ handle_cast(Msg, State) ->
 
 handle_info({'ETS-TRANSFER', _TableId, _Pid,  {?TABLE_NAME, _Options, ?SERVER}}, State) ->
     {noreply, State};
+handle_info({'EXIT', _Pid, normal}, State) ->
+    {noreply, State};
 handle_info({flow, FlowId, Msg}, State) ->
     handler_flow_msg(FlowId, Msg, State);
 handle_info(Info, State) ->
@@ -108,4 +124,12 @@ handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) 
     {noreply, State};
 handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts}, State) ->
     swirl_reducer:start_link(FlowId, FlowMod, FlowOpts),
+    {noreply, State};
+handler_flow_msg(FlowId, {stop_mapper, FlowId}, State) ->
+    MapperPid = swirl_mapper:lookup(FlowId),
+    MapperPid ! stop,
+    {noreply, State};
+handler_flow_msg(FlowId, {stop_reducer, FlowId}, State) ->
+    ReducerPid = swirl_reducer:lookup(FlowId),
+    ReducerPid ! stop,
     {noreply, State}.
