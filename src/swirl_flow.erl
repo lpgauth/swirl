@@ -32,8 +32,8 @@ register(FlowId, FlowMod, FlowOpts, TableId) ->
 -spec start(atom(), [flow_opts()], [node()], node()) -> binary().
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     FlowId = swirl_utils:uuid(),
-    swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode),
+    swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     FlowId.
 
 -spec stop(binary(), [node()], node()) -> ok.
@@ -72,6 +72,8 @@ verify_options([{reducer_flush, ReducerFlush} | Options], Errors)
     when is_integer(ReducerFlush) ->
         verify_options(Options, Errors);
 verify_options([{reducer_opts, _} | Options], Errors) ->
+    verify_options(Options, Errors);
+verify_options([{stream_filter, undefined} | Options], Errors) ->
     verify_options(Options, Errors);
 verify_options([{stream_filter, StreamFilter} = Option | Options], Errors) ->
     case swirl_ql:parse(StreamFilter) of
