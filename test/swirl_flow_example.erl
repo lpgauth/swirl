@@ -11,8 +11,8 @@
 map(StreamName, Event, _MapperOpts) ->
     {update, {StreamName, ?L(exchange_id, Event), ?L(bidder_id, Event)}, {1, 10}}.
 
-reduce(_Period, Counters, ReducerOpts) ->
+reduce(_Period, Aggregates, ReducerOpts) ->
     case ?L(send_to , ReducerOpts) of
         undefined -> ok;
-        Pid -> Pid ! Counters
+        Pid -> Pid ! Aggregates
     end.

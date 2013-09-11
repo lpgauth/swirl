@@ -117,7 +117,7 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-handler_flow_msg(FlowId, {mapper_flush, _Period, _CountersList} = Msg, State) ->
+handler_flow_msg(FlowId, {mapper_flush, _Period, _Aggregates} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
 handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) ->

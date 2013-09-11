@@ -25,7 +25,7 @@
     code_change/3
 ]).
 
--define(TABLE_NAME, counters).
+-define(TABLE_NAME, aggregates).
 -define(TABLE_OPTS, [public]).
 -define(SERVER, ?MODULE).
 -define(WIDTH, 16).
@@ -107,7 +107,7 @@ handle_info(flush, #state {
     swirl_flow:unregister(FlowId, StreamName, TableId),
 
     Period = #period {start_at = Timestamp, end_at = Timestamp2},
-    spawn(fun() -> flush_counters(FlowId, Period, TableId, ReducerNode) end),
+    spawn(fun() -> flush_aggregates(FlowId, Period, TableId, ReducerNode) end),
 
     {noreply, State#state {
         table_id = NewTableId,
@@ -137,11 +137,11 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-flush_counters(_FlowId, _Period, undefined, _ReducerNode) ->
+flush_aggregates(_FlowId, _Period, undefined, _ReducerNode) ->
     ok;
-flush_counters(FlowId, Period, TableId, ReducerNode) ->
-    CountersList = ets:tab2list(TableId),
-    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, CountersList}),
+flush_aggregates(FlowId, Period, TableId, ReducerNode) ->
+    Aggregates = ets:tab2list(TableId),
+    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, Aggregates}),
     % to prevent unregister race condition
     timer:sleep(500),
     swirl_utils:safe_ets_delete(TableId).
