@@ -23,14 +23,14 @@ swirl
 
     -behavior(swirl_flow).
     -export([
-        map/3,
+        map/4,
         reduce/4
     ]).
 
-    map(_StreamName, Event, _Opts) ->
+    map(_FlowId, StreamName, Event, _MapperOpts) ->
         {update, {?L(exchange_id, Event), ?L(bidder_id, Event)}, {1, 10}}.
 
-    reduce(_StartTstamp, _EndTstamp, Aggregates, Opts) ->
+    reduce(_FlowId, _Period, Aggregates, _ReducerOpts) ->
         io:format("~p~n", [Aggregates]).
 
 ##### Starting flow: #####
