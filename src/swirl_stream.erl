@@ -16,13 +16,13 @@ emit(StreamName, Event) ->
 %% private
 evaluate(_StreamName, _Event, []) ->
     ok;
-evaluate(StreamName, Event, [{undefined, FlowMod, MapperOpts, TableId} | T]) ->
-    swirl_mapper:map(FlowMod, StreamName, Event, MapperOpts, TableId),
+evaluate(StreamName, Event, [{undefined, FlowId, FlowMod, MapperOpts, TableId} | T]) ->
+    swirl_mapper:map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId),
     evaluate(StreamName, Event, T);
-evaluate(StreamName, Event, [{ExpTree, FlowMod, MapperOpts, TableId} | T]) ->
+evaluate(StreamName, Event, [{ExpTree, FlowId, FlowMod, MapperOpts, TableId} | T]) ->
     case swirl_ql:evaluate(ExpTree, Event) of
         true ->
-            swirl_mapper:map(FlowMod, StreamName, Event, MapperOpts, TableId);
+            swirl_mapper:map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId);
         false ->
             ok
     end,

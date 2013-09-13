@@ -11,7 +11,7 @@
 
 %% internal
 -export([
-    reduce/4,
+    reduce/5,
     start_link/3
 ]).
 
@@ -25,7 +25,7 @@
     code_change/3
 ]).
 
--define(TABLE_NAME, counters).
+-define(TABLE_NAME, aggregates).
 -define(TABLE_OPTS, [public, {write_concurrency, true}]).
 -define(SERVER, ?MODULE).
 
@@ -52,8 +52,8 @@ unregister(FlowId) ->
     swirl_tracker:unregister(key(FlowId)).
 
 %% internal
-reduce(FlowMod, FlowOpts, Period, CountersList) ->
-    FlowMod:reduce(Period, CountersList, ?L(reducer_opts, FlowOpts, [])).
+reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates) ->
+    FlowMod:reduce(FlowId, Period, Aggregates, ?L(reducer_opts, FlowOpts, [])).
 
 start_link(FlowId, FlowMod, FlowOpts) ->
     gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts}, []).
@@ -78,6 +78,7 @@ handle_cast(Msg, State) ->
     {noreply, State}.
 
 handle_info(flush, #state {
+        flow_id = FlowId,
         flow_mod = FlowMod,
         flow_opts = FlowOpts,
         table_id = TableId,
@@ -86,11 +87,9 @@ handle_info(flush, #state {
 
     ReducerFlush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
     {Timstamp2, TimerRef} = swirl_utils:new_timer(ReducerFlush, flush),
-
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
-
     Period = #period {start_at = Timstamp, end_at = Timstamp2},
-    spawn(fun() -> flush_counters(FlowMod, FlowOpts, Period, TableId) end),
+    spawn(fun() -> flush_aggregates(FlowId, FlowMod, FlowOpts, Period, TableId) end),
 
     {noreply, State#state {
         table_id = NewTableId,
@@ -99,11 +98,11 @@ handle_info(flush, #state {
     }};
 handle_info(stop, State) ->
     {stop, normal, State};
-handle_info({mapper_flush, Period, CountersList}, #state {
+handle_info({mapper_flush, Period, Aggregates}, #state {
         table_id = TableId
     } = State) ->
 
-    spawn(fun() -> map_counters(Period, CountersList, TableId) end),
+    spawn(fun() -> map_aggregates(Period, Aggregates, TableId) end),
     {noreply, State};
 handle_info(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
@@ -125,17 +124,17 @@ code_change(_OldVsn, State, _Extra) ->
 key(FlowId) ->
     {reducer, FlowId}.
 
-flush_counters(_FlowMod, _FlowOpts, _Period, undefined) ->
+flush_aggregates(_FlowId, _FlowMod, _FlowOpts, _Period, undefined) ->
     ok;
-flush_counters(FlowMod, FlowOpts, Period, TableId) ->
-    CountersList = ets:tab2list(TableId),
+flush_aggregates(FlowId, FlowMod, FlowOpts, Period, TableId) ->
+    Aggregates = ets:tab2list(TableId),
     true = ets:delete(TableId),
-    reduce(FlowMod, FlowOpts, Period, CountersList).
+    reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates).
 
-map_counters(_Period, [], _TableId) ->
+map_aggregates(_Period, [], _TableId) ->
     ok;
-map_counters(Period, [H | T], TableId) ->
+map_aggregates(Period, [H | T], TableId) ->
     [{Key, _} | Counters] = tuple_to_list(H),
     UpdateOp = swirl_utils:update_op(Counters),
     swirl_utils:safe_ets_increment(TableId, Key, UpdateOp),
-    map_counters(Period, T, TableId).
+    map_aggregates(Period, T, TableId).

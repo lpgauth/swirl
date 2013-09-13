@@ -10,6 +10,7 @@
     new_timer/2,
     new_timer/3,
     safe_dict_fetch/2,
+    safe_ets_delete/1,
     safe_ets_increment/3,
     update_op/1,
     uuid/0
@@ -48,10 +49,22 @@ safe_ets_increment(TableId, Key, UpdateOp) ->
     try ets:update_counter(TableId, Key, UpdateOp)
     catch
         error:badarg ->
-            NumCounters = length(UpdateOp),
-            New = list_to_tuple([Key] ++ [0 || _ <- lists:seq(1, NumCounters)]),
-            ets:insert(TableId, New),
-            ets:update_counter(TableId, Key, UpdateOp)
+            case ets:info(TableId) of
+                undefined ->
+                    ok;
+                _Else ->
+                    NumCounters = length(UpdateOp),
+                    New = list_to_tuple([Key] ++ [0 || _ <- lists:seq(1, NumCounters)]),
+                    ets:insert(TableId, New),
+                    ets:update_counter(TableId, Key, UpdateOp)
+            end
+    end.
+
+safe_ets_delete(TableId) ->
+    try ets:delete(TableId)
+    catch
+        error:badarg ->
+            ok
     end.
 
 update_op(Counters) when is_tuple(Counters) ->

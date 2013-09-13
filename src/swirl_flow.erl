@@ -11,8 +11,8 @@
 ]).
 
 %% callback
--callback map(atom(), event(), term()) -> {update, tuple(), tuple()} | ignore.
--callback reduce(period(), term(), term()) -> ok.
+-callback map(binary(), atom(), event(), term()) -> {update, tuple(), tuple()} | ignore.
+-callback reduce(binary(), period(), term(), term()) -> ok.
 
 %% public
 -spec lookup(atom()) -> [tuple()].
@@ -32,8 +32,8 @@ register(FlowId, FlowMod, FlowOpts, TableId) ->
 -spec start(atom(), [flow_opts()], [node()], node()) -> binary().
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     FlowId = swirl_utils:uuid(),
-    swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode),
+    swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     FlowId.
 
 -spec stop(binary(), [node()], node()) -> ok.
@@ -57,8 +57,8 @@ key(FlowId, StreamName) ->
     {flow, FlowId, StreamName}.
 
 match_lookup_spec(StreamName) ->
-    [{{{flow, '_', '$1'}, {'$2', '$3', '$4', '$5'}}, [{'orelse' , {'=:=', '$1', StreamName},
-        {'=:=', '$1', undefined}}], [{{'$2', '$3', '$4', '$5'}}]}].
+    [{{{flow, '$1', '$2'}, {'$3', '$4', '$5', '$6'}}, [{'orelse' , {'=:=', '$2', StreamName},
+        {'=:=', '$2', undefined}}], [{{'$3', '$1', '$4', '$5', '$6'}}]}].
 
 match_delete_spec(FlowId, StreamName, TableId) ->
     [{{{flow, FlowId, StreamName}, {'_', '_', '_', TableId}}, [], [true]}].
@@ -72,6 +72,8 @@ verify_options([{reducer_flush, ReducerFlush} | Options], Errors)
     when is_integer(ReducerFlush) ->
         verify_options(Options, Errors);
 verify_options([{reducer_opts, _} | Options], Errors) ->
+    verify_options(Options, Errors);
+verify_options([{stream_filter, undefined} | Options], Errors) ->
     verify_options(Options, Errors);
 verify_options([{stream_filter, StreamFilter} = Option | Options], Errors) ->
     case swirl_ql:parse(StreamFilter) of
