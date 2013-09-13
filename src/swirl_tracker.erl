@@ -41,8 +41,10 @@
 %% public
 -spec lookup(tuple()) -> term().
 lookup(Key) ->
-    [{_, Value} | _] = ets:lookup(?TABLE_NAME, Key),
-    Value.
+    case ets:lookup(?TABLE_NAME, Key) of
+        [{_, Value} | _] -> Value;
+        [] -> undefined
+    end.
 
 -spec message(node(), binary(), term()) -> ok.
 message(Node, FlowId, Msg) ->
@@ -115,9 +117,8 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-handler_flow_msg(FlowId, {mapper_flush, _Period, _CountersList} = Msg, State) ->
-    ReducerPid = swirl_reducer:lookup(FlowId),
-    ReducerPid ! Msg,
+handler_flow_msg(FlowId, {mapper_flush, _Period, _Aggregates} = Msg, State) ->
+    message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
 handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) ->
     swirl_mapper:start_link(FlowId, FlowMod, FlowOpts, ReducerNode),
@@ -126,10 +127,13 @@ handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts}, State) ->
     swirl_reducer:start_link(FlowId, FlowMod, FlowOpts),
     {noreply, State};
 handler_flow_msg(FlowId, {stop_mapper, FlowId}, State) ->
-    MapperPid = swirl_mapper:lookup(FlowId),
-    MapperPid ! stop,
+    message(swirl_mapper:lookup(FlowId), stop),
     {noreply, State};
 handler_flow_msg(FlowId, {stop_reducer, FlowId}, State) ->
-    ReducerPid = swirl_reducer:lookup(FlowId),
-    ReducerPid ! stop,
+    message(swirl_reducer:lookup(FlowId), stop),
     {noreply, State}.
+
+message(undefined, _Msg) ->
+    ok;
+message(Pid, Msg) when is_pid(Pid) ->
+    Pid ! Msg.

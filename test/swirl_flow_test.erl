@@ -53,21 +53,21 @@ test_swirl_flow() ->
     swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 1}]),
     swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 10}]),
 
-    Counters = receive_loop(),
+    Aggregates = receive_loop(),
     Expected = [
         {{delivery,3,1},1,10},
         {{delivery,3,10},1,10}
     ],
 
-    ?assert_equal(Expected, Counters),
+    ?assert_equal(Expected, Aggregates),
     swirl_flow:stop(FlowId, [node()], node()).
 
 receive_loop() ->
     receive
         [] ->
             receive_loop();
-        Counters ->
-            Counters
+        Aggregates ->
+            Aggregates
     end.
 
 %% private

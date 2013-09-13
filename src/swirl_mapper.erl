@@ -11,7 +11,7 @@
 %% internal
 -export([
     lookup/1,
-    map/5,
+    map/6,
     start_link/4
 ]).
 
@@ -25,7 +25,7 @@
     code_change/3
 ]).
 
--define(TABLE_NAME, counters).
+-define(TABLE_NAME, aggregates).
 -define(TABLE_OPTS, [public]).
 -define(SERVER, ?MODULE).
 -define(WIDTH, 16).
@@ -45,9 +45,9 @@
 lookup(FlowId) ->
     swirl_tracker:lookup(key(FlowId)).
 
--spec map(atom(), atom(), event(), term(), pos_integer()) -> ok.
-map(FlowMod, StreamName, Event, MapperOpts, TableId) ->
-    case FlowMod:map(StreamName, Event, MapperOpts) of
+-spec map(binary(), atom(), atom(), event(), term(), pos_integer()) -> ok.
+map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId) ->
+    case FlowMod:map(FlowId, StreamName, Event, MapperOpts) of
         {update, Key, Counters} ->
             Rnd = erlang:system_info(scheduler_id) band (?WIDTH-1),
             UpdateOp = swirl_utils:update_op(Counters),
@@ -99,15 +99,15 @@ handle_info(flush, #state {
     } = State) ->
 
     MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
-    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
+    StreamName = ?L(stream_name, FlowOpts),
 
+    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     swirl_flow:register(FlowId, FlowMod, FlowOpts, NewTableId),
-    StreamName = ?L(stream_name, FlowOpts),
     swirl_flow:unregister(FlowId, StreamName, TableId),
 
     Period = #period {start_at = Timestamp, end_at = Timestamp2},
-    spawn(fun() -> flush_counters(FlowId, Period, TableId, ReducerNode) end),
+    spawn(fun() -> flush_aggregates(FlowId, Period, TableId, ReducerNode) end),
 
     {noreply, State#state {
         table_id = NewTableId,
@@ -137,14 +137,14 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-flush_counters(_FlowId, _Period, undefined, _ReducerNode) ->
+flush_aggregates(_FlowId, _Period, undefined, _ReducerNode) ->
     ok;
-flush_counters(FlowId, Period, TableId, ReducerNode) ->
-    CountersList = ets:tab2list(TableId),
-    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, CountersList}),
+flush_aggregates(FlowId, Period, TableId, ReducerNode) ->
+    Aggregates = ets:tab2list(TableId),
+    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, Aggregates}),
     % to prevent unregister race condition
     timer:sleep(500),
-    true = ets:delete(TableId).
+    swirl_utils:safe_ets_delete(TableId).
 
 key(FlowId) ->
     {mapper, FlowId}.
