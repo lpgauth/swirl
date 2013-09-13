@@ -11,8 +11,8 @@
 ]).
 
 %% callback
--callback map(atom(), event(), term()) -> {update, tuple(), tuple()} | ignore.
--callback reduce(period(), term(), term()) -> ok.
+-callback map(binary(), atom(), event(), term()) -> {update, tuple(), tuple()} | ignore.
+-callback reduce(binary(), period(), term(), term()) -> ok.
 
 %% public
 -spec lookup(atom()) -> [tuple()].
@@ -57,8 +57,8 @@ key(FlowId, StreamName) ->
     {flow, FlowId, StreamName}.
 
 match_lookup_spec(StreamName) ->
-    [{{{flow, '_', '$1'}, {'$2', '$3', '$4', '$5'}}, [{'orelse' , {'=:=', '$1', StreamName},
-        {'=:=', '$1', undefined}}], [{{'$2', '$3', '$4', '$5'}}]}].
+    [{{{flow, '$1', '$2'}, {'$3', '$4', '$5', '$6'}}, [{'orelse' , {'=:=', '$2', StreamName},
+        {'=:=', '$2', undefined}}], [{{'$3', '$1', '$4', '$5', '$6'}}]}].
 
 match_delete_spec(FlowId, StreamName, TableId) ->
     [{{{flow, FlowId, StreamName}, {'_', '_', '_', TableId}}, [], [true]}].

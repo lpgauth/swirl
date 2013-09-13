@@ -11,7 +11,7 @@
 
 %% internal
 -export([
-    reduce/4,
+    reduce/5,
     start_link/3
 ]).
 
@@ -52,8 +52,8 @@ unregister(FlowId) ->
     swirl_tracker:unregister(key(FlowId)).
 
 %% internal
-reduce(FlowMod, FlowOpts, Period, Aggregates) ->
-    FlowMod:reduce(Period, Aggregates, ?L(reducer_opts, FlowOpts, [])).
+reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates) ->
+    FlowMod:reduce(FlowId, Period, Aggregates, ?L(reducer_opts, FlowOpts, [])).
 
 start_link(FlowId, FlowMod, FlowOpts) ->
     gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts}, []).
@@ -78,6 +78,7 @@ handle_cast(Msg, State) ->
     {noreply, State}.
 
 handle_info(flush, #state {
+        flow_id = FlowId,
         flow_mod = FlowMod,
         flow_opts = FlowOpts,
         table_id = TableId,
@@ -88,7 +89,7 @@ handle_info(flush, #state {
     {Timstamp2, TimerRef} = swirl_utils:new_timer(ReducerFlush, flush),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     Period = #period {start_at = Timstamp, end_at = Timstamp2},
-    spawn(fun() -> flush_aggregates(FlowMod, FlowOpts, Period, TableId) end),
+    spawn(fun() -> flush_aggregates(FlowId, FlowMod, FlowOpts, Period, TableId) end),
 
     {noreply, State#state {
         table_id = NewTableId,
@@ -123,12 +124,12 @@ code_change(_OldVsn, State, _Extra) ->
 key(FlowId) ->
     {reducer, FlowId}.
 
-flush_aggregates(_FlowMod, _FlowOpts, _Period, undefined) ->
+flush_aggregates(_FlowId, _FlowMod, _FlowOpts, _Period, undefined) ->
     ok;
-flush_aggregates(FlowMod, FlowOpts, Period, TableId) ->
+flush_aggregates(FlowId, FlowMod, FlowOpts, Period, TableId) ->
     Aggregates = ets:tab2list(TableId),
     true = ets:delete(TableId),
-    reduce(FlowMod, FlowOpts, Period, Aggregates).
+    reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates).
 
 map_aggregates(_Period, [], _TableId) ->
     ok;

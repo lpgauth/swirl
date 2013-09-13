@@ -11,7 +11,7 @@
 %% internal
 -export([
     lookup/1,
-    map/5,
+    map/6,
     start_link/4
 ]).
 
@@ -45,9 +45,9 @@
 lookup(FlowId) ->
     swirl_tracker:lookup(key(FlowId)).
 
--spec map(atom(), atom(), event(), term(), pos_integer()) -> ok.
-map(FlowMod, StreamName, Event, MapperOpts, TableId) ->
-    case FlowMod:map(StreamName, Event, MapperOpts) of
+-spec map(binary(), atom(), atom(), event(), term(), pos_integer()) -> ok.
+map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId) ->
+    case FlowMod:map(FlowId, StreamName, Event, MapperOpts) of
         {update, Key, Counters} ->
             Rnd = erlang:system_info(scheduler_id) band (?WIDTH-1),
             UpdateOp = swirl_utils:update_op(Counters),

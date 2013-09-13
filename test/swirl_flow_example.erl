@@ -3,15 +3,15 @@
 
 -behavior(swirl_flow).
 -export([
-    map/3,
-    reduce/3
+    map/4,
+    reduce/4
 ]).
 
 %% swirl_flow callbacks
-map(StreamName, Event, _MapperOpts) ->
+map(_FlowId, StreamName, Event, _MapperOpts) ->
     {update, {StreamName, ?L(exchange_id, Event), ?L(bidder_id, Event)}, {1, 10}}.
 
-reduce(_Period, Aggregates, ReducerOpts) ->
+reduce(_FlowId, _Period, Aggregates, ReducerOpts) ->
     case ?L(send_to , ReducerOpts) of
         undefined -> ok;
         Pid -> Pid ! Aggregates
