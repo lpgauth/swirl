@@ -34,8 +34,8 @@
     flow_mod,
     flow_opts,
     table_id,
-    last_flush,
-    timer_ref
+    flush_tstamp,
+    flush_timer
 }).
 
 %% public
@@ -82,19 +82,19 @@ handle_info(flush, #state {
         flow_mod = FlowMod,
         flow_opts = FlowOpts,
         table_id = TableId,
-        last_flush = Timstamp
+        flush_tstamp = Timestamp
     } = State) ->
 
     ReducerFlush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
-    {Timstamp2, TimerRef} = swirl_utils:new_timer(ReducerFlush, flush),
+    {Timestamp2, FlushTimer} = swirl_utils:new_timer(ReducerFlush, flush),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
-    Period = #period {start_at = Timstamp, end_at = Timstamp2},
+    Period = #period {start_at = Timestamp, end_at = Timestamp2},
     spawn(fun() -> flush_aggregates(FlowId, FlowMod, FlowOpts, Period, TableId) end),
 
     {noreply, State#state {
         table_id = NewTableId,
-        last_flush = Timstamp2,
-        timer_ref = TimerRef
+        flush_tstamp = Timestamp2,
+        flush_timer = FlushTimer
     }};
 handle_info(stop, State) ->
     {stop, normal, State};
@@ -104,17 +104,20 @@ handle_info({mapper_flush, Period, Aggregates}, #state {
 
     spawn(fun() -> map_aggregates(Period, Aggregates, TableId) end),
     {noreply, State};
+handle_info({ping, Node}, #state {flow_id = FlowId} = State) ->
+    swirl_tracker:message(Node, FlowId, pong),
+    {noreply, State};
 handle_info(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
 terminate(_Reason, #state {
         flow_id = FlowId,
-        timer_ref = TimerRef
+        flush_timer = FlushTimer
     }) ->
 
     unregister(FlowId),
-    timer:cancel(TimerRef),
+    timer:cancel(FlushTimer),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->

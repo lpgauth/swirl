@@ -66,6 +66,9 @@ match_delete_spec(FlowId, StreamName, TableId) ->
 verify_options([{mapper_flush, MapperFlush} | Options], Errors)
     when is_integer(MapperFlush) ->
         verify_options(Options, Errors);
+verify_options([{mapper_heartbeat, MapperHeartbeat} | Options], Errors)
+    when is_integer(MapperHeartbeat) ->
+        verify_options(Options, Errors);
 verify_options([{mapper_opts, _} | Options], Errors) ->
     verify_options(Options, Errors);
 verify_options([{reducer_flush, ReducerFlush} | Options], Errors)

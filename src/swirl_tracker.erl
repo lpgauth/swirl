@@ -68,14 +68,12 @@ start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode) ->
 
 -spec stop_mappers(binary(), [node()]) -> ok.
 stop_mappers(FlowId, MapperNodes) ->
-    Msg = {stop_mapper, FlowId},
-    [swirl_tracker:message(Node, FlowId, Msg) || Node <- MapperNodes],
+    [swirl_tracker:message(Node, FlowId, stop_mapper) || Node <- MapperNodes],
     ok.
 
 -spec stop_reducer(binary(), node()) -> ok.
 stop_reducer(FlowId, ReducerNode) ->
-    Msg = {stop_reducer, FlowId},
-    swirl_tracker:message(ReducerNode, FlowId, Msg),
+    swirl_tracker:message(ReducerNode, FlowId, stop_reducer),
     ok.
 
 -spec unregister(tuple()) -> true.
@@ -120,16 +118,22 @@ code_change(_OldVsn, State, _Extra) ->
 handler_flow_msg(FlowId, {mapper_flush, _Period, _Aggregates} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
+handler_flow_msg(FlowId, {ping, _Node} = Msg, State) ->
+    message(swirl_reducer:lookup(FlowId), Msg),
+    {noreply, State};
+handler_flow_msg(_FlowId, pong, State) ->
+    % message(swirl_mapper:lookup(FlowId), pong),
+    {noreply, State};
 handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) ->
     swirl_mapper:start_link(FlowId, FlowMod, FlowOpts, ReducerNode),
     {noreply, State};
 handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts}, State) ->
     swirl_reducer:start_link(FlowId, FlowMod, FlowOpts),
     {noreply, State};
-handler_flow_msg(FlowId, {stop_mapper, FlowId}, State) ->
+handler_flow_msg(FlowId, stop_mapper, State) ->
     message(swirl_mapper:lookup(FlowId), stop),
     {noreply, State};
-handler_flow_msg(FlowId, {stop_reducer, FlowId}, State) ->
+handler_flow_msg(FlowId, stop_reducer, State) ->
     message(swirl_reducer:lookup(FlowId), stop),
     {noreply, State}.
 
