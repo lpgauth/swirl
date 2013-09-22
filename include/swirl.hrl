@@ -1,6 +1,6 @@
-%% macros
--define(NULL, undefined).
+-include_lib("deps/swirl_ql/include/swirl_ql.hrl").
 
+%% macros
 -define(DEFAULT_MAPPER_FLUSH, timer:seconds(1)).
 -define(DEFAULT_REDUCER_FLUSH, timer:seconds(1)).
 
@@ -23,14 +23,3 @@
                      {mapper_opts, term()} |
                      {reducer_flush, pos_integer()} |
                      {reducer_opts, term()}.
-
--type boolean_op() :: 'and' | 'or'.
--type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.
--type inclusion_op() :: in | notin.
--type null_op() :: null | notnull.
--type value() :: integer() | float() | binary().
-
--type exp_tree() :: {boolean_op(), exp_tree(), exp_tree()} |
-                    {comparison_op(), atom(), value()} |
-                    {inclusion_op(), atom(), [value(), ...]} |
-                    {null_op(), atom()}.

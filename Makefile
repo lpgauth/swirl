@@ -28,13 +28,9 @@ deps:
 dialyze:
 	@dialyzer ebin/*.beam --plt ~/.$(PROJECT).plt
 
-eunit:
-	@echo "Running EUnit suite..."
-	@$(REBAR) skip_deps=true eunit
-
 etest:
 	@echo "Running ETest suite..."
 	@ERL_LIBS=deps erlc -pa ebin -o test test/*.erl
 	@priv/etest-runner
 
-test: all eunit etest
+test: all etest
