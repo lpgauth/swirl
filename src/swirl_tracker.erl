@@ -122,7 +122,7 @@ handler_flow_msg(FlowId, {ping, _Node} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
 handler_flow_msg(_FlowId, pong, State) ->
-    % message(swirl_mapper:lookup(FlowId), pong),
+    message(swirl_mapper:lookup(FlowId), pong),
     {noreply, State};
 handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) ->
     swirl_mapper:start_link(FlowId, FlowMod, FlowOpts, ReducerNode),
