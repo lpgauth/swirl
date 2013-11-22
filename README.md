@@ -49,6 +49,5 @@ swirl
     swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}])
 
 #### TODO: ####
-- heartbeat
 - node discovery
 - code distribution
