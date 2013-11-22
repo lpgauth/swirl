@@ -51,3 +51,4 @@ swirl
 #### TODO: ####
 - node discovery
 - code distribution
+- resource limitation
