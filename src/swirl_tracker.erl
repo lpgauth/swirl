@@ -133,7 +133,12 @@ handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) 
     end,
     {noreply, State};
 handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts, MapperNodes}, State) ->
-    swirl_reducer:start_link(FlowId, FlowMod, FlowOpts, MapperNodes),
+    case swirl_reducer:lookup(FlowId) of
+        undefined ->
+            swirl_reducer:start_link(FlowId, FlowMod, FlowOpts, MapperNodes);
+        _Else ->
+            ok
+    end,
     {noreply, State};
 handler_flow_msg(FlowId, stop_mapper, State) ->
     message(swirl_mapper:lookup(FlowId), stop),
