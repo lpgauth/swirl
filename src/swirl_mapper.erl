@@ -36,8 +36,10 @@
     flow_opts,
     table_id,
     reducer_node,
-    last_flush,
-    timer_ref
+    flush_timer,
+    flush_tstamp,
+    heartbeat_timer,
+    heartbeat_tstamp
 }).
 
 %% public
@@ -73,12 +75,14 @@ init({FlowId, FlowMod, FlowOpts, ReducerNode}) ->
     process_flag(trap_exit, true),
     register(FlowId),
     self() ! flush,
+    self() ! heartbeat,
 
     {ok, #state {
         flow_id = FlowId,
         flow_mod = FlowMod,
         flow_opts = FlowOpts,
-        reducer_node = ReducerNode
+        reducer_node = ReducerNode,
+        heartbeat_tstamp = swirl_utils:epoch_ms()
     }}.
 
 handle_call(Request, _From, State) ->
@@ -95,13 +99,13 @@ handle_info(flush, #state {
         flow_mod = FlowMod,
         flow_opts = FlowOpts,
         reducer_node = ReducerNode,
-        last_flush = Timestamp
+        flush_tstamp = Timestamp
     } = State) ->
 
     MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
     StreamName = ?L(stream_name, FlowOpts),
 
-    {Timestamp2, TimerRef} = swirl_utils:new_timer(MapperFlush, flush),
+    {Timestamp2, FlushTimer} = swirl_utils:new_timer(MapperFlush, flush),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     swirl_flow:register(FlowId, FlowMod, FlowOpts, NewTableId),
     swirl_flow:unregister(FlowId, StreamName, TableId),
@@ -111,8 +115,33 @@ handle_info(flush, #state {
 
     {noreply, State#state {
         table_id = NewTableId,
-        last_flush = Timestamp2,
-        timer_ref = TimerRef
+        flush_tstamp = Timestamp2,
+        flush_timer = FlushTimer
+    }};
+handle_info(heartbeat, #state {
+        flow_id = FlowId,
+        flow_opts = FlowOpts,
+        reducer_node = ReducerNode,
+        heartbeat_tstamp = Timestamp
+    } = State) ->
+
+    MapperHeartbeat = ?L(mapper_heartbeat, FlowOpts, ?DEFAULT_MAPPER_HEARTBEAT),
+    {Timestamp2, HeartbeatTimer} = swirl_utils:new_timer(MapperHeartbeat, heartbeat),
+
+    case Timestamp2 - Timestamp > 2 * MapperHeartbeat of
+        true ->
+            {stop, normal, State#state {
+                heartbeat_timer = HeartbeatTimer
+            }};
+        false ->
+            swirl_tracker:message(ReducerNode, FlowId, {ping, node()}),
+            {noreply, State#state {
+                heartbeat_timer = HeartbeatTimer
+            }}
+    end;
+handle_info(pong, State) ->
+    {noreply, State#state {
+        heartbeat_tstamp = swirl_utils:epoch_ms()
     }};
 handle_info(stop, State) ->
     {stop, normal, State};
@@ -124,13 +153,15 @@ terminate(_Reason, #state {
         flow_id = FlowId,
         table_id = TableId,
         flow_opts = FlowOpts,
-        timer_ref = TimerRef
+        flush_timer = FlushTimer,
+        heartbeat_timer = HeartbeatTimer
     }) ->
 
     StreamName = ?L(stream_name, FlowOpts),
     swirl_flow:unregister(FlowId, StreamName, TableId),
     unregister(FlowId),
-    timer:cancel(TimerRef),
+    timer:cancel(FlushTimer),
+    timer:cancel(HeartbeatTimer),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
