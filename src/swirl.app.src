@@ -1,6 +1,6 @@
 {application, swirl, [
   {description, "lightweight distributed stream processor"},
-  {vsn, "0.1.2"},
+  {vsn, "0.1.3"},
   {registered, []},
   {applications, [
     kernel,
