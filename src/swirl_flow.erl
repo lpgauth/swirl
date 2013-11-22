@@ -32,7 +32,7 @@ register(FlowId, FlowMod, FlowOpts, TableId) ->
 -spec start(atom(), [flow_opts()], [node()], node()) -> binary().
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     FlowId = swirl_utils:uuid(),
-    swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode),
+    swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
     FlowId.
 

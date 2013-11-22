@@ -1,9 +1,9 @@
 %% macros
 -define(NULL, undefined).
 
--define(DEFAULT_MAPPER_HEARTBEAT, timer:seconds(5)).
 -define(DEFAULT_MAPPER_FLUSH, timer:seconds(1)).
 -define(DEFAULT_REDUCER_FLUSH, timer:seconds(1)).
+-define(DEFAULT_HEARTBEAT, timer:seconds(5)).
 
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 -define(L(Key, List), swirl_utils:lookup(Key, List)).
@@ -21,10 +21,10 @@
 -type flow_opts() :: {stream_name, atom()} |
                      {stream_filter, string()} |
                      {mapper_flush, pos_integer()} |
-                     {mapper_heartbeat, pos_integer()} |
                      {mapper_opts, term()} |
                      {reducer_flush, pos_integer()} |
-                     {reducer_opts, term()}.
+                     {reducer_opts, term()} |
+                     {heartbeat, pos_integer()}.
 
 -type boolean_op() :: 'and' | 'or'.
 -type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.

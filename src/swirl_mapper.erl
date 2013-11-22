@@ -119,27 +119,30 @@ handle_info(flush, #state {
         flush_timer = FlushTimer
     }};
 handle_info(heartbeat, #state {
-        flow_id = FlowId,
         flow_opts = FlowOpts,
-        reducer_node = ReducerNode,
         heartbeat_tstamp = Timestamp
     } = State) ->
 
-    MapperHeartbeat = ?L(mapper_heartbeat, FlowOpts, ?DEFAULT_MAPPER_HEARTBEAT),
-    {Timestamp2, HeartbeatTimer} = swirl_utils:new_timer(MapperHeartbeat, heartbeat),
+    Heartbeat = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
+    {Timestamp2, HeartbeatTimer} = swirl_utils:new_timer(Heartbeat, heartbeat),
 
-    case Timestamp2 - Timestamp > 2 * MapperHeartbeat of
+    case Timestamp2 - Timestamp > 2 * Heartbeat of
         true ->
             {stop, normal, State#state {
                 heartbeat_timer = HeartbeatTimer
             }};
         false ->
-            swirl_tracker:message(ReducerNode, FlowId, {ping, node()}),
             {noreply, State#state {
                 heartbeat_timer = HeartbeatTimer
             }}
     end;
-handle_info(pong, State) ->
+handle_info({ping, ReducerNode}, #state {
+        flow_id = FlowId,
+        reducer_node = ReducerNode
+    } = State) ->
+
+    swirl_tracker:message(ReducerNode, FlowId, {pong, node()}),
+
     {noreply, State#state {
         heartbeat_tstamp = swirl_utils:epoch_ms()
     }};

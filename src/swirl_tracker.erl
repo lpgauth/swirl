@@ -11,7 +11,7 @@
     message/3,
     register/2,
     start_mappers/5,
-    start_reducer/4,
+    start_reducer/5,
     stop_mappers/2,
     stop_reducer/2,
     unregister/1
@@ -61,9 +61,9 @@ start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     [swirl_tracker:message(Node, FlowId, Msg) || Node <- MapperNodes],
     ok.
 
--spec start_reducer(binary(), atom(), [flow_opts()], node()) -> ok.
-start_reducer(FlowId, FlowMod, FlowOpts, ReducerNode) ->
-    Msg = {start_reducer, FlowMod, FlowOpts},
+-spec start_reducer(binary(), atom(), [flow_opts()], [node()], node()) -> ok.
+start_reducer(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
+    Msg = {start_reducer, FlowMod, FlowOpts, MapperNodes},
     swirl_tracker:message(ReducerNode, FlowId, Msg).
 
 -spec stop_mappers(binary(), [node()]) -> ok.
@@ -119,16 +119,21 @@ handler_flow_msg(FlowId, {mapper_flush, _Period, _Aggregates} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
 handler_flow_msg(FlowId, {ping, _Node} = Msg, State) ->
+    message(swirl_mapper:lookup(FlowId), Msg),
+    {noreply, State};
+handler_flow_msg(FlowId, {pong, _Node} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
-handler_flow_msg(FlowId, pong, State) ->
-    message(swirl_mapper:lookup(FlowId), pong),
-    {noreply, State};
 handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) ->
-    swirl_mapper:start_link(FlowId, FlowMod, FlowOpts, ReducerNode),
+    case swirl_mapper:lookup(FlowId) of
+        undefined ->
+            swirl_mapper:start_link(FlowId, FlowMod, FlowOpts, ReducerNode);
+        _Else ->
+            ok
+    end,
     {noreply, State};
-handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts}, State) ->
-    swirl_reducer:start_link(FlowId, FlowMod, FlowOpts),
+handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts, MapperNodes}, State) ->
+    swirl_reducer:start_link(FlowId, FlowMod, FlowOpts, MapperNodes),
     {noreply, State};
 handler_flow_msg(FlowId, stop_mapper, State) ->
     message(swirl_mapper:lookup(FlowId), stop),

@@ -12,7 +12,7 @@
 %% internal
 -export([
     reduce/5,
-    start_link/3
+    start_link/4
 ]).
 
 -behaviour(gen_server).
@@ -33,9 +33,12 @@
     flow_id,
     flow_mod,
     flow_opts,
+    mapper_nodes,
     table_id,
+    flush_timer,
     flush_tstamp,
-    flush_timer
+    heartbeat_timer,
+    heartbeat_nodes
 }).
 
 %% public
@@ -55,19 +58,22 @@ unregister(FlowId) ->
 reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates) ->
     FlowMod:reduce(FlowId, Period, Aggregates, ?L(reducer_opts, FlowOpts, [])).
 
-start_link(FlowId, FlowMod, FlowOpts) ->
-    gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts}, []).
+start_link(FlowId, FlowMod, FlowOpts, MapperNodes) ->
+    gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts, MapperNodes}, []).
 
 %% gen_server callbacks
-init({FlowId, FlowMod, FlowOpts}) ->
+init({FlowId, FlowMod, FlowOpts, MapperNodes}) ->
     process_flag(trap_exit, true),
     register(FlowId),
     self() ! flush,
+    self() ! heartbeat,
 
     {ok, #state {
         flow_id = FlowId,
         flow_mod = FlowMod,
-        flow_opts = FlowOpts
+        flow_opts = FlowOpts,
+        mapper_nodes = MapperNodes,
+        heartbeat_nodes = MapperNodes
     }}.
 handle_call(Request, _From, State) ->
     io:format("unexpected message: ~p~n", [Request]),
@@ -95,6 +101,39 @@ handle_info(flush, #state {
         table_id = NewTableId,
         flush_tstamp = Timestamp2,
         flush_timer = FlushTimer
+    }};
+handle_info(heartbeat, #state {
+        flow_id = FlowId,
+        flow_mod = FlowMod,
+        flow_opts = FlowOpts,
+        mapper_nodes = MapperNodes,
+        heartbeat_nodes = HeartbeatNodes
+    } = State) ->
+
+    Heartbeat = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
+    {_Timestamp, HeartbeatTimer} = swirl_utils:new_timer(Heartbeat, heartbeat),
+
+    DeadNodes = lists:filter(fun(Node) ->
+        not lists:member(Node, HeartbeatNodes)
+    end, MapperNodes),
+
+    Msg = {start_mapper, FlowMod, FlowOpts, node()},
+    [swirl_tracker:message(Node, FlowId, Msg) || Node <- DeadNodes],
+    [swirl_tracker:message(Node, FlowId, Msg) || Node <- DeadNodes],
+
+    Msg2 = {ping, node()},
+    [swirl_tracker:message(Node, FlowId, Msg2) || Node <- MapperNodes],
+
+    {noreply, State#state {
+        heartbeat_timer = HeartbeatTimer,
+        heartbeat_nodes = []
+    }};
+handle_info({pong, MapperNode}, #state {
+        heartbeat_nodes = HeartbeatNodes
+    } = State) ->
+
+    {noreply, State#state {
+        heartbeat_nodes = [MapperNode | HeartbeatNodes]
     }};
 handle_info(stop, State) ->
     {stop, normal, State};
