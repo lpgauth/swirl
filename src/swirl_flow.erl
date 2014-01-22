@@ -11,7 +11,7 @@
 ]).
 
 %% callback
--callback map(binary(), atom(), event(), term()) -> {update, tuple(), tuple()} | ignore.
+-callback map(binary(), atom(), event(), term()) -> list(update()) | update() | ignore.
 -callback reduce(binary(), period(), term(), term()) -> ok.
 
 %% public

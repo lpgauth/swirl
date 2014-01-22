@@ -25,14 +25,5 @@
                      {reducer_flush, pos_integer()} |
                      {reducer_opts, term()} |
                      {heartbeat, pos_integer()}.
-
--type boolean_op() :: 'and' | 'or'.
--type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.
--type inclusion_op() :: in | notin.
--type null_op() :: null | notnull.
+-type update() :: {update, tuple(), tuple()}.
 -type value() :: integer() | float() | binary().
-
--type exp_tree() :: {boolean_op(), exp_tree(), exp_tree()} |
-                    {comparison_op(), atom(), value()} |
-                    {inclusion_op(), atom(), [value(), ...]} |
-                    {null_op(), atom()}.
