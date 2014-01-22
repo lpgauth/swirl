@@ -23,3 +23,4 @@
                      {mapper_opts, term()} |
                      {reducer_flush, pos_integer()} |
                      {reducer_opts, term()}.
+-type update() :: {update, tuple(), tuple()}.

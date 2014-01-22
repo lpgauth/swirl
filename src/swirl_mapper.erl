@@ -48,10 +48,12 @@ lookup(FlowId) ->
 -spec map(binary(), atom(), atom(), event(), term(), pos_integer()) -> ok.
 map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId) ->
     case FlowMod:map(FlowId, StreamName, Event, MapperOpts) of
+        Updates when is_list(Updates) ->
+            lists:map(fun ({update, Key, Counters}) ->
+                update(TableId, Key, Counters)
+            end, Updates);
         {update, Key, Counters} ->
-            Rnd = erlang:system_info(scheduler_id) band (?WIDTH-1),
-            UpdateOp = swirl_utils:update_op(Counters),
-            swirl_utils:safe_ets_increment(TableId, {Key, Rnd}, UpdateOp);
+            update(TableId, Key, Counters);
         ignore ->
             ok
     end.
@@ -148,3 +150,9 @@ flush_aggregates(FlowId, Period, TableId, ReducerNode) ->
 
 key(FlowId) ->
     {mapper, FlowId}.
+
+-spec update(pos_integer(), tuple(), tuple()) -> ok.
+update(TableId, Key, Counters) ->
+    Rnd = erlang:system_info(scheduler_id) band (?WIDTH-1),
+    UpdateOp = swirl_utils:update_op(Counters),
+    swirl_utils:safe_ets_increment(TableId, {Key, Rnd}, UpdateOp).
