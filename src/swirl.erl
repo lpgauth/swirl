@@ -13,7 +13,7 @@
 
 %% public
 start() ->
-    ok = application:start(swirl).
+    application:ensure_all_started(?MODULE).
 
 %% application callbacks
 start(_StartType, _StartArgs) ->

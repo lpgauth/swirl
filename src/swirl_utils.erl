@@ -34,7 +34,7 @@ new_timer(Time, Msg) ->
     new_timer(Time, Msg, self()).
 
 new_timer(Time, Msg, To) ->
-    EpochMs = swirl_utils:epoch_ms(),
+    EpochMs = epoch_ms(),
     Delta = EpochMs rem Time,
     TimerRef = erlang:send_after(Time - Delta, To, Msg),
     {EpochMs, TimerRef}.

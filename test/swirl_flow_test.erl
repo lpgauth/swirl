@@ -15,7 +15,7 @@ after_suite() ->
 
 before_suite() ->
     random:seed(erlang:now()),
-    ok = application:start(swirl).
+    application:ensure_all_started(swirl).
 
 test_benchmark_emit() ->
     FlowIds = lists:map(fun (_) ->
