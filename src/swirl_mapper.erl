@@ -176,7 +176,7 @@ code_change(_OldVsn, State, _Extra) ->
 flush_aggregates(_FlowId, _Period, undefined, _ReducerNode) ->
     ok;
 flush_aggregates(FlowId, Period, TableId, ReducerNode) ->
-    Aggregates = ets:tab2list(TableId),
+    Aggregates = swirl_utils:tab2list(TableId),
     swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, Aggregates}),
     % to prevent unregister race condition
     timer:sleep(500),

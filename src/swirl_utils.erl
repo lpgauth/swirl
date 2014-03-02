@@ -12,6 +12,7 @@
     safe_dict_fetch/2,
     safe_ets_delete/1,
     safe_ets_increment/3,
+    tab2list/1,
     update_op/1,
     uuid/0
 ]).
@@ -67,6 +68,9 @@ safe_ets_delete(TableId) ->
             ok
     end.
 
+tab2list(Tid) ->
+    lists:append(match_all(ets:match_object(Tid, '_', 500))).
+
 update_op(Counters) when is_tuple(Counters) ->
     update_op(tuple_to_list(Counters), 2);
 update_op(Counters) when is_list(Counters) ->
@@ -76,6 +80,11 @@ uuid() ->
     uuid:get_v1(uuid:new(self(), os)).
 
 %% private
+match_all('$end_of_table') ->
+    [];
+match_all({Match, Continuation}) ->
+    [Match | match_all(ets:match_object(Continuation))].
+
 update_op([], _Pos) ->
     [];
 update_op([Counter | T], Pos) ->

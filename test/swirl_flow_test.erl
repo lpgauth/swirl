@@ -22,7 +22,7 @@ test_benchmark_emit() ->
         swirl_flow:start(swirl_flow_example, [
             {stream_name, video}
         ], [node()], node())
-    end, lists:seq(1, 100)),
+    end, lists:seq(1, 1)),
 
     timer:sleep(timer:seconds(1)),
 
@@ -49,15 +49,12 @@ test_swirl_flow() ->
 
     timer:sleep(timer:seconds(1)),
 
-    swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
-    swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 1}]),
-    swirl_stream:emit(delivery, [{exchange_id, 3}, {bidder_id, 10}]),
+    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 1}, {bidder_id, 10}]),
+    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 1}]),
+    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 10}]),
 
     Aggregates = receive_loop(),
-    Expected = [
-        {{delivery,3,1},1,10},
-        {{delivery,3,10},1,10}
-    ],
+    Expected = [{{start,3,10},1,10}, {{start,3,1},1,10}],
 
     ?assert_equal(Expected, Aggregates),
     swirl_flow:stop(FlowId, [node()], node()).
@@ -78,19 +75,22 @@ emit_loop(N) ->
     emit_loop(N-1).
 
 random_event() ->
-    lists:nth(random:uniform(14), [
-        [{type, start}, {exchange_id, 3}],
-        [{type, start}, {exchange_id, 3}],
-        [{type, start}, {exchange_id, 3}],
-        [{type, start}, {exchange_id, 3}],
-        [{type, start}, {exchange_id, 3}],
-        [{type, start}, {exchange_id, 3}],
-        [{type, midpoint}, {exchange_id, 3}],
-        [{type, midpoint}, {exchange_id, 3}],
-        [{type, midpoint}, {exchange_id, 3}],
-        [{type, complete}, {exchange_id, 3}],
-        [{type, complete}, {exchange_id, 3}],
-        [{type, pause}, {exchange_id, 3}],
-        [{type, resume}, {exchange_id, 3}],
-        [{type, rewind}, {exchange_id, 3}]
+    Type = random_type(),
+    ExchangeId = random:uniform(1000000),
+    BidderId = random:uniform(100000),
+    [{type, Type}, {exchange_id, ExchangeId}, {bidder_id, BidderId}].
+
+random_type() ->
+    lists:nth(random:uniform(11), [
+        complete,
+        firstQuartile,
+        fullscreen,
+        midpoint,
+        mute,
+        pause,
+        resume,
+        rewind,
+        start,
+        thirdQuartile,
+        unmute
     ]).

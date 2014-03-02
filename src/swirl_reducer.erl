@@ -169,7 +169,7 @@ key(FlowId) ->
 flush_aggregates(_FlowId, _FlowMod, _FlowOpts, _Period, undefined) ->
     ok;
 flush_aggregates(FlowId, FlowMod, FlowOpts, Period, TableId) ->
-    Aggregates = ets:tab2list(TableId),
+    Aggregates = swirl_utils:tab2list(TableId),
     true = ets:delete(TableId),
     reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates).
 
