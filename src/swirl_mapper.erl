@@ -188,5 +188,4 @@ key(FlowId) ->
 -spec update(pos_integer(), tuple(), tuple()) -> ok.
 update(TableId, Key, Counters) ->
     Rnd = erlang:system_info(scheduler_id) band (?WIDTH-1),
-    UpdateOp = swirl_utils:update_op(Counters),
-    swirl_utils:safe_ets_increment(TableId, {Key, Rnd}, UpdateOp).
+    swirl_utils:safe_ets_increment(TableId, {Key, Rnd}, Counters).

@@ -22,7 +22,7 @@ test_benchmark_emit() ->
         swirl_flow:start(swirl_flow_example, [
             {stream_name, video}
         ], [node()], node())
-    end, lists:seq(1, 1)),
+    end, lists:seq(1, 100)),
 
     timer:sleep(timer:seconds(1)),
 

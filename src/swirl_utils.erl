@@ -31,6 +31,11 @@ lookup(Key, List, Default) ->
         {_, Value} -> Value
     end.
 
+maybe_tuple_to_list(Tuple) when is_tuple(Tuple) ->
+    tuple_to_list(Tuple);
+maybe_tuple_to_list(List) when is_list(List) ->
+    List.
+
 new_timer(Time, Msg) ->
     new_timer(Time, Msg, self()).
 
@@ -46,23 +51,25 @@ safe_dict_fetch(Key, Dict) ->
         error:badarg -> undefined
     end.
 
-safe_ets_increment(TableId, Key, UpdateOp) ->
+safe_ets_delete(TableId) ->
+    try ets:delete(TableId)
+    catch
+        error:badarg ->
+            ok
+    end.
+
+safe_ets_increment(TableId, Key, Counters) ->
+    UpdateOp = swirl_utils:update_op(Counters),
     try ets:update_counter(TableId, Key, UpdateOp)
     catch
         error:badarg ->
-            case ets:info(TableId) of
-                undefined ->
-                    ok;
-                _Else ->
-                    NumCounters = length(UpdateOp),
-                    New = list_to_tuple([Key] ++ [0 || _ <- lists:seq(1, NumCounters)]),
-                    ets:insert(TableId, New),
-                    ets:update_counter(TableId, Key, UpdateOp)
-            end
+            safe_ets_insert(TableId, Key, Counters)
     end.
 
-safe_ets_delete(TableId) ->
-    try ets:delete(TableId)
+safe_ets_insert(TableId, Key, Counters) ->
+    try
+        New = list_to_tuple([Key] ++ maybe_tuple_to_list(Counters)),
+        ets:insert(TableId, New)
     catch
         error:badarg ->
             ok

@@ -177,6 +177,5 @@ map_aggregates(_Period, [], _TableId) ->
     ok;
 map_aggregates(Period, [H | T], TableId) ->
     [{Key, _} | Counters] = tuple_to_list(H),
-    UpdateOp = swirl_utils:update_op(Counters),
-    swirl_utils:safe_ets_increment(TableId, Key, UpdateOp),
+    swirl_utils:safe_ets_increment(TableId, Key, Counters),
     map_aggregates(Period, T, TableId).
