@@ -1,6 +1,9 @@
 -module(swirl_reducer).
 -include("swirl.hrl").
--compile({no_auto_import, [unregister/1]}).
+
+-compile({no_auto_import, [
+    unregister/1
+]}).
 
 %% public
 -export([
@@ -25,7 +28,7 @@
     code_change/3
 ]).
 
--define(TABLE_NAME, aggregates).
+-define(TABLE_NAME, reducer_aggregates).
 -define(TABLE_OPTS, [public, {write_concurrency, true}]).
 -define(SERVER, ?MODULE).
 

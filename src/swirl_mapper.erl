@@ -1,6 +1,9 @@
 -module(swirl_mapper).
 -include("swirl.hrl").
--compile({no_auto_import, [unregister/1]}).
+
+-compile({no_auto_import, [
+    unregister/1
+]}).
 
 %% public
 -export([
@@ -25,8 +28,8 @@
     code_change/3
 ]).
 
--define(TABLE_NAME, aggregates).
--define(TABLE_OPTS, [public]).
+-define(TABLE_NAME, mapper_aggregates).
+-define(TABLE_OPTS, [public, {write_concurrency, true}]).
 -define(SERVER, ?MODULE).
 -define(WIDTH, 16).
 
@@ -84,7 +87,7 @@ init({FlowId, FlowMod, FlowOpts, ReducerNode}) ->
         flow_mod = FlowMod,
         flow_opts = FlowOpts,
         reducer_node = ReducerNode,
-        heartbeat_tstamp = swirl_utils:epoch_ms()
+        heartbeat_tstamp = swirl_utils:unix_timestamp_ms()
     }}.
 
 handle_call(Request, _From, State) ->
@@ -146,7 +149,7 @@ handle_info({ping, ReducerNode}, #state {
     swirl_tracker:message(ReducerNode, FlowId, {pong, node()}),
 
     {noreply, State#state {
-        heartbeat_tstamp = swirl_utils:epoch_ms()
+        heartbeat_tstamp = swirl_utils:unix_timestamp_ms()
     }};
 handle_info(stop, State) ->
     {stop, normal, State};
@@ -178,6 +181,7 @@ flush_aggregates(_FlowId, _Period, undefined, _ReducerNode) ->
 flush_aggregates(FlowId, Period, TableId, ReducerNode) ->
     Aggregates = swirl_utils:tab2list(TableId),
     swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, Aggregates}),
+
     % to prevent unregister race condition
     timer:sleep(500),
     swirl_utils:safe_ets_delete(TableId).

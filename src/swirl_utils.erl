@@ -3,7 +3,6 @@
 
 %% public
 -export([
-    epoch_ms/0,
     lookup/2,
     lookup/3,
     new_timer/2,
@@ -11,16 +10,14 @@
     safe_dict_fetch/2,
     safe_ets_delete/1,
     safe_ets_increment/3,
+    safe_ets_lookup_element/2,
     tab2list/1,
+    unix_timestamp_ms/0,
     update_op/1,
     uuid/0
 ]).
 
 %% public
-epoch_ms() ->
-    {Mega, Sec, Micro} = os:timestamp(),
-    (Mega * 1000000000 + Sec * 1000) + trunc(Micro / 1000).
-
 lookup(Key, List) ->
     lookup(Key, List, undefined).
 
@@ -39,10 +36,10 @@ new_timer(Time, Msg) ->
     new_timer(Time, Msg, self()).
 
 new_timer(Time, Msg, To) ->
-    EpochMs = epoch_ms(),
-    Delta = EpochMs rem Time,
+    Timestamp = unix_timestamp_ms(),
+    Delta = Timestamp rem Time,
     TimerRef = erlang:send_after(Time - Delta, To, Msg),
-    {EpochMs, TimerRef}.
+    {Timestamp, TimerRef}.
 
 safe_dict_fetch(Key, Dict) ->
     try dict:fetch(Key, Dict)
@@ -74,8 +71,20 @@ safe_ets_insert(TableId, Key, Counters) ->
             ok
     end.
 
+safe_ets_lookup_element(TableId, Key) ->
+    try
+         ets:lookup_element(TableId, Key, 2)
+    catch
+        error:badarg ->
+            undefined
+    end.
+
 tab2list(Tid) ->
     lists:append(match_all(ets:match_object(Tid, '_', 500))).
+
+unix_timestamp_ms() ->
+    {Mega, Sec, Micro} = os:timestamp(),
+    (Mega * 1000000000 + Sec * 1000) + trunc(Micro / 1000).
 
 update_op(Counters) when is_tuple(Counters) ->
     update_op(tuple_to_list(Counters), 2);

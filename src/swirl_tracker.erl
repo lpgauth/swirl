@@ -41,10 +41,7 @@
 %% public
 -spec lookup(atom(), tuple()) -> term().
 lookup(Table, Key) ->
-    case ets:lookup(Table, Key) of
-        [{_, Value} | _] -> Value;
-        [] -> undefined
-    end.
+    swirl_utils:safe_ets_lookup_element(Table, Key).
 
 -spec message(node(), binary(), term()) -> ok.
 message(Node, FlowId, Msg) ->
