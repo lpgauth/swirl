@@ -45,7 +45,7 @@
 %% public
 -spec lookup(binary()) -> list(tuple()).
 lookup(FlowId) ->
-    swirl_tracker:lookup(key(FlowId)).
+    swirl_tracker:lookup(?TABLE_NAME_MAPPERS, key(FlowId)).
 
 -spec map(binary(), atom(), atom(), event(), term(), pos_integer()) -> ok.
 map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId) ->
@@ -62,11 +62,11 @@ map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId) ->
 
 -spec register(binary()) -> true.
 register(FlowId) ->
-    swirl_tracker:register(key(FlowId), self()).
+    swirl_tracker:register(?TABLE_NAME_MAPPERS, key(FlowId), self()).
 
 -spec unregister(binary()) -> true.
 unregister(FlowId) ->
-    swirl_tracker:unregister(key(FlowId)).
+    swirl_tracker:unregister(?TABLE_NAME_MAPPERS, key(FlowId)).
 
 %% internal
 start_link(FlowId, FlowMod, FlowOpts, ReducerNode) ->
@@ -187,5 +187,5 @@ key(FlowId) ->
 
 -spec update(pos_integer(), tuple(), tuple()) -> ok.
 update(TableId, Key, Counters) ->
-    Rnd = erlang:system_info(scheduler_id) band (?WIDTH-1),
+    Rnd = erlang:system_info(scheduler_id) band (?WIDTH - 1),
     swirl_utils:safe_ets_increment(TableId, {Key, Rnd}, Counters).

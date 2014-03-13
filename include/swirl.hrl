@@ -1,9 +1,11 @@
 %% macros
--define(NULL, undefined).
-
 -define(DEFAULT_MAPPER_FLUSH, timer:seconds(1)).
 -define(DEFAULT_REDUCER_FLUSH, timer:seconds(1)).
 -define(DEFAULT_HEARTBEAT, timer:seconds(5)).
+
+-define(TABLE_NAME_FLOWS, swirl_flows).
+-define(TABLE_NAME_MAPPERS, swirl_mappers).
+-define(TABLE_NAME_REDUCERS, swirl_reducers).
 
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 -define(L(Key, List), swirl_utils:lookup(Key, List)).

@@ -44,15 +44,15 @@
 %% public
 -spec lookup(binary()) -> list(tuple()).
 lookup(FlowId) ->
-    swirl_tracker:lookup(key(FlowId)).
+    swirl_tracker:lookup(?TABLE_NAME_REDUCERS, key(FlowId)).
 
 -spec register(binary()) -> true.
 register(FlowId) ->
-    swirl_tracker:register(key(FlowId), self()).
+    swirl_tracker:register(?TABLE_NAME_REDUCERS, key(FlowId), self()).
 
 -spec unregister(binary()) -> true.
 unregister(FlowId) ->
-    swirl_tracker:unregister(key(FlowId)).
+    swirl_tracker:unregister(?TABLE_NAME_REDUCERS, key(FlowId)).
 
 %% internal
 reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates) ->

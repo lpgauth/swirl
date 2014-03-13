@@ -1,5 +1,6 @@
 -module(swirl_tracker).
 -include("swirl.hrl").
+
 -compile({no_auto_import, [
     register/2,
     unregister/1
@@ -7,14 +8,14 @@
 
 %% public
 -export([
-    lookup/1,
+    lookup/2,
     message/3,
-    register/2,
+    register/3,
     start_mappers/5,
     start_reducer/5,
     stop_mappers/2,
     stop_reducer/2,
-    unregister/1
+    unregister/2
 ]).
 
 %% internal
@@ -32,16 +33,15 @@
     code_change/3
 ]).
 
--define(TABLE_NAME, registry).
 -define(TABLE_OPTS, [public, named_table, {read_concurrency, true}]).
 -define(SERVER, ?MODULE).
 
 -record(state, {}).
 
 %% public
--spec lookup(tuple()) -> term().
-lookup(Key) ->
-    case ets:lookup(?TABLE_NAME, Key) of
+-spec lookup(atom(), tuple()) -> term().
+lookup(Table, Key) ->
+    case ets:lookup(Table, Key) of
         [{_, Value} | _] -> Value;
         [] -> undefined
     end.
@@ -51,9 +51,9 @@ message(Node, FlowId, Msg) ->
     {swirl_tracker, Node} ! {flow, FlowId, Msg},
     ok.
 
--spec register(tuple(), term()) -> true.
-register(Key, Value) ->
-    ets:insert(?TABLE_NAME, {Key, Value}).
+-spec register(atom(), tuple(), term()) -> true.
+register(Table, Key, Value) ->
+    ets:insert(Table, {Key, Value}).
 
 -spec start_mappers(binary(), atom(), [flow_opts()], [node()], node()) -> ok.
 start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
@@ -76,9 +76,9 @@ stop_reducer(FlowId, ReducerNode) ->
     swirl_tracker:message(ReducerNode, FlowId, stop_reducer),
     ok.
 
--spec unregister(tuple()) -> true.
-unregister(Key) ->
-    ets:delete(?TABLE_NAME, Key).
+-spec unregister(atom(), tuple()) -> true.
+unregister(Table, Key) ->
+    ets:delete(Table, Key).
 
 %% internal
 start_link() ->
@@ -87,7 +87,9 @@ start_link() ->
 %% gen_server callbacks
 init([]) ->
     process_flag(trap_exit, true),
-    swirl_ets_manager:table(?TABLE_NAME, ?TABLE_OPTS, swirl_tracker),
+    swirl_ets_manager:table(?TABLE_NAME_MAPPERS, ?TABLE_OPTS, swirl_tracker),
+    swirl_ets_manager:table(?TABLE_NAME_REDUCERS, ?TABLE_OPTS, swirl_tracker),
+    swirl_ets_manager:table(?TABLE_NAME_FLOWS, ?TABLE_OPTS, swirl_tracker),
     {ok, #state{}}.
 
 handle_call(Request, _From, State) ->
@@ -98,7 +100,7 @@ handle_cast(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
-handle_info({'ETS-TRANSFER', _TableId, _Pid,  {?TABLE_NAME, _Options, ?SERVER}}, State) ->
+handle_info({'ETS-TRANSFER', _TableId, _Pid,  {_TableName, _Options, ?SERVER}}, State) ->
     {noreply, State};
 handle_info({'EXIT', _Pid, normal}, State) ->
     {noreply, State};

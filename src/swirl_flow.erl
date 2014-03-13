@@ -17,7 +17,7 @@
 %% public
 -spec lookup(atom()) -> [tuple()].
 lookup(StreamName) ->
-    ets:select(registry, match_lookup_spec(StreamName)).
+    ets:select(?TABLE_NAME_FLOWS, match_lookup_spec(StreamName)).
 
 -spec register(binary(), atom(), [flow_opts()], pos_integer()) -> true.
 register(FlowId, FlowMod, FlowOpts, TableId) ->
@@ -27,7 +27,7 @@ register(FlowId, FlowMod, FlowOpts, TableId) ->
     ExpTree = expression_tree(StreamFilter),
     MapperOpts = ?L(mapper_opts, FlowOpts, []),
     Value = {ExpTree, FlowMod, MapperOpts, TableId},
-    swirl_tracker:register(key(FlowId, StreamName), Value).
+    swirl_tracker:register(?TABLE_NAME_FLOWS, key(FlowId, StreamName), Value).
 
 -spec start(atom(), [flow_opts()], [node()], node()) -> binary().
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
@@ -44,7 +44,7 @@ stop(FlowId, MapperNodes, ReducerNode) ->
 
 -spec unregister(binary(), atom(), pos_integer()) -> true.
 unregister(FlowId, StreamName, TableId) ->
-    ets:select_delete(registry, match_delete_spec(FlowId, StreamName, TableId)).
+    ets:select_delete(?TABLE_NAME_FLOWS, match_delete_spec(FlowId, StreamName, TableId)).
 
 %% private
 expression_tree(undefined) ->

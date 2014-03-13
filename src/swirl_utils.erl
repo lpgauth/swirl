@@ -1,6 +1,5 @@
 -module(swirl_utils).
 -include("swirl.hrl").
--compile(native).
 
 %% public
 -export([
