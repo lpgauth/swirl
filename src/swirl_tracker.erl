@@ -45,7 +45,7 @@ lookup(Table, Key) ->
 
 -spec message(node(), binary(), term()) -> ok.
 message(Node, FlowId, Msg) ->
-    {swirl_tracker, Node} ! {flow, FlowId, Msg},
+    {?SERVER, Node} ! {flow, FlowId, Msg},
     ok.
 
 -spec register(atom(), tuple(), term()) -> true.
@@ -84,9 +84,9 @@ start_link() ->
 %% gen_server callbacks
 init([]) ->
     process_flag(trap_exit, true),
-    swirl_ets_manager:table(?TABLE_NAME_MAPPERS, ?TABLE_OPTS, swirl_tracker),
-    swirl_ets_manager:table(?TABLE_NAME_REDUCERS, ?TABLE_OPTS, swirl_tracker),
-    swirl_ets_manager:table(?TABLE_NAME_FLOWS, ?TABLE_OPTS, swirl_tracker),
+    swirl_ets_manager:table(?TABLE_NAME_MAPPERS, ?TABLE_OPTS, ?SERVER),
+    swirl_ets_manager:table(?TABLE_NAME_REDUCERS, ?TABLE_OPTS, ?SERVER),
+    swirl_ets_manager:table(?TABLE_NAME_FLOWS, ?TABLE_OPTS, ?SERVER),
     {ok, #state{}}.
 
 handle_call(Request, _From, State) ->
@@ -124,20 +124,10 @@ handler_flow_msg(FlowId, {pong, _Node} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
 handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) ->
-    case swirl_mapper:lookup(FlowId) of
-        undefined ->
-            swirl_mapper:start_link(FlowId, FlowMod, FlowOpts, ReducerNode);
-        _Else ->
-            ok
-    end,
+    swirl_mapper:start(FlowId, FlowMod, FlowOpts, ReducerNode),
     {noreply, State};
 handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts, MapperNodes}, State) ->
-    case swirl_reducer:lookup(FlowId) of
-        undefined ->
-            swirl_reducer:start_link(FlowId, FlowMod, FlowOpts, MapperNodes);
-        _Else ->
-            ok
-    end,
+    swirl_reducer:start(FlowId, FlowMod, FlowOpts, MapperNodes),
     {noreply, State};
 handler_flow_msg(FlowId, stop_mapper, State) ->
     message(swirl_mapper:lookup(FlowId), stop),

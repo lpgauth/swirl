@@ -15,7 +15,7 @@
 %% internal
 -export([
     reduce/5,
-    start_link/4
+    start/4
 ]).
 
 -behaviour(gen_server).
@@ -61,8 +61,12 @@ unregister(FlowId) ->
 reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates) ->
     FlowMod:reduce(FlowId, Period, Aggregates, ?L(reducer_opts, FlowOpts, [])).
 
-start_link(FlowId, FlowMod, FlowOpts, MapperNodes) ->
-    gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts, MapperNodes}, []).
+start(FlowId, FlowMod, FlowOpts, ReducerNode) ->
+    case lookup(FlowId) of
+        undefined ->
+            start_link(FlowId, FlowMod, FlowOpts, ReducerNode);
+        _Else -> ok
+    end.
 
 %% gen_server callbacks
 init({FlowId, FlowMod, FlowOpts, MapperNodes}) ->
@@ -182,3 +186,6 @@ map_aggregates(Period, [H | T], TableId) ->
     [{Key, _} | Counters] = tuple_to_list(H),
     swirl_utils:safe_ets_increment(TableId, Key, Counters),
     map_aggregates(Period, T, TableId).
+
+start_link(FlowId, FlowMod, FlowOpts, MapperNodes) ->
+    gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts, MapperNodes}, []).
