@@ -8,7 +8,7 @@
 %% public
 -export([
     lookup/1,
-    register/1,
+    register/4,
     unregister/1
 ]).
 
@@ -49,9 +49,10 @@
 lookup(FlowId) ->
     swirl_tracker:lookup(?TABLE_NAME_REDUCERS, key(FlowId)).
 
--spec register(binary()) -> true.
-register(FlowId) ->
-    swirl_tracker:register(?TABLE_NAME_REDUCERS, key(FlowId), self()).
+-spec register(binary(), atom(), [flow_opts()], [node()]) -> true.
+register(FlowId, FlowMod, FlowOpts, MapperNodes) ->
+    Info = {FlowMod, FlowOpts, MapperNodes},
+    swirl_tracker:register(?TABLE_NAME_REDUCERS, key(FlowId), self(), Info).
 
 -spec unregister(binary()) -> true.
 unregister(FlowId) ->
@@ -61,17 +62,17 @@ unregister(FlowId) ->
 reduce(FlowId, FlowMod, FlowOpts, Period, Aggregates) ->
     FlowMod:reduce(FlowId, Period, Aggregates, ?L(reducer_opts, FlowOpts, [])).
 
-start(FlowId, FlowMod, FlowOpts, ReducerNode) ->
+start(FlowId, FlowMod, FlowOpts, MapperNodes) ->
     case lookup(FlowId) of
         undefined ->
-            start_link(FlowId, FlowMod, FlowOpts, ReducerNode);
+            start_link(FlowId, FlowMod, FlowOpts, MapperNodes);
         _Else -> ok
     end.
 
 %% gen_server callbacks
 init({FlowId, FlowMod, FlowOpts, MapperNodes}) ->
     process_flag(trap_exit, true),
-    register(FlowId),
+    register(FlowId, FlowMod, FlowOpts, MapperNodes),
     self() ! flush,
     self() ! heartbeat,
 

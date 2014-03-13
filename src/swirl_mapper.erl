@@ -8,7 +8,7 @@
 %% public
 -export([
     lookup/1,
-    register/1,
+    register/4,
     unregister/1
 ]).
 
@@ -50,9 +50,10 @@
 lookup(FlowId) ->
     swirl_tracker:lookup(?TABLE_NAME_MAPPERS, key(FlowId)).
 
--spec register(binary()) -> true.
-register(FlowId) ->
-    swirl_tracker:register(?TABLE_NAME_MAPPERS, key(FlowId), self()).
+-spec register(binary(), atom(), [flow_opts()], node()) -> true.
+register(FlowId, FlowMod, FlowOpts, ReducerNode) ->
+    Info = {FlowMod, FlowOpts, ReducerNode},
+    swirl_tracker:register(?TABLE_NAME_MAPPERS, key(FlowId), self(), Info).
 
 -spec unregister(binary()) -> true.
 unregister(FlowId) ->
@@ -82,7 +83,7 @@ start(FlowId, FlowMod, FlowOpts, ReducerNode) ->
 %% gen_server callbacks
 init({FlowId, FlowMod, FlowOpts, ReducerNode}) ->
     process_flag(trap_exit, true),
-    register(FlowId),
+    register(FlowId, FlowMod, FlowOpts, ReducerNode),
     self() ! flush,
     self() ! heartbeat,
 

@@ -72,8 +72,7 @@ safe_ets_insert(TableId, Key, Counters) ->
     end.
 
 safe_ets_lookup_element(TableId, Key) ->
-    try
-         ets:lookup_element(TableId, Key, 2)
+    try ets:lookup_element(TableId, Key, 2)
     catch
         error:badarg ->
             undefined

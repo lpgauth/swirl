@@ -10,7 +10,7 @@
 -export([
     lookup/2,
     message/3,
-    register/3,
+    register/4,
     start_mappers/5,
     start_reducer/5,
     stop_mappers/2,
@@ -48,9 +48,9 @@ message(Node, FlowId, Msg) ->
     {?SERVER, Node} ! {flow, FlowId, Msg},
     ok.
 
--spec register(atom(), tuple(), term()) -> true.
-register(Table, Key, Value) ->
-    ets:insert(Table, {Key, Value}).
+-spec register(atom(), tuple(), pid(), term()) -> true.
+register(Table, Key, Pid, Info) ->
+    ets:insert(Table, {Key, Pid, Info}).
 
 -spec start_mappers(binary(), atom(), [flow_opts()], [node()], node()) -> ok.
 start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->

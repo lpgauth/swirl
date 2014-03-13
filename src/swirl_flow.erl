@@ -26,8 +26,9 @@ register(FlowId, FlowMod, FlowOpts, TableId) ->
     StreamFilter = ?L(stream_filter, FlowOpts),
     ExpTree = expression_tree(StreamFilter),
     MapperOpts = ?L(mapper_opts, FlowOpts, []),
+    Key = key(FlowId, StreamName),
     Value = {ExpTree, FlowMod, MapperOpts, TableId},
-    swirl_tracker:register(?TABLE_NAME_FLOWS, key(FlowId, StreamName), Value).
+    ets:insert(?TABLE_NAME_FLOWS, {Key, Value}).
 
 -spec start(atom(), [flow_opts()], [node()], node()) -> binary().
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
