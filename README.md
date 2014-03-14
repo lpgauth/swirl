@@ -13,9 +13,21 @@ swirl
 #### Data Types: ####
 
     event() :: [{atom(), value()}].
-    flow_opts() :: {stream_name, atom()} | {stream_filter, string()}.
+    flow_opts() :: {stream_name, atom()} | 
+                   {stream_filter, string()} | 
+                   {mapper_flush, pos_integer()} | 
+                   {mapper_opts, term()} |
+                   {reducer_flush, pos_integer()} |
+                   {reducer_opts, term()} |
+                   {heartbeat, pos_integer()}
 
-#### Example: ####
+#### Web Interface: ####
+
+Port is configurable via environment config (e.g. application:set_env(swirl_ui, port, 9999)).
+
+    http://localhost:9090/
+
+#### Examples: ####
 
 ##### Implementing a flow: #####
     -module(swirl_flow_example).
@@ -47,8 +59,9 @@ swirl
 ##### Emitting to stream: #####
 
     swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}])
-
+    
 #### TODO: ####
 - node discovery
 - code distribution
 - resource limitation
+- boolean expression indexing
