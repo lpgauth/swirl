@@ -55,22 +55,22 @@ register(Table, Key, Pid, Info) ->
 -spec start_mappers(binary(), atom(), [flow_opts()], [node()], node()) -> ok.
 start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     Msg = {start_mapper, FlowMod, FlowOpts, ReducerNode},
-    [swirl_tracker:message(Node, FlowId, Msg) || Node <- MapperNodes],
+    [message(Node, FlowId, Msg) || Node <- MapperNodes],
     ok.
 
 -spec start_reducer(binary(), atom(), [flow_opts()], [node()], node()) -> ok.
 start_reducer(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     Msg = {start_reducer, FlowMod, FlowOpts, MapperNodes},
-    swirl_tracker:message(ReducerNode, FlowId, Msg).
+    message(ReducerNode, FlowId, Msg).
 
 -spec stop_mappers(binary(), [node()]) -> ok.
 stop_mappers(FlowId, MapperNodes) ->
-    [swirl_tracker:message(Node, FlowId, stop_mapper) || Node <- MapperNodes],
+    [message(Node, FlowId, stop_mapper) || Node <- MapperNodes],
     ok.
 
 -spec stop_reducer(binary(), node()) -> ok.
 stop_reducer(FlowId, ReducerNode) ->
-    swirl_tracker:message(ReducerNode, FlowId, stop_reducer),
+    message(ReducerNode, FlowId, stop_reducer),
     ok.
 
 -spec unregister(atom(), tuple()) -> true.

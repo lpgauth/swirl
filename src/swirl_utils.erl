@@ -55,7 +55,7 @@ safe_ets_delete(TableId) ->
     end.
 
 safe_ets_increment(TableId, Key, Counters) ->
-    UpdateOp = swirl_utils:update_op(Counters),
+    UpdateOp = update_op(Counters),
     try ets:update_counter(TableId, Key, UpdateOp)
     catch
         error:badarg ->
