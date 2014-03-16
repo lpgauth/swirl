@@ -29,7 +29,7 @@ test_benchmark_emit() ->
     [swirl_flow:stop(Flow) || Flow <- Flows].
 
 test_swirl_flow() ->
-    Flow = swirl_flow:start(swirl_flow_example, [
+    {ok, Flow} = swirl_flow:start(swirl_flow_example, [
         {stream_name, delivery},
         {stream_filter, "exchange_id = 3"},
         {mapper_flush, timer:seconds(1)},
@@ -68,7 +68,8 @@ emit_loop(N) ->
 
 new_flow() ->
     FlowOpts = [{stream_name, video}],
-    swirl_flow:start(swirl_flow_example, FlowOpts, [node()], node()).
+    {ok, Flow} = swirl_flow:start(swirl_flow_example, FlowOpts, [node()], node()),
+    Flow.
 
 random_event() ->
     Type = random_type(),
