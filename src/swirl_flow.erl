@@ -3,11 +3,15 @@
 
 %% public
 -export([
-    lookup/1,
-    register/4,
     start/4,
-    stop/3,
-    unregister/3
+    stop/1
+]).
+
+%% inernal
+-export([
+    lookup/1,
+    register/1,
+    unregister/1
 ]).
 
 %% callback
@@ -15,54 +19,57 @@
 -callback reduce(binary(), period(), term(), term()) -> ok.
 
 %% public
--spec lookup(atom()) -> [tuple()].
-lookup(StreamName) ->
-    ets:select(?TABLE_NAME_FLOWS, match_lookup_spec(StreamName)).
-
--spec register(binary(), atom(), [flow_opts()], pos_integer()) -> true.
-register(FlowId, FlowMod, FlowOpts, TableId) ->
-    verify_options(FlowOpts, []),
-    StreamName = ?L(stream_name, FlowOpts),
-    StreamFilter = ?L(stream_filter, FlowOpts),
-    ExpTree = expression_tree(StreamFilter),
-    MapperOpts = ?L(mapper_opts, FlowOpts, []),
-    Key = key(FlowId, StreamName),
-    Value = {ExpTree, FlowMod, MapperOpts, TableId},
-    ets:insert(?TABLE_NAME_FLOWS, {Key, Value}).
-
--spec start(atom(), [flow_opts()], [node()], node()) -> binary().
+-spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()}.
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
-    FlowId = swirl_utils:uuid(),
-    swirl_tracker:start_reducer(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
-    swirl_tracker:start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode),
-    FlowId.
+    Flow = flow(FlowMod, FlowOpts, MapperNodes, ReducerNode),
+    ok = swirl_tracker:start_reducer(Flow),
+    ok = swirl_tracker:start_mappers(Flow),
+    {ok, Flow}.
 
--spec stop(binary(), [node()], node()) -> ok.
-stop(FlowId, MapperNodes, ReducerNode) ->
-    swirl_tracker:stop_mappers(FlowId, MapperNodes),
-    swirl_tracker:stop_reducer(FlowId, ReducerNode),
+-spec stop(flow()) -> ok.
+stop(Flow) ->
+    ok = swirl_tracker:stop_mappers(Flow),
+    ok = swirl_tracker:stop_reducer(Flow),
     ok.
 
--spec unregister(binary(), atom(), pos_integer()) -> true.
-unregister(FlowId, StreamName, TableId) ->
-    ets:select_delete(?TABLE_NAME_FLOWS, match_delete_spec(FlowId, StreamName, TableId)).
+%% internal
+-spec lookup(binary() | flow()) -> undefined | flow().
+lookup(FlowId) when is_binary(FlowId) ->
+    lookup(#flow {id = FlowId});
+lookup(Flow) ->
+    swirl_tracker:lookup(?TABLE_NAME_FLOWS, key(Flow)).
+
+-spec register(flow()) -> true.
+register(Flow) ->
+    swirl_tracker:register(?TABLE_NAME_FLOWS, key(Flow), Flow).
+
+-spec unregister(flow()) -> true.
+unregister(Flow) ->
+    swirl_tracker:unregister(?TABLE_NAME_FLOWS, key(Flow)).
 
 %% private
-expression_tree(undefined) ->
-    undefined;
-expression_tree(StreamFilter) ->
-    {ok, ExpTree} = swirl_ql:parse(StreamFilter),
-    ExpTree.
+flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
+    ok = verify_options(FlowOpts),
+    #flow {
+        id            = swirl_utils:uuid(),
+        module        = FlowMod,
+        heartbeat     = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
+        mapper_flush  = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
+        mapper_nodes  = MapperNodes,
+        mapper_opts   = ?L(mapper_opts, FlowOpts, []),
+        reducer_flush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
+        reducer_node  = ReducerNode,
+        reducer_opts  = ?L(reducer_opts, FlowOpts, []),
+        stream_filter = ?L(stream_filter, FlowOpts),
+        stream_name   = ?L(stream_name, FlowOpts),
+        timestamp     = os:timestamp()
+    }.
 
-key(FlowId, StreamName) ->
-    {flow, FlowId, StreamName}.
+key(#flow {id = Id, stream_name = StreamName}) ->
+    {flow, Id, StreamName}.
 
-match_lookup_spec(StreamName) ->
-    [{{{flow, '$1', '$2'}, {'$3', '$4', '$5', '$6'}}, [{'orelse' , {'=:=', '$2', StreamName},
-        {'=:=', '$2', undefined}}], [{{'$3', '$1', '$4', '$5', '$6'}}]}].
-
-match_delete_spec(FlowId, StreamName, TableId) ->
-    [{{{flow, FlowId, StreamName}, {'_', '_', '_', TableId}}, [], [true]}].
+verify_options(FlowOpts) ->
+    verify_options(FlowOpts, []).
 
 verify_options([{mapper_flush, MapperFlush} | Options], Errors)
     when is_integer(MapperFlush) ->
@@ -94,4 +101,4 @@ verify_options([Option | Options], Errors) ->
 verify_options([], []) ->
     ok;
 verify_options([], Errors) ->
-    erlang:error({bad_options, Errors}).
+    erlang:error({invalid_options, Errors}).

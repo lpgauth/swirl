@@ -5,17 +5,13 @@
     unregister/1
 ]}).
 
-%% public
--export([
-    lookup/1,
-    register/4,
-    unregister/1
-]).
-
 %% internal
 -export([
+    lookup/1,
     map/6,
-    start/4
+    register/1,
+    start/1,
+    unregister/1
 ]).
 
 -behaviour(gen_server).
@@ -34,64 +30,61 @@
 -define(WIDTH, 16).
 
 -record(state, {
-    flow_id,
-    flow_mod,
-    flow_opts,
+    flow,
     table_id,
-    reducer_node,
     flush_timer,
     flush_tstamp,
     heartbeat_timer,
     heartbeat_tstamp
 }).
 
-%% public
--spec lookup(binary()) -> list(tuple()).
-lookup(FlowId) ->
-    swirl_tracker:lookup(?TABLE_NAME_MAPPERS, key(FlowId)).
-
--spec register(binary(), atom(), [flow_opts()], node()) -> true.
-register(FlowId, FlowMod, FlowOpts, ReducerNode) ->
-    Info = {FlowMod, FlowOpts, ReducerNode},
-    swirl_tracker:register(?TABLE_NAME_MAPPERS, key(FlowId), self(), Info).
-
--spec unregister(binary()) -> true.
-unregister(FlowId) ->
-    swirl_tracker:unregister(?TABLE_NAME_MAPPERS, key(FlowId)).
-
 %% internal
--spec map(binary(), atom(), atom(), event(), term(), pos_integer()) -> ok.
+-spec lookup(binary() | flow()) -> undefined | pid.
+lookup(FlowId) when is_binary(FlowId) ->
+    lookup(#flow {id = FlowId});
+lookup(Flow) ->
+    swirl_tracker:lookup(?TABLE_NAME_MAPPERS, key(Flow)).
+
+-spec map(binary(), module(), atom(), event(), term(), erlang:tab()) -> ok.
 map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId) ->
     case FlowMod:map(FlowId, StreamName, Event, MapperOpts) of
         Updates when is_list(Updates) ->
-            lists:map(fun ({update, Key, Counters}) ->
-                update(TableId, Key, Counters)
-            end, Updates);
+            [update(TableId, Key, Counters) ||
+                {update, Key, Counters} <- Updates];
         {update, Key, Counters} ->
             update(TableId, Key, Counters);
         ignore ->
             ok
     end.
 
-start(FlowId, FlowMod, FlowOpts, ReducerNode) ->
-    case lookup(FlowId) of
-        undefined ->
-            start_link(FlowId, FlowMod, FlowOpts, ReducerNode);
+-spec register(flow()) -> true.
+register(Flow) ->
+    swirl_tracker:register(?TABLE_NAME_MAPPERS, key(Flow), self()).
+
+start(Flow) ->
+    MappersCount = swirl_config:mappers_count(),
+    MappersMax = swirl_config:mappers_max(),
+    case lookup(Flow) of
+        undefined when MappersCount < MappersMax ->
+            start_link(Flow);
         _Else -> ok
     end.
 
+-spec unregister(flow()) -> true.
+unregister(Flow) ->
+    swirl_tracker:unregister(?TABLE_NAME_MAPPERS, key(Flow)).
+
 %% gen_server callbacks
-init({FlowId, FlowMod, FlowOpts, ReducerNode}) ->
+init(#flow {} = Flow) ->
     process_flag(trap_exit, true),
-    register(FlowId, FlowMod, FlowOpts, ReducerNode),
+    register(Flow),
+    swirl_flow:register(Flow),
+
     self() ! flush,
     self() ! heartbeat,
 
     {ok, #state {
-        flow_id = FlowId,
-        flow_mod = FlowMod,
-        flow_opts = FlowOpts,
-        reducer_node = ReducerNode,
+        flow = Flow,
         heartbeat_tstamp = swirl_utils:unix_timestamp_ms()
     }}.
 
@@ -104,24 +97,19 @@ handle_cast(Msg, State) ->
     {noreply, State}.
 
 handle_info(flush, #state {
-        flow_id = FlowId,
+        flow = Flow,
         table_id = TableId,
-        flow_mod = FlowMod,
-        flow_opts = FlowOpts,
-        reducer_node = ReducerNode,
         flush_tstamp = Timestamp
     } = State) ->
 
-    MapperFlush = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
-    StreamName = ?L(stream_name, FlowOpts),
-
+    MapperFlush = Flow#flow.mapper_flush,
     {Timestamp2, FlushTimer} = swirl_utils:new_timer(MapperFlush, flush),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
-    swirl_flow:register(FlowId, FlowMod, FlowOpts, NewTableId),
-    swirl_flow:unregister(FlowId, StreamName, TableId),
+    swirl_stream:register(Flow, NewTableId),
+    swirl_stream:unregister(Flow, TableId),
 
     Period = #period {start_at = Timestamp, end_at = Timestamp2},
-    spawn(fun() -> flush_aggregates(FlowId, Period, TableId, ReducerNode) end),
+    spawn(fun() -> flush_aggregates(Flow, Period, TableId) end),
 
     {noreply, State#state {
         table_id = NewTableId,
@@ -129,28 +117,22 @@ handle_info(flush, #state {
         flush_timer = FlushTimer
     }};
 handle_info(heartbeat, #state {
-        flow_opts = FlowOpts,
-        heartbeat_tstamp = Timestamp
+        flow = Flow,
+        heartbeat_tstamp = Tstamp
     } = State) ->
 
-    Heartbeat = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
-    {Timestamp2, HeartbeatTimer} = swirl_utils:new_timer(Heartbeat, heartbeat),
-
-    case Timestamp2 - Timestamp > 2 * Heartbeat of
-        true ->
-            {stop, normal, State#state {
-                heartbeat_timer = HeartbeatTimer
-            }};
-        false ->
-            {noreply, State#state {
-                heartbeat_timer = HeartbeatTimer
-            }}
+    Heartbeat = Flow#flow.heartbeat,
+    {Tstamp2, HeartbeatTimer} = swirl_utils:new_timer(Heartbeat, heartbeat),
+    NewState = State#state {
+        heartbeat_timer = HeartbeatTimer
+    },
+    case Tstamp2 - Tstamp > 2 * Heartbeat of
+        true -> {stop, normal, NewState};
+        false -> {noreply, NewState}
     end;
-handle_info({ping, ReducerNode}, #state {
-        flow_id = FlowId,
-        reducer_node = ReducerNode
-    } = State) ->
-
+handle_info({ping, ReducerNode}, #state {flow = Flow} = State) ->
+    ReducerNode = Flow#flow.reducer_node,
+    FlowId = Flow#flow.id,
     swirl_tracker:message(ReducerNode, FlowId, {pong, node()}),
 
     {noreply, State#state {
@@ -163,16 +145,15 @@ handle_info(Msg, State) ->
     {noreply, State}.
 
 terminate(_Reason, #state {
-        flow_id = FlowId,
+        flow = Flow,
         table_id = TableId,
-        flow_opts = FlowOpts,
         flush_timer = FlushTimer,
         heartbeat_timer = HeartbeatTimer
     }) ->
 
-    StreamName = ?L(stream_name, FlowOpts),
-    swirl_flow:unregister(FlowId, StreamName, TableId),
-    unregister(FlowId),
+    swirl_stream:unregister(Flow, TableId),
+    swirl_flow:unregister(Flow),
+    unregister(Flow),
     timer:cancel(FlushTimer),
     timer:cancel(HeartbeatTimer),
     ok.
@@ -181,9 +162,11 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-flush_aggregates(_FlowId, _Period, undefined, _ReducerNode) ->
+flush_aggregates(_Flow, _Period, undefined) ->
     ok;
-flush_aggregates(FlowId, Period, TableId, ReducerNode) ->
+flush_aggregates(Flow, Period, TableId) ->
+    ReducerNode = Flow#flow.reducer_node,
+    FlowId = Flow#flow.id,
     Aggregates = swirl_utils:tab2list(TableId),
     swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, Aggregates}),
 
@@ -191,11 +174,11 @@ flush_aggregates(FlowId, Period, TableId, ReducerNode) ->
     timer:sleep(500),
     swirl_utils:safe_ets_delete(TableId).
 
-key(FlowId) ->
-    {mapper, FlowId}.
+key(Flow) ->
+    {mapper, Flow#flow.id}.
 
-start_link(FlowId, FlowMod, FlowOpts, ReducerNode) ->
-    gen_server:start_link(?MODULE, {FlowId, FlowMod, FlowOpts, ReducerNode}, []).
+start_link(Flow) ->
+    gen_server:start_link(?MODULE, Flow, []).
 
 -spec update(pos_integer(), tuple(), tuple()) -> ok.
 update(TableId, Key, Counters) ->
