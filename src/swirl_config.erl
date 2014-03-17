@@ -4,6 +4,7 @@
 %% public
 -export([
     flows/0,
+    flows_count/0,
     mappers/0,
     mappers_count/0,
     mappers_max/0,
@@ -15,6 +16,9 @@
 %% public
 flows() ->
     swirl_utils:tab2list(?TABLE_NAME_FLOWS).
+
+flows_count() ->
+    select_count_all(?TABLE_NAME_FLOWS).
 
 mappers() ->
     swirl_utils:tab2list(?TABLE_NAME_MAPPERS).

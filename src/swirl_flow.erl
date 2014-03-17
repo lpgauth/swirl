@@ -65,8 +65,8 @@ flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
         timestamp     = os:timestamp()
     }.
 
-key(#flow {id = Id, stream_name = StreamName}) ->
-    {flow, Id, StreamName}.
+key(#flow {id = Id}) ->
+    {flow, Id}.
 
 verify_options(FlowOpts) ->
     verify_options(FlowOpts, []).
