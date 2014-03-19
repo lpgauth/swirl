@@ -6,6 +6,10 @@ swirl
 
     start(FlowMod :: atom(), FlowOpts :: [flow_opts()], MapperNodes :: [node()], ReducerNode :: node()) -> ok
 
+##### swirl_flow:stop/4 ######
+
+    stop(Flow :: flow()) -> ok.
+
 ##### swirl_stream:emit/1 ######
 
     emit(StreamName :: atom(), Event :: event()) -> ok
@@ -13,9 +17,9 @@ swirl
 #### Data Types: ####
 
     event() :: [{atom(), value()}].
-    flow_opts() :: {stream_name, atom()} | 
-                   {stream_filter, string()} | 
-                   {mapper_flush, pos_integer()} | 
+    flow_opts() :: {stream_name, atom()} |
+                   {stream_filter, string()} |
+                   {mapper_flush, pos_integer()} |
                    {mapper_opts, term()} |
                    {reducer_flush, pos_integer()} |
                    {reducer_opts, term()} |
@@ -23,9 +27,17 @@ swirl
 
 #### Web Interface: ####
 
-Port is configurable via environment config (e.g. application:set_env(swirl_ui, port, 9999)).
-
     http://localhost:9090/
+
+Ip and Port are configurable via environment config:
+
+    application:set_env(swirl_ui, ip, {74,125,226,55})),
+    application:set_env(swirl_ui, port, 9999))
+
+#### Resource Limitation: ####
+
+    application:set_env(swirl, mappers_max, 140)),
+    application:set_env(swirl, reducers_max, 200))
 
 #### Examples: ####
 
@@ -45,8 +57,9 @@ Port is configurable via environment config (e.g. application:set_env(swirl_ui, 
     reduce(_FlowId, _Period, Aggregates, _ReducerOpts) ->
         io:format("~p~n", [Aggregates]).
 
-##### Starting flow: #####
-
+##### Starting a flow: #####
+    ok = application:start(swirl),
+    ..
     FlowMod = swirl_flow_example,
     FlowOpts = [
         {stream_name, delivery},
@@ -54,14 +67,14 @@ Port is configurable via environment config (e.g. application:set_env(swirl_ui, 
     ],
     MapperNodes = [node()],
     ReducerNode = node(),
-    swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
+    {ok, Flow} = swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
+    ..
+    swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
+    ..
+    ok = swirl_flow:stop(Flow).
 
-##### Emitting to stream: #####
-
-    swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}])
-    
 #### TODO: ####
 - node discovery
 - code distribution
-- resource limitation
 - boolean expression indexing
+
