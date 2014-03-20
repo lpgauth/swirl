@@ -19,15 +19,19 @@
 -callback reduce(binary(), period(), term(), term()) -> ok.
 
 %% public
--spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()}.
+-spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()} | {error, {bad_flow_opts, list()}}.
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
-    Flow = flow(FlowMod, FlowOpts, MapperNodes, ReducerNode),
-    ok = swirl_tracker:start_reducer(Flow),
-    ok = swirl_tracker:start_mappers(Flow),
-    {ok, Flow}.
+    case flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) of
+        {ok, Flow} ->
+            ok = swirl_tracker:start_reducer(Flow),
+            ok = swirl_tracker:start_mappers(Flow),
+            {ok, Flow};
+        {error, Reason} ->
+            {error, Reason}
+    end.
 
 -spec stop(flow()) -> ok.
-stop(Flow) ->
+stop(#flow {} = Flow) ->
     ok = swirl_tracker:stop_mappers(Flow),
     ok = swirl_tracker:stop_reducer(Flow),
     ok.
@@ -36,34 +40,37 @@ stop(Flow) ->
 -spec lookup(binary() | flow()) -> undefined | flow().
 lookup(FlowId) when is_binary(FlowId) ->
     lookup(#flow {id = FlowId});
-lookup(Flow) ->
+lookup(#flow {} = Flow) ->
     swirl_tracker:lookup(?TABLE_NAME_FLOWS, key(Flow)).
 
 -spec register(flow()) -> true.
-register(Flow) ->
+register(#flow {} = Flow) ->
     swirl_tracker:register(?TABLE_NAME_FLOWS, key(Flow), Flow).
 
 -spec unregister(flow()) -> true.
-unregister(Flow) ->
+unregister(#flow {} = Flow) ->
     swirl_tracker:unregister(?TABLE_NAME_FLOWS, key(Flow)).
 
 %% private
 flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
-    ok = verify_options(FlowOpts),
-    #flow {
-        id            = swirl_utils:uuid(),
-        module        = FlowMod,
-        heartbeat     = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
-        mapper_flush  = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
-        mapper_nodes  = MapperNodes,
-        mapper_opts   = ?L(mapper_opts, FlowOpts, []),
-        reducer_flush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
-        reducer_node  = ReducerNode,
-        reducer_opts  = ?L(reducer_opts, FlowOpts, []),
-        stream_filter = ?L(stream_filter, FlowOpts),
-        stream_name   = ?L(stream_name, FlowOpts),
-        timestamp     = os:timestamp()
-    }.
+    case verify_options(FlowOpts) of
+        ok ->
+            {ok, #flow {
+                id            = swirl_utils:uuid(),
+                module        = FlowMod,
+                heartbeat     = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
+                mapper_flush  = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
+                mapper_nodes  = MapperNodes,
+                mapper_opts   = ?L(mapper_opts, FlowOpts, []),
+                reducer_flush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
+                reducer_node  = ReducerNode,
+                reducer_opts  = ?L(reducer_opts, FlowOpts, []),
+                stream_filter = ?L(stream_filter, FlowOpts),
+                stream_name   = ?L(stream_name, FlowOpts),
+                timestamp     = os:timestamp()
+            }};
+        {error, Reason} -> {error, Reason}
+    end.
 
 key(#flow {id = Id}) ->
     {flow, Id}.
@@ -101,4 +108,4 @@ verify_options([Option | Options], Errors) ->
 verify_options([], []) ->
     ok;
 verify_options([], Errors) ->
-    erlang:error({invalid_options, Errors}).
+    {error, {bad_flow_opts, Errors}}.

@@ -12,6 +12,7 @@
 ]).
 
 %% internal
+-spec start_link() -> {ok, pid()}.
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 

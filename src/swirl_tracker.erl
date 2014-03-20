@@ -48,6 +48,7 @@ message(Node, FlowId, Msg) ->
 register(TableId, Key, Value) ->
     ets:insert(TableId, {Key, Value}).
 
+-spec start_link() -> {'ok', pid()}.
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 

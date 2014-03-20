@@ -23,7 +23,7 @@ emit(StreamName, Event) ->
 -spec lookup(atom() | flow()) -> [tuple()].
 lookup(StreamName) when is_atom(StreamName) ->
     lookup(#flow {stream_name = StreamName});
-lookup(Flow) ->
+lookup(#flow {} = Flow) ->
     ets:select(?TABLE_NAME_STREAMS, match_lookup_spec(Flow)).
 
 -spec register(flow(), erlang:tab()) -> true.
@@ -38,7 +38,7 @@ register(#flow {
     ets:insert(?TABLE_NAME_STREAMS, {key(Flow), Value}).
 
 -spec unregister(flow(), erlang:tab()) -> true.
-unregister(Flow, TableId) ->
+unregister(#flow {} = Flow, TableId) ->
     DeleteSpec = match_delete_spec(Flow, TableId),
     ets:select_delete(?TABLE_NAME_STREAMS, DeleteSpec),
     true.

@@ -41,9 +41,10 @@
 -spec lookup(binary() | flow()) -> undefined | pid().
 lookup(FlowId) when is_binary(FlowId) ->
     lookup(#flow {id = FlowId});
-lookup(Flow) ->
+lookup(#flow {} = Flow) ->
     swirl_tracker:lookup(?TABLE_NAME_REDUCERS, key(Flow)).
 
+-spec reduce(flow(), period(), list(tuple())) -> ok.
 reduce(#flow {
         id = FlowId,
         module = FlowMod,
@@ -53,20 +54,22 @@ reduce(#flow {
     FlowMod:reduce(FlowId, Period, Aggregates, ReducerOpts).
 
 -spec register(flow()) -> true.
-register(Flow) ->
+register(#flow {} = Flow) ->
     swirl_tracker:register(?TABLE_NAME_REDUCERS, key(Flow), self()).
 
+-spec start(flow()) -> {ok, pid()} | {error, reducers_max}.
 start(#flow {} = Flow) ->
     ReducersCount = swirl_config:reducers_count(),
     ReducersMax = swirl_config:reducers_max(),
     case lookup(Flow) of
         undefined when ReducersCount < ReducersMax ->
             start_link(Flow);
-        _Else -> ok
+        _Else ->
+            {error, reducers_max}
     end.
 
 -spec unregister(flow()) -> true.
-unregister(Flow) ->
+unregister(#flow {} = Flow) ->
     swirl_tracker:unregister(?TABLE_NAME_REDUCERS, key(Flow)).
 
 %% gen_server callbacks

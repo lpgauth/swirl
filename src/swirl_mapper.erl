@@ -30,7 +30,7 @@
 -define(WIDTH, 16).
 
 -record(state, {
-    flow,
+    flow :: flow(),
     table_id,
     flush_timer,
     flush_tstamp,
@@ -42,7 +42,7 @@
 -spec lookup(binary() | flow()) -> undefined | pid.
 lookup(FlowId) when is_binary(FlowId) ->
     lookup(#flow {id = FlowId});
-lookup(Flow) ->
+lookup(#flow {} = Flow) ->
     swirl_tracker:lookup(?TABLE_NAME_MAPPERS, key(Flow)).
 
 -spec map(binary(), module(), atom(), event(), term(), erlang:tab()) -> ok.
@@ -58,10 +58,11 @@ map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId) ->
     end.
 
 -spec register(flow()) -> true.
-register(Flow) ->
+register(#flow {} = Flow) ->
     swirl_tracker:register(?TABLE_NAME_MAPPERS, key(Flow), self()).
 
-start(Flow) ->
+-spec start(flow()) -> {ok, pid()} | {error, mappers_max}.
+start(#flow {} = Flow) ->
     MappersCount = swirl_config:mappers_count(),
     MappersMax = swirl_config:mappers_max(),
     case lookup(Flow) of
@@ -71,7 +72,7 @@ start(Flow) ->
     end.
 
 -spec unregister(flow()) -> true.
-unregister(Flow) ->
+unregister(#flow {} = Flow) ->
     swirl_tracker:unregister(?TABLE_NAME_MAPPERS, key(Flow)).
 
 %% gen_server callbacks
@@ -99,21 +100,21 @@ handle_cast(Msg, State) ->
 handle_info(flush, #state {
         flow = Flow,
         table_id = TableId,
-        flush_tstamp = Timestamp
+        flush_tstamp = Tstamp
     } = State) ->
 
     MapperFlush = Flow#flow.mapper_flush,
-    {Timestamp2, FlushTimer} = swirl_utils:new_timer(MapperFlush, flush),
+    {Tstamp2, FlushTimer} = swirl_utils:new_timer(MapperFlush, flush),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     swirl_stream:register(Flow, NewTableId),
     swirl_stream:unregister(Flow, TableId),
 
-    Period = #period {start_at = Timestamp, end_at = Timestamp2},
+    Period = #period {start_at = Tstamp, end_at = Tstamp2},
     spawn(fun() -> flush_aggregates(Flow, Period, TableId) end),
 
     {noreply, State#state {
         table_id = NewTableId,
-        flush_tstamp = Timestamp2,
+        flush_tstamp = Tstamp2,
         flush_timer = FlushTimer
     }};
 handle_info(heartbeat, #state {

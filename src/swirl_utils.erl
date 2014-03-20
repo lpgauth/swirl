@@ -36,10 +36,10 @@ new_timer(Time, Msg) ->
     new_timer(Time, Msg, self()).
 
 new_timer(Time, Msg, To) ->
-    Timestamp = unix_timestamp_ms(),
-    Delta = Timestamp rem Time,
+    Tstamp = unix_timestamp_ms(),
+    Delta = Tstamp rem Time,
     TimerRef = erlang:send_after(Time - Delta, To, Msg),
-    {Timestamp, TimerRef}.
+    {Tstamp, TimerRef}.
 
 safe_dict_fetch(Key, Dict) ->
     try dict:fetch(Key, Dict)
