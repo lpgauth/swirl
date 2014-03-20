@@ -72,8 +72,7 @@ flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
         {error, Reason} -> {error, Reason}
     end.
 
-key(#flow {id = Id}) ->
-    {flow, Id}.
+key(#flow {id = Id}) -> Id.
 
 verify_options(FlowOpts) ->
     verify_options(FlowOpts, []).

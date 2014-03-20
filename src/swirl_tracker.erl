@@ -35,7 +35,7 @@
 -record(state, {}).
 
 %% internal
--spec lookup(erlang:tab(), tuple()) -> term().
+-spec lookup(ets:tab(), term()) -> term().
 lookup(TableId, Key) ->
     swirl_utils:safe_ets_lookup_element(TableId, Key).
 
@@ -44,7 +44,7 @@ message(Node, FlowId, Msg) ->
     {?SERVER, Node} ! {flow, FlowId, Msg},
     ok.
 
--spec register(erlang:tab(), tuple(), term()) -> true.
+-spec register(ets:tab(), term(), term()) -> true.
 register(TableId, Key, Value) ->
     ets:insert(TableId, {Key, Value}).
 
@@ -71,7 +71,7 @@ stop_reducer(#flow {id = FlowId, reducer_node = ReducerNode}) ->
     message(ReducerNode, FlowId, stop_reducer),
     ok.
 
--spec unregister(erlang:tab(), tuple()) -> true.
+-spec unregister(ets:tab(), term()) -> true.
 unregister(TableId, Key) ->
     ets:delete(TableId, Key).
 

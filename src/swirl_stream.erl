@@ -1,6 +1,6 @@
 -module(swirl_stream).
 -include("swirl.hrl").
--compile([native]).
+% -compile([native]).
 
 %% public
 -export([
@@ -26,18 +26,25 @@ lookup(StreamName) when is_atom(StreamName) ->
 lookup(#flow {} = Flow) ->
     ets:select(?TABLE_NAME_STREAMS, match_lookup_spec(Flow)).
 
--spec register(flow(), erlang:tab()) -> true.
+-spec register(flow(), ets:tab()) -> true.
 register(#flow {
-        stream_filter = StreamFilter,
+        id = FlowId,
         module = FlowMod,
-        mapper_opts = MapperOpts
+        stream_filter = StreamFilter,
+        mapper_opts = MapperOpts,
+        reducer_node = ReducerNode
     } = Flow, TableId) ->
 
-    ExpTree = expression_tree(StreamFilter),
-    Value = {ExpTree, FlowMod, MapperOpts, TableId},
-    ets:insert(?TABLE_NAME_STREAMS, {key(Flow), Value}).
+    ets:insert(?TABLE_NAME_STREAMS, {key(Flow), #stream {
+        flow_id = FlowId,
+        flow_mod = FlowMod,
+        exp_tree = expession_tree(StreamFilter),
+        mapper_opts = MapperOpts,
+        reducer_node = ReducerNode,
+        table_id = TableId
+    }}).
 
--spec unregister(flow(), erlang:tab()) -> true.
+-spec unregister(flow(), ets:tab()) -> true.
 unregister(#flow {} = Flow, TableId) ->
     DeleteSpec = match_delete_spec(Flow, TableId),
     ets:select_delete(?TABLE_NAME_STREAMS, DeleteSpec),
@@ -46,29 +53,34 @@ unregister(#flow {} = Flow, TableId) ->
 %% private
 evaluate(_StreamName, _Event, []) ->
     ok;
-evaluate(StreamName, Event, [{undefined, FlowId, FlowMod, MapperOpts, TableId} | T]) ->
-    swirl_mapper:map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId),
+evaluate(StreamName, Event, [{#stream {
+        exp_tree = undefined
+    } = Stream} | T]) ->
+
+    swirl_mapper:map(StreamName, Event, Stream),
     evaluate(StreamName, Event, T);
-evaluate(StreamName, Event, [{ExpTree, FlowId, FlowMod, MapperOpts, TableId} | T]) ->
+evaluate(StreamName, Event, [{#stream {
+        exp_tree = ExpTree
+    } = Stream} | T]) ->
+
     case swirl_ql:evaluate(ExpTree, Event) of
-        true ->
-            swirl_mapper:map(FlowId, FlowMod, StreamName, Event, MapperOpts, TableId);
+        true -> swirl_mapper:map(StreamName, Event, Stream);
         false -> ok
     end,
     evaluate(StreamName, Event, T).
 
-expression_tree(undefined) ->
+expession_tree(undefined) ->
     undefined;
-expression_tree(StreamFilter) ->
+expession_tree(StreamFilter) ->
     {ok, ExpTree} = swirl_ql:parse(StreamFilter),
     ExpTree.
 
 key(#flow {id = FlowId, stream_name = StreamName}) ->
-    {stream, FlowId, StreamName}.
+    {FlowId, StreamName}.
 
 match_lookup_spec(#flow {stream_name = StreamName}) ->
-    [{{{stream, '$1', '$2'}, {'$3', '$4', '$5', '$6'}}, [{'orelse' , {'=:=', '$2', StreamName},
-        {'=:=', '$2', undefined}}], [{{'$3', '$1', '$4', '$5', '$6'}}]}].
+    [{{{'$1', '$2'}, '$3'}, [{'orelse', {'=:=', '$2', StreamName},
+        {'=:=', '$2', undefined}}], [{{'$3'}}]}].
 
 match_delete_spec(#flow {id = FlowId, stream_name = StreamName}, TableId) ->
-    [{{{stream, FlowId, StreamName}, {'_', '_', '_', TableId}}, [], [true]}].
+    [{{{FlowId, StreamName}, #stream {table_id = TableId}}, [], [true]}].

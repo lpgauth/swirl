@@ -51,7 +51,12 @@ reduce(#flow {
         reducer_opts = ReducerOpts
     }, Period, Aggregates) ->
 
-    FlowMod:reduce(FlowId, Period, Aggregates, ReducerOpts).
+    try FlowMod:reduce(FlowId, Period, Aggregates, ReducerOpts)
+    catch
+        error:undef ->
+            % TODO: fetch module
+            io:format("fetch module: ~p~n", [FlowMod])
+    end.
 
 -spec register(flow()) -> true.
 register(#flow {} = Flow) ->
@@ -172,8 +177,7 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-key(#flow {id = FlowId}) ->
-    {reducer, FlowId}.
+key(#flow {id = FlowId}) -> FlowId.
 
 flush_aggregates(_Flow, _Period, undefined) ->
     ok;

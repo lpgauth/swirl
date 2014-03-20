@@ -1,3 +1,5 @@
+-include_lib("swirl_ql/include/swirl_ql.hrl").
+
 %% macros
 -define(DEFAULT_MAPPER_FLUSH, timer:seconds(1)).
 -define(DEFAULT_MAPPERS_MAX, 100).
@@ -31,6 +33,15 @@
     timestamp     :: erlang:timestamp()
 }).
 
+-record(stream, {
+    flow_id       :: binary(),
+    exp_tree      :: exp_tree(),
+    flow_mod      :: module(),
+    mapper_opts   :: term(),
+    table_id      :: ets:tab(),
+    reducer_node  :: node()
+}).
+
 -record(period, {
     start_at,
     end_at
@@ -38,7 +49,6 @@
 
 %% types
 -type event()     :: [{atom(), value()}].
--type period()    :: #period {}.
 -type flow()      :: #flow {}.
 -type flow_opts() :: {stream_name, atom()} |
                      {stream_filter, string()} |
@@ -47,5 +57,6 @@
                      {reducer_flush, pos_integer()} |
                      {reducer_opts, term()} |
                      {heartbeat, pos_integer()}.
+-type period()    :: #period {}.
+-type stream()    :: #stream {}.
 -type update()    :: {update, tuple(), tuple()}.
--type value()     :: integer() | float() | binary().
