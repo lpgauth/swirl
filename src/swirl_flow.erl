@@ -19,7 +19,8 @@
 -callback reduce(binary(), period(), term(), term()) -> ok.
 
 %% public
--spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()} | {error, {bad_flow_opts, list()}}.
+-spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()} |
+    {error, {bad_flow_opts, list()}}.
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     case flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) of
         {ok, Flow} ->
@@ -53,22 +54,28 @@ unregister(#flow {} = Flow) ->
 
 %% private
 flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
-    case verify_options(FlowOpts) of
-        ok ->
-            {ok, #flow {
-                id            = swirl_utils:uuid(),
-                module        = FlowMod,
-                heartbeat     = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
-                mapper_flush  = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
-                mapper_nodes  = MapperNodes,
-                mapper_opts   = ?L(mapper_opts, FlowOpts, []),
-                reducer_flush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
-                reducer_node  = ReducerNode,
-                reducer_opts  = ?L(reducer_opts, FlowOpts, []),
-                stream_filter = ?L(stream_filter, FlowOpts),
-                stream_name   = ?L(stream_name, FlowOpts),
-                timestamp     = os:timestamp()
-            }};
+    case swirl_code_server:version(FlowMod) of
+        {ok, ModuleVsn} ->
+            case verify_options(FlowOpts) of
+                ok ->
+                    {ok, #flow {
+                        id            = swirl_utils:uuid(),
+                        module        = FlowMod,
+                        module_vsn    = ModuleVsn,
+                        start_node    = node(),
+                        heartbeat     = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
+                        mapper_flush  = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
+                        mapper_nodes  = MapperNodes,
+                        mapper_opts   = ?L(mapper_opts, FlowOpts, []),
+                        reducer_flush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
+                        reducer_node  = ReducerNode,
+                        reducer_opts  = ?L(reducer_opts, FlowOpts, []),
+                        stream_filter = ?L(stream_filter, FlowOpts),
+                        stream_name   = ?L(stream_name, FlowOpts),
+                        timestamp     = os:timestamp()
+                    }};
+                {error, Reason} -> {error, Reason}
+            end;
         {error, Reason} -> {error, Reason}
     end.
 

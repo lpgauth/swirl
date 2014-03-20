@@ -7,6 +7,7 @@
 -define(DEFAULT_REDUCERS_MAX, 100).
 -define(DEFAULT_HEARTBEAT, timer:seconds(5)).
 
+-define(TABLE_NAME_CODE_SERVER, swirl_code_server).
 -define(TABLE_NAME_FLOWS, swirl_flows).
 -define(TABLE_NAME_MAPPERS, swirl_mappers).
 -define(TABLE_NAME_REDUCERS, swirl_reducers).
@@ -21,6 +22,8 @@
 -record(flow, {
     id            :: binary(),
     module        :: module(),
+    module_vsn    :: pos_integer(),
+    start_node    :: node(),
     heartbeat     :: pos_integer(),
     mapper_flush  :: pos_integer(),
     mapper_nodes  :: [node()],
@@ -35,16 +38,17 @@
 
 -record(stream, {
     flow_id       :: binary(),
-    exp_tree      :: exp_tree(),
     flow_mod      :: module(),
+    flow_mod_vsn  :: md5(),
+    start_node    :: node(),
+    exp_tree      :: exp_tree(),
     mapper_opts   :: term(),
-    table_id      :: ets:tab(),
-    reducer_node  :: node()
+    table_id      :: ets:tab()
 }).
 
 -record(period, {
-    start_at,
-    end_at
+    start_at      :: pos_integer(),
+    end_at        :: pos_integer()
 }).
 
 %% types
@@ -57,6 +61,7 @@
                      {reducer_flush, pos_integer()} |
                      {reducer_opts, term()} |
                      {heartbeat, pos_integer()}.
+-type md5()       :: pos_integer().
 -type period()    :: #period {}.
 -type stream()    :: #stream {}.
 -type update()    :: {update, tuple(), tuple()}.

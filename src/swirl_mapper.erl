@@ -49,6 +49,8 @@ lookup(#flow {} = Flow) ->
 map(StreamName, Event, #stream {
         flow_id = FlowId,
         flow_mod = FlowMod,
+        flow_mod_vsn = FlowModVsn,
+        start_node = StartNode,
         mapper_opts = MapperOpts,
         table_id = TableId
     }) ->
@@ -63,8 +65,7 @@ map(StreamName, Event, #stream {
             ok
     catch
         error:undef ->
-            % TODO: fetch module
-            io:format("fetch module: ~p~n", [FlowMod])
+            swirl_code_server:get_module(StartNode, FlowMod, FlowModVsn)
     end.
 
 -spec register(flow()) -> true.

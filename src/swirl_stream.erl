@@ -1,6 +1,6 @@
 -module(swirl_stream).
 -include("swirl.hrl").
-% -compile([native]).
+-compile([native]).
 
 %% public
 -export([
@@ -30,17 +30,19 @@ lookup(#flow {} = Flow) ->
 register(#flow {
         id = FlowId,
         module = FlowMod,
+        module_vsn = FlowModVsn,
+        start_node = StartNode,
         stream_filter = StreamFilter,
-        mapper_opts = MapperOpts,
-        reducer_node = ReducerNode
+        mapper_opts = MapperOpts
     } = Flow, TableId) ->
 
     ets:insert(?TABLE_NAME_STREAMS, {key(Flow), #stream {
         flow_id = FlowId,
         flow_mod = FlowMod,
+        flow_mod_vsn = FlowModVsn,
+        start_node = StartNode,
         exp_tree = expession_tree(StreamFilter),
         mapper_opts = MapperOpts,
-        reducer_node = ReducerNode,
         table_id = TableId
     }}).
 

@@ -47,15 +47,16 @@ lookup(#flow {} = Flow) ->
 -spec reduce(flow(), period(), list(tuple())) -> ok.
 reduce(#flow {
         id = FlowId,
-        module = FlowMod,
+        module = Module,
+        module_vsn = ModuleVsn,
+        start_node = StartNode,
         reducer_opts = ReducerOpts
     }, Period, Aggregates) ->
 
-    try FlowMod:reduce(FlowId, Period, Aggregates, ReducerOpts)
+    try Module:reduce(FlowId, Period, Aggregates, ReducerOpts)
     catch
         error:undef ->
-            % TODO: fetch module
-            io:format("fetch module: ~p~n", [FlowMod])
+            swirl_code_server:get_module(StartNode, Module, ModuleVsn)
     end.
 
 -spec register(flow()) -> true.
