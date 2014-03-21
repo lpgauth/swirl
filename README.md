@@ -1,30 +1,5 @@
 swirl
 =====
-#### Function Details: ####
-
-##### swirl_flow:start/4 ######
-
-    start(FlowMod :: atom(), FlowOpts :: [flow_opts()], MapperNodes :: [node()], ReducerNode :: node()) -> ok
-
-##### swirl_flow:stop/4 ######
-
-    stop(Flow :: flow()) -> ok.
-
-##### swirl_stream:emit/1 ######
-
-    emit(StreamName :: atom(), Event :: event()) -> ok
-
-#### Data Types: ####
-
-    event() :: [{atom(), value()}].
-    flow_opts() :: {stream_name, atom()} |
-                   {stream_filter, string()} |
-                   {mapper_flush, pos_integer()} |
-                   {mapper_opts, term()} |
-                   {reducer_flush, pos_integer()} |
-                   {reducer_opts, term()} |
-                   {heartbeat, pos_integer()}
-
 #### Web Interface: ####
 
     http://localhost:9090/
@@ -73,6 +48,31 @@ Ip and Port are configurable via environment config:
     ..
     ok = swirl_flow:stop(Flow).
 
+#### Function Details: ####
+
+##### swirl_flow:start/4 ######
+
+    start(FlowMod :: atom(), FlowOpts :: [flow_opts()], MapperNodes :: [node()], ReducerNode :: node()) -> ok
+
+##### swirl_flow:stop/4 ######
+
+    stop(Flow :: flow()) -> ok.
+
+##### swirl_stream:emit/1 ######
+
+    emit(StreamName :: atom(), Event :: event()) -> ok
+
+#### Data Types: ####
+
+    event() :: [{atom(), value()}].
+    flow_opts() :: {stream_name, atom()} |
+                   {stream_filter, string()} |
+                   {mapper_flush, pos_integer()} |
+                   {mapper_opts, term()} |
+                   {reducer_flush, pos_integer()} |
+                   {reducer_opts, term()} |
+                   {heartbeat, pos_integer()}
+                   
 #### TODO: ####
 - node discovery
 - code distribution
