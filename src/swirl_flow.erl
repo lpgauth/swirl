@@ -72,7 +72,7 @@ flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
                         reducer_opts  = ?L(reducer_opts, FlowOpts, []),
                         stream_filter = ?L(stream_filter, FlowOpts),
                         stream_name   = ?L(stream_name, FlowOpts),
-                        timestamp     = os:timestamp()
+                        started_at    = os:timestamp()
                     }};
                 {error, Reason} ->
                     {error, Reason}

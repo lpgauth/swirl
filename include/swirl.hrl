@@ -23,17 +23,17 @@
     id            :: binary(),
     module        :: module(),
     module_vsn    :: pos_integer(),
-    start_node    :: node(),
-    heartbeat     :: pos_integer(),
+    stream_name   :: atom(),
+    stream_filter :: string(),
     mapper_flush  :: pos_integer(),
     mapper_nodes  :: [node()],
     mapper_opts   :: term(),
     reducer_flush :: pos_integer(),
     reducer_node  :: node(),
     reducer_opts  :: term(),
-    stream_filter :: string(),
-    stream_name   :: atom(),
-    timestamp     :: erlang:timestamp()
+    heartbeat     :: pos_integer(),
+    started_at    :: erlang:timestamp(),
+    start_node    :: node()
 }).
 
 -record(stream, {
