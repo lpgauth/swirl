@@ -16,22 +16,6 @@ Ip and Port are configurable via environment config:
 
 #### Examples: ####
 
-##### Implementing a flow: #####
-    -module(swirl_flow_example).
-    -include("swirl.hrl").
-
-    -behavior(swirl_flow).
-    -export([
-        map/4,
-        reduce/4
-    ]).
-
-    map(_FlowId, StreamName, Event, _MapperOpts) ->
-        {update, {?L(exchange_id, Event), ?L(bidder_id, Event)}, {1, 10}}.
-
-    reduce(_FlowId, _Period, Aggregates, _ReducerOpts) ->
-        io:format("~p~n", [Aggregates]).
-
 ##### Starting a flow: #####
     ok = application:start(swirl),
     ..
@@ -47,6 +31,22 @@ Ip and Port are configurable via environment config:
     swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
     ..
     ok = swirl_flow:stop(Flow).
+
+##### Implementing a flow: #####
+    -module(swirl_flow_example).
+    -include("swirl.hrl").
+
+    -behavior(swirl_flow).
+    -export([
+        map/4,
+        reduce/4
+    ]).
+
+    map(_FlowId, StreamName, Event, _MapperOpts) ->
+        {update, {?L(exchange_id, Event), ?L(bidder_id, Event)}, {1, 10}}.
+
+    reduce(_FlowId, _Period, Aggregates, _ReducerOpts) ->
+        io:format("~p~n", [Aggregates]).
 
 #### Function Details: ####
 
@@ -76,4 +76,3 @@ Ip and Port are configurable via environment config:
 #### TODO: ####
 - node discovery
 - boolean expression indexing
-
