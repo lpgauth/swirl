@@ -72,9 +72,8 @@ Ip and Port are configurable via environment config:
                    {reducer_flush, pos_integer()} |
                    {reducer_opts, term()} |
                    {heartbeat, pos_integer()}
-                   
+
 #### TODO: ####
 - node discovery
-- code distribution
 - boolean expression indexing
 
