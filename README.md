@@ -1,19 +1,5 @@
 swirl
 =====
-#### Web Interface: ####
-
-    http://localhost:9090/
-
-Ip and Port are configurable via environment config:
-
-    application:set_env(swirl_ui, ip, {74,125,226,55})),
-    application:set_env(swirl_ui, port, 9999))
-
-#### Resource Limitation: ####
-
-    application:set_env(swirl, mappers_max, 140)),
-    application:set_env(swirl, reducers_max, 200))
-
 #### Examples: ####
 
 ##### Starting a flow: #####
@@ -48,6 +34,22 @@ Ip and Port are configurable via environment config:
     reduce(_FlowId, _Period, Aggregates, _ReducerOpts) ->
         io:format("~p~n", [Aggregates]).
 
+#### Web Interface: ####
+
+    http://localhost:9090/
+
+configurable via:
+
+    application:set_env(swirl_ui, ip, {74,125,226,55}))
+    application:set_env(swirl_ui, port, 9999))
+
+#### Resource Limitation: ####
+
+configurable via:
+
+    application:set_env(swirl, mappers_max, 140))
+    application:set_env(swirl, reducers_max, 200))
+
 #### Function Details: ####
 
 ##### swirl_flow:start/4 ######
@@ -62,7 +64,7 @@ Ip and Port are configurable via environment config:
 
     emit(StreamName :: atom(), Event :: event()) -> ok
 
-#### Data Types: ####
+##### data types: #####
 
     event() :: [{atom(), value()}].
     flow_opts() :: {stream_name, atom()} |
