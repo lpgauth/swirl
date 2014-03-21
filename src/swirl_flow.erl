@@ -20,7 +20,7 @@
 
 %% public
 -spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()} |
-    {error, {bad_flow_opts, list()}}.
+    {error, flow_mod_undef | {bad_flow_opts, list()}}.
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     case flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) of
         {ok, Flow} ->
@@ -74,9 +74,11 @@ flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
                         stream_name   = ?L(stream_name, FlowOpts),
                         timestamp     = os:timestamp()
                     }};
-                {error, Reason} -> {error, Reason}
+                {error, Reason} ->
+                    {error, Reason}
             end;
-        {error, Reason} -> {error, Reason}
+        {error, undef} ->
+            {error, flow_mod_undef}
     end.
 
 key(#flow {id = Id}) -> Id.
