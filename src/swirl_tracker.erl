@@ -54,12 +54,14 @@ start_link() ->
 
 -spec start_mappers(flow()) -> ok.
 start_mappers(#flow {id = FlowId, mapper_nodes = MapperNodes} = Flow) ->
-    [message(Node, FlowId, {start_mapper, Flow}) || Node <- MapperNodes],
+    FlowProp = swirl_utils:record_to_proplist(Flow),
+    [message(Node, FlowId, {start_mapper, FlowProp}) || Node <- MapperNodes],
     ok.
 
 -spec start_reducer(flow()) -> ok.
 start_reducer(#flow {id = FlowId, reducer_node = ReducerNode} = Flow) ->
-    message(ReducerNode, FlowId, {start_reducer, Flow}).
+    FlowProp = swirl_utils:record_to_proplist(Flow),
+    message(ReducerNode, FlowId, {start_reducer, FlowProp}).
 
 -spec stop_mappers(flow()) -> ok.
 stop_mappers(#flow {id = FlowId, mapper_nodes = MapperNodes}) ->
@@ -109,7 +111,7 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-handler_flow_msg(FlowId, {mapper_flush, _Period, _Aggregates} = Msg, State) ->
+handler_flow_msg(FlowId, {mapper_window, _Period, _Rows} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
 handler_flow_msg(FlowId, {ping, _Node} = Msg, State) ->
@@ -118,10 +120,12 @@ handler_flow_msg(FlowId, {ping, _Node} = Msg, State) ->
 handler_flow_msg(FlowId, {pong, _Node} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
-handler_flow_msg(_FlowId, {start_mapper, Flow}, State) ->
+handler_flow_msg(_FlowId, {start_mapper, FlowProp}, State) ->
+    Flow = swirl_utils:proplist_to_record(FlowProp, flow),
     swirl_mapper:start(Flow),
     {noreply, State};
-handler_flow_msg(_FlowId, {start_reducer, Flow}, State) ->
+handler_flow_msg(_FlowId, {start_reducer, FlowProp}, State) ->
+    Flow = swirl_utils:proplist_to_record(FlowProp, flow),
     swirl_reducer:start(Flow),
     {noreply, State};
 handler_flow_msg(FlowId, stop_mapper, State) ->

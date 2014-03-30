@@ -24,18 +24,17 @@
     code_change/3
 ]).
 
--define(TABLE_NAME, mapper_aggregates).
+-define(TABLE_NAME, mapper_rows).
 -define(TABLE_OPTS, [public, {write_concurrency, true}]).
 -define(SERVER, ?MODULE).
--define(WIDTH, 16).
 
 -record(state, {
     flow,
     table_id,
-    flush_timer,
-    flush_tstamp,
-    heartbeat_timer,
-    heartbeat_tstamp
+    window_timer,
+    window_tstamp,
+    hbeat_timer,
+    hbeat_tstamp
 }).
 
 %% internal
@@ -47,7 +46,6 @@ lookup(#flow {} = Flow) ->
 
 -spec map(atom(), event(), stream()) -> ok.
 map(StreamName, Event, #stream {
-        flow_id = FlowId,
         flow_mod = FlowMod,
         flow_mod_vsn = FlowModVsn,
         start_node = StartNode,
@@ -55,11 +53,10 @@ map(StreamName, Event, #stream {
         table_id = TableId
     }) ->
 
-    try FlowMod:map(FlowId, StreamName, Event, MapperOpts) of
+    try FlowMod:map(StreamName, Event, MapperOpts) of
         Updates when is_list(Updates) ->
-            [update(TableId, Key, Counters) ||
-                {update, Key, Counters} <- Updates];
-        {update, Key, Counters} ->
+            [update(TableId, Key, Counters) || {Key, Counters} <- Updates];
+        {Key, Counters} ->
             update(TableId, Key, Counters);
         ignore ->
             ok
@@ -97,7 +94,7 @@ init(#flow {} = Flow) ->
 
     {ok, #state {
         flow = Flow,
-        heartbeat_tstamp = swirl_utils:unix_timestamp_ms()
+        hbeat_tstamp = swirl_utils:unix_tstamp_ms()
     }}.
 
 handle_call(Request, _From, State) ->
@@ -110,37 +107,45 @@ handle_cast(Msg, State) ->
 
 handle_info(flush, #state {
         flow = #flow {
-            mapper_flush = MapperFlush
+            mapper_window = Window,
+            window_sync = Sync
         } = Flow,
         table_id = TableId,
-        flush_tstamp = Tstamp
+        window_tstamp = Tstamp
     } = State) ->
 
-    {Tstamp2, FlushTimer} = swirl_utils:new_timer(MapperFlush, flush),
+    Tstamp2 = swirl_utils:unix_tstamp_ms(),
+    WindowTimer = swirl_utils:new_timer(Window, flush, Sync),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     swirl_stream:register(Flow, NewTableId),
     swirl_stream:unregister(Flow, TableId),
 
     Period = #period {start_at = Tstamp, end_at = Tstamp2},
-    spawn(fun() -> flush_aggregates(Flow, Period, TableId) end),
+    spawn(fun() -> flush_window(Flow, Period, TableId) end),
 
     {noreply, State#state {
         table_id = NewTableId,
-        flush_tstamp = Tstamp2,
-        flush_timer = FlushTimer
+        window_tstamp = Tstamp2,
+        window_timer = WindowTimer
     }};
 handle_info(heartbeat, #state {
-        flow = #flow {heartbeat = Heartbeat},
-        heartbeat_tstamp = Tstamp
+        flow = #flow {
+            heartbeat = Hbeat
+        },
+        hbeat_tstamp = Tstamp
     } = State) ->
 
-    {Tstamp2, HeartbeatTimer} = swirl_utils:new_timer(Heartbeat, heartbeat),
-    NewState = State#state {
-        heartbeat_timer = HeartbeatTimer
-    },
-    case Tstamp2 - Tstamp > 2 * Heartbeat of
-        true -> {stop, normal, NewState};
-        false -> {noreply, NewState}
+    Tstamp2 = swirl_utils:unix_tstamp_ms(),
+    HbeatTimer = swirl_utils:new_timer(Hbeat, heartbeat, true),
+    Delta = Tstamp2 - Tstamp,
+
+    case Delta > 2 * Hbeat of
+        true ->
+            {stop, normal, State};
+        false ->
+            {noreply, State#state {
+                hbeat_timer = HbeatTimer
+            }}
     end;
 handle_info({ping, ReducerNode}, #state {
         flow = #flow {
@@ -149,9 +154,11 @@ handle_info({ping, ReducerNode}, #state {
         }
     } = State) ->
 
-    swirl_tracker:message(ReducerNode, FlowId, {pong, node()}),
+    Msg = {pong, node()},
+    swirl_tracker:message(ReducerNode, FlowId, Msg),
+
     {noreply, State#state {
-        heartbeat_tstamp = swirl_utils:unix_timestamp_ms()
+        hbeat_tstamp = swirl_utils:unix_tstamp_ms()
     }};
 handle_info(stop, State) ->
     {stop, normal, State};
@@ -162,33 +169,31 @@ handle_info(Msg, State) ->
 terminate(_Reason, #state {
         flow = Flow,
         table_id = TableId,
-        flush_timer = FlushTimer,
-        heartbeat_timer = HeartbeatTimer
+        window_timer = WindowTimer,
+        hbeat_timer = HbeatTimer
     }) ->
 
     swirl_stream:unregister(Flow, TableId),
     swirl_flow:unregister(Flow),
     unregister(Flow),
-    timer:cancel(FlushTimer),
-    timer:cancel(HeartbeatTimer),
+    timer:cancel(WindowTimer),
+    timer:cancel(HbeatTimer),
     ok.
 
 code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-flush_aggregates(_Flow, _Period, undefined) ->
+flush_window(_Flow, _Period, undefined) ->
     ok;
-flush_aggregates(#flow {
+flush_window(#flow {
         id = FlowId,
         reducer_node = ReducerNode
     }, Period, TableId) ->
 
-    Aggregates = swirl_utils:tab2list(TableId),
-    swirl_tracker:message(ReducerNode, FlowId, {mapper_flush, Period, Aggregates}),
-
-    % to prevent unregister race condition
-    timer:sleep(500),
+    Rows = swirl_utils:tab2list(TableId),
+    Msg = {mapper_window, Period, Rows},
+    swirl_tracker:message(ReducerNode, FlowId, Msg),
     swirl_utils:safe_ets_delete(TableId).
 
 key(#flow {id = Id}) -> Id.
@@ -198,5 +203,4 @@ start_link(Flow) ->
 
 -spec update(ets:tab(), tuple(), tuple()) -> ok.
 update(TableId, Key, Counters) ->
-    Rnd = erlang:system_info(scheduler_id) band (?WIDTH - 1),
-    swirl_utils:safe_ets_increment(TableId, {Key, Rnd}, Counters).
+    swirl_utils:safe_ets_increment(TableId, Key, Counters).

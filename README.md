@@ -20,19 +20,30 @@ swirl
 
 ##### Implementing a flow: #####
     -module(swirl_flow_example).
-    -include("swirl.hrl").
 
     -behavior(swirl_flow).
     -export([
-        map/4,
-        reduce/4
+        map/3,
+        reduce/3,
+        output/4
     ]).
 
-    map(_FlowId, StreamName, Event, _MapperOpts) ->
-        {update, {?L(exchange_id, Event), ?L(bidder_id, Event)}, {1, 10}}.
+    %% swirl_flow callbacks
+    map(_StreamName, Event, _MapperOpts) ->
+        {{l(type, Event), l(exchange_id, Event), l(bidder_id, Event)}, {1, 10}}.
 
-    reduce(_FlowId, _Period, Aggregates, _ReducerOpts) ->
-        io:format("~p~n", [Aggregates]).
+    reduce(_Flow, Row, _ReducerOpts) ->
+        Row.
+
+    output(_Flow, _Period, Rows, OutputOpts) ->
+        case l(send_to , OutputOpts) of
+            undefined -> ok;
+            Pid -> Pid ! Rows
+        end.
+
+    %% helpers
+    l(Key, Event) ->
+        swirl_utils:lookup(Key, Event).
 
 #### Web Interface: ####
 
@@ -69,9 +80,9 @@ configurable via:
     event() :: [{atom(), value()}].
     flow_opts() :: {stream_name, atom()} |
                    {stream_filter, string()} |
-                   {mapper_flush, pos_integer()} |
+                   {mapper_window, pos_integer()} |
                    {mapper_opts, term()} |
-                   {reducer_flush, pos_integer()} |
+                   {reducer_window, pos_integer()} |
                    {reducer_opts, term()} |
                    {heartbeat, pos_integer()}
 

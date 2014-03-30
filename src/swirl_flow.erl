@@ -15,8 +15,9 @@
 ]).
 
 %% callback
--callback map(binary(), atom(), event(), term()) -> list(update()) | update() | ignore.
--callback reduce(binary(), period(), term(), term()) -> ok.
+-callback map(stream_name(), event(), mapper_opts()) -> list(update()) | update() | ignore.
+-callback reduce(flow(), row(), reducer_opts()) -> update() | ignore.
+-callback output(flow(), period(), list(row()), output_opts()) -> ok.
 
 %% public
 -spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()} |
@@ -53,27 +54,31 @@ unregister(#flow {} = Flow) ->
     swirl_tracker:unregister(?TABLE_NAME_FLOWS, key(Flow)).
 
 %% private
-flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
-    case swirl_code_server:version(FlowMod) of
+flow(Module, Options, MapperNodes, ReducerNode) ->
+    case swirl_code_server:version(Module) of
         {ok, ModuleVsn} ->
-            case verify_options(FlowOpts) of
+            case verify_options(Options) of
                 ok ->
-                    {ok, #flow {
-                        id            = swirl_utils:uuid(),
-                        module        = FlowMod,
-                        module_vsn    = ModuleVsn,
-                        start_node    = node(),
-                        heartbeat     = ?L(heartbeat, FlowOpts, ?DEFAULT_HEARTBEAT),
-                        mapper_flush  = ?L(mapper_flush, FlowOpts, ?DEFAULT_MAPPER_FLUSH),
-                        mapper_nodes  = MapperNodes,
-                        mapper_opts   = ?L(mapper_opts, FlowOpts, []),
-                        reducer_flush = ?L(reducer_flush, FlowOpts, ?DEFAULT_REDUCER_FLUSH),
-                        reducer_node  = ReducerNode,
-                        reducer_opts  = ?L(reducer_opts, FlowOpts, []),
-                        stream_filter = ?L(stream_filter, FlowOpts),
-                        stream_name   = ?L(stream_name, FlowOpts),
-                        started_at    = os:timestamp()
-                    }};
+                    Flow = #flow {
+                        id             = swirl_utils:uuid(),
+                        module         = Module,
+                        module_vsn     = ModuleVsn,
+                        start_node     = node(),
+                        heartbeat      = ?L(heartbeat, Options, ?DEFAULT_HEARTBEAT),
+                        window_sync    = ?L(window_sync, Options, ?DEFAULT_WINDOW_SYNC),
+                        mapper_window  = ?L(mapper_window, Options, ?DEFAULT_MAPPER_WINDOW),
+                        mapper_nodes   = MapperNodes,
+                        mapper_opts    = ?L(mapper_opts, Options, []),
+                        reducer_window = ?L(reducer_window, Options, ?DEFAULT_REDUCER_WINDOW),
+                        reducer_node   = ReducerNode,
+                        reducer_opts   = ?L(reducer_opts, Options, []),
+                        reducer_skip   = ?L(reducer_skip, Options, ?DEFAULT_REDUCER_SKIP),
+                        output_opts    = ?L(output_opts, Options, []),
+                        stream_filter  = ?L(stream_filter, Options),
+                        stream_name    = ?L(stream_name, Options),
+                        started_at     = os:timestamp()
+                    },
+                    {ok, Flow};
                 {error, Reason} ->
                     {error, Reason}
             end;
@@ -86,19 +91,24 @@ key(#flow {id = Id}) -> Id.
 verify_options(FlowOpts) ->
     verify_options(FlowOpts, []).
 
-verify_options([{mapper_flush, MapperFlush} | Options], Errors)
-    when is_integer(MapperFlush) ->
-        verify_options(Options, Errors);
-verify_options([{mapper_heartbeat, MapperHeartbeat} | Options], Errors)
-    when is_integer(MapperHeartbeat) ->
+verify_options([{heartbeat, Heartbeat} | Options], Errors)
+    when is_integer(Heartbeat) ->
         verify_options(Options, Errors);
 verify_options([{mapper_opts, _} | Options], Errors) ->
     verify_options(Options, Errors);
-verify_options([{reducer_flush, ReducerFlush} | Options], Errors)
-    when is_integer(ReducerFlush) ->
+verify_options([{mapper_window, MapperWindow} | Options], Errors)
+    when is_integer(MapperWindow) ->
         verify_options(Options, Errors);
+verify_options([{output_opts, _} | Options], Errors) ->
+    verify_options(Options, Errors);
 verify_options([{reducer_opts, _} | Options], Errors) ->
     verify_options(Options, Errors);
+verify_options([{reducer_skip, ReducerSkip} | Options], Errors)
+    when is_boolean(ReducerSkip) ->
+        verify_options(Options, Errors);
+verify_options([{reducer_window, ReducerWindow} | Options], Errors)
+    when is_integer(ReducerWindow) ->
+        verify_options(Options, Errors);
 verify_options([{stream_filter, undefined} | Options], Errors) ->
     verify_options(Options, Errors);
 verify_options([{stream_filter, StreamFilter} = Option | Options], Errors) ->
@@ -110,6 +120,9 @@ verify_options([{stream_filter, StreamFilter} = Option | Options], Errors) ->
     end;
 verify_options([{stream_name, StreamName} | Options], Errors)
     when is_atom(StreamName)->
+        verify_options(Options, Errors);
+verify_options([{window_sync, WindowSync} | Options], Errors)
+    when is_boolean(WindowSync) ->
         verify_options(Options, Errors);
 verify_options([Option | Options], Errors) ->
     verify_options(Options, [Option | Errors]);

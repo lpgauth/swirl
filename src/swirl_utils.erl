@@ -7,12 +7,14 @@
     lookup/3,
     new_timer/2,
     new_timer/3,
+    proplist_to_record/2,
+    record_to_proplist/1,
     safe_dict_fetch/2,
     safe_ets_delete/1,
     safe_ets_increment/3,
     safe_ets_lookup_element/2,
     tab2list/1,
-    unix_timestamp_ms/0,
+    unix_tstamp_ms/0,
     update_op/1,
     uuid/0
 ]).
@@ -33,18 +35,26 @@ maybe_tuple_to_list(List) when is_list(List) ->
     List.
 
 new_timer(Time, Msg) ->
-    new_timer(Time, Msg, self()).
+    new_timer(Time, Msg, false).
 
-new_timer(Time, Msg, To) ->
-    Tstamp = unix_timestamp_ms(),
-    Delta = Tstamp rem Time,
-    TimerRef = erlang:send_after(Time - Delta, To, Msg),
-    {Tstamp, TimerRef}.
+new_timer(Time, Msg, true) ->
+    Delta = unix_tstamp_ms() rem Time,
+    erlang:send_after(Time - Delta, self(), Msg);
+new_timer(Time, Msg, false) ->
+    erlang:send_after(Time, self(), Msg).
+
+proplist_to_record(Proplist, Record) ->
+    Fields = [lookup(Field, Proplist) || Field <- record_info(Record)],
+    list_to_tuple([Record | Fields]).
+
+record_to_proplist(#flow {} = Flow) ->
+    lists:zip(record_info(flow), tl(tuple_to_list(Flow))).
 
 safe_dict_fetch(Key, Dict) ->
     try dict:fetch(Key, Dict)
     catch
-        error:badarg -> undefined
+        error:badarg ->
+            undefined
     end.
 
 safe_ets_delete(TableId) ->
@@ -81,7 +91,7 @@ safe_ets_lookup_element(TableId, Key) ->
 tab2list(Tid) ->
     lists:append(match_all(ets:match_object(Tid, '_', 500))).
 
-unix_timestamp_ms() ->
+unix_tstamp_ms() ->
     {Mega, Sec, Micro} = os:timestamp(),
     (Mega * 1000000000 + Sec * 1000) + trunc(Micro / 1000).
 
@@ -98,6 +108,9 @@ match_all('$end_of_table') ->
     [];
 match_all({Match, Continuation}) ->
     [Match | match_all(ets:match_object(Continuation))].
+
+record_info(flow) ->
+    record_info(fields, flow).
 
 update_op([], _Pos) ->
     [];

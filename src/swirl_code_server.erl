@@ -24,7 +24,7 @@
 -record(state, {}).
 
 %% public
--spec get_module(node(), module(), md5()) -> ok.
+-spec get_module(node(), module(), module_vsn()) -> ok.
 get_module(Node, Module, ModuleVsn) ->
     KeyVal = {{Module, ModuleVsn}, true},
     case ets:insert_new(?TABLE_NAME_CODE_SERVER, KeyVal) of
@@ -37,7 +37,7 @@ get_module(Node, Module, ModuleVsn) ->
 start_link() ->
     gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
--spec version(module()) -> {ok, md5()} | {error, term()}.
+-spec version(module()) -> {ok, module_vsn()} | {error, term()}.
 version(Module) ->
     try Module:module_info(attributes) of
         Attributes ->
