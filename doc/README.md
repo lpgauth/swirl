@@ -12,7 +12,7 @@ Lightweight Distributed Stream Processor
 
 ```
 ok = application:start(swirl),
-..
+
 FlowMod = swirl_flow_example,
 FlowOpts = [
     {stream_names, [delivery]},
@@ -21,9 +21,9 @@ FlowOpts = [
 MapperNodes = [node()],
 ReducerNode = node(),
 {ok, Flow} = swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
-..
+
 swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
-..
+
 ok = swirl_flow:stop(Flow).
 ```
 ##### Implementing a flow: #####
@@ -79,6 +79,9 @@ application:set_env(swirl, reducers_max, 200))
 <tr><td><a href="swirl_ets_manager.md" class="module">swirl_ets_manager</a></td></tr>
 <tr><td><a href="swirl_flow.md" class="module">swirl_flow</a></td></tr>
 <tr><td><a href="swirl_mapper.md" class="module">swirl_mapper</a></td></tr>
+<tr><td><a href="swirl_ql.md" class="module">swirl_ql</a></td></tr>
+<tr><td><a href="swirl_ql_lexer.md" class="module">swirl_ql_lexer</a></td></tr>
+<tr><td><a href="swirl_ql_parser.md" class="module">swirl_ql_parser</a></td></tr>
 <tr><td><a href="swirl_reducer.md" class="module">swirl_reducer</a></td></tr>
 <tr><td><a href="swirl_stream.md" class="module">swirl_stream</a></td></tr>
 <tr><td><a href="swirl_sup.md" class="module">swirl_sup</a></td></tr>

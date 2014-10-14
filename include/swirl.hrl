@@ -1,5 +1,3 @@
--include_lib("swirl_ql/include/swirl_ql.hrl").
-
 %% macros
 -define(DEFAULT_HEARTBEAT, timer:seconds(5)).
 -define(DEFAULT_MAPPERS_MAX, 100).
@@ -18,6 +16,7 @@
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 -define(L(Key, List), swirl_utils:lookup(Key, List)).
 -define(L(Key, List, Default), swirl_utils:lookup(Key, List, Default)).
+-define(NULL, undefined).
 
 %% records
 -record(flow, {
@@ -56,7 +55,6 @@
 }).
 
 %% types
--type event()        :: list(tuple(atom(), value())).
 -type flow()         :: #flow {}.
 -type flow_opts()    :: {heartbeat, pos_integer()} |
                         {mapper_opts, mapper_opts()} |
@@ -68,7 +66,6 @@
                         {stream_filter, string()} |
                         {stream_names, stream_names()} |
                         {window_sync, boolean()}.
-
 -type mapper_opts()  :: term().
 -type module_vsn()   :: pos_integer().
 -type output_opts()  :: term().
@@ -80,3 +77,15 @@
 -type stream_names() :: [stream_name()].
 -type update()       :: {tuple(), tuple()}.
 
+-type event()        :: list(tuple(atom(), value())).
+
+-type boolean_op() :: 'and' | 'or'.
+-type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.
+-type inclusion_op() :: in | notin.
+-type null_op() :: null | notnull.
+-type value() :: integer() | float() | binary().
+
+-type exp_tree() :: {boolean_op(), exp_tree(), exp_tree()} |
+                    {comparison_op(), atom(), value()} |
+                    {inclusion_op(), atom(), [value(), ...]} |
+                    {null_op(), atom()}.
