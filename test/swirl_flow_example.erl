@@ -8,8 +8,8 @@
 ]).
 
 %% swirl_flow callbacks
-map(_StreamName, Event, _MapperOpts) ->
-    {{l(type, Event), l(exchange_id, Event), l(bidder_id, Event)}, {1, 10}}.
+map(StreamName, Event, _MapperOpts) ->
+    {{l(type, Event), StreamName, l(exchange_id, Event), l(bidder_id, Event)}, {1, 10}}.
 
 reduce(_Flow, Row, _ReducerOpts) ->
     Row.

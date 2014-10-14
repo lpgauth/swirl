@@ -75,7 +75,7 @@ flow(Module, Options, MapperNodes, ReducerNode) ->
                         reducer_skip   = ?L(reducer_skip, Options, ?DEFAULT_REDUCER_SKIP),
                         output_opts    = ?L(output_opts, Options, []),
                         stream_filter  = ?L(stream_filter, Options),
-                        stream_name    = ?L(stream_name, Options),
+                        stream_names   = ?L(stream_names, Options, []),
                         started_at     = os:timestamp()
                     },
                     {ok, Flow};
@@ -118,8 +118,8 @@ verify_options([{stream_filter, StreamFilter} = Option | Options], Errors) ->
         {error, _Reason} ->
             verify_options(Options, [Option | Errors])
     end;
-verify_options([{stream_name, StreamName} | Options], Errors)
-    when is_atom(StreamName)->
+verify_options([{stream_names, StreamNames} | Options], Errors)
+    when is_list(StreamNames)->
         verify_options(Options, Errors);
 verify_options([{window_sync, WindowSync} | Options], Errors)
     when is_boolean(WindowSync) ->

@@ -24,8 +24,8 @@
     id             :: binary(),
     module         :: module(),
     module_vsn     :: module_vsn(),
-    stream_name    :: stream_name(),
     stream_filter  :: string(),
+    stream_names   :: stream_names(),
     mapper_window  :: pos_integer(),
     mapper_nodes   :: [node()],
     mapper_opts    :: mapper_opts(),
@@ -58,15 +58,15 @@
 %% types
 -type event()        :: list(tuple(atom(), value())).
 -type flow()         :: #flow {}.
--type flow_opts()    :: {stream_name, stream_name()} |
-                        {stream_filter, string()} |
+-type flow_opts()    :: {heartbeat, pos_integer()} |
                         {mapper_opts, mapper_opts()} |
                         {mapper_window, pos_integer()} |
+                        {output_opts, output_opts()} |
                         {reducer_opts, reducer_opts()} |
                         {reducer_skip, boolean()} |
                         {reducer_window, pos_integer()} |
-                        {output_opts, output_opts()} |
-                        {heartbeat, pos_integer()} |
+                        {stream_filter, string()} |
+                        {stream_names, stream_names()} |
                         {window_sync, boolean()}.
 
 -type mapper_opts()  :: term().
@@ -77,4 +77,6 @@
 -type row()          :: tuple().
 -type stream()       :: #stream {}.
 -type stream_name()  :: atom().
+-type stream_names() :: [stream_name()].
 -type update()       :: {tuple(), tuple()}.
+

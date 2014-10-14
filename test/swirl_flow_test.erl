@@ -30,17 +30,15 @@ test_benchmark_emit() ->
 
 test_swirl_flow() ->
     {ok, Flow} = swirl_flow:start(swirl_flow_example, [
-        {stream_name, delivery},
-        {stream_filter, "exchange_id = 3"},
+        {heartbeat, timer:seconds(10)},
         {mapper_opts, []},
         {mapper_window, timer:seconds(1)},
+        {output_opts, [{send_to, self()}]},
         {reducer_opts, []},
         {reducer_skip, true},
         {reducer_window, timer:seconds(1)},
-        {output_opts, [
-          {send_to, self()}
-        ]},
-        {heartbeat, timer:seconds(10)},
+        {stream_filter, "exchange_id = 3"},
+        {stream_names, [delivery, requests]},
         {window_sync, true}
     ], [node()], node()),
 
@@ -49,9 +47,14 @@ test_swirl_flow() ->
     swirl_stream:emit(delivery, [{type, start}, {exchange_id, 1}, {bidder_id, 10}]),
     swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 1}]),
     swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 10}]),
+    swirl_stream:emit(requests, [{type, start}, {exchange_id, 3}, {bidder_id, 50}]),
 
     Rows = receive_loop(),
-    Expected = [{{start,3,10},{1,10}}, {{start,3,1},{1,10}}],
+    Expected = [
+        {{start,requests,3,50},{1,10}},
+        {{start,delivery,3,1},{1,10}},
+        {{start,delivery,3,10},{1,10}}
+    ],
 
     ?assert_equal(Expected, Rows),
     swirl_flow:stop(Flow).
@@ -73,7 +76,7 @@ emit_loop(N) ->
 
 new_flow() ->
     FlowOpts = [
-        {stream_name, video},
+        {stream_names, [video]},
         {reducer_skip, true}
     ],
     {ok, Flow} = swirl_flow:start(swirl_flow_example, FlowOpts, [node()], node()),

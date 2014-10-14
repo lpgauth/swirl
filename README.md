@@ -7,7 +7,7 @@ swirl
     ..
     FlowMod = swirl_flow_example,
     FlowOpts = [
-        {stream_name, delivery},
+        {stream_names, [delivery]},
         {stream_filter, "exchange_id = 3 AND bidder_id IS NOT NULL"}
     ],
     MapperNodes = [node()],
@@ -78,13 +78,13 @@ configurable via:
 ##### data types: #####
 
     event() :: [{atom(), value()}].
-    flow_opts() :: {stream_name, atom()} |
-                   {stream_filter, string()} |
-                   {mapper_window, pos_integer()} |
+    flow_opts() :: {heartbeat, pos_integer()} |
                    {mapper_opts, term()} |
-                   {reducer_window, pos_integer()} |
+                   {mapper_window, pos_integer()} |
                    {reducer_opts, term()} |
-                   {heartbeat, pos_integer()}
+                   {reducer_window, pos_integer()} |
+                   {stream_filter, string()} |
+                   {stream_names, [atom()]}
 
 #### TODO: ####
 - node discovery

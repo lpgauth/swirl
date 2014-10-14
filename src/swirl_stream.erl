@@ -15,16 +15,15 @@
 ]).
 
 %% public
--spec emit(atom(), event()) -> ok.
+-spec emit(stream_name(), event()) -> ok.
 emit(StreamName, Event) ->
     evaluate(StreamName, Event, lookup(StreamName)).
 
 %% internal
--spec lookup(atom() | flow()) -> [tuple()].
-lookup(StreamName) when is_atom(StreamName) ->
-    lookup(#flow {stream_name = StreamName});
-lookup(#flow {} = Flow) ->
-    ets:select(?TABLE_NAME_STREAMS, match_lookup_spec(Flow)).
+-spec lookup(stream_name()) -> [tuple()].
+lookup(StreamName) ->
+    LookupSpec = match_lookup_spec(StreamName),
+    ets:select(?TABLE_NAME_STREAMS, LookupSpec).
 
 -spec register(flow(), ets:tab()) -> true.
 register(#flow {
@@ -33,24 +32,31 @@ register(#flow {
         module_vsn = FlowModVsn,
         start_node = StartNode,
         stream_filter = StreamFilter,
+        stream_names = StreamNames,
         mapper_opts = MapperOpts
     } = Flow, TableId) ->
 
-    ets:insert(?TABLE_NAME_STREAMS, {key(Flow), #stream {
-        flow_id = FlowId,
-        flow_mod = FlowMod,
-        flow_mod_vsn = FlowModVsn,
-        start_node = StartNode,
-        exp_tree = expession_tree(StreamFilter),
-        mapper_opts = MapperOpts,
-        table_id = TableId
-    }}).
+    ok =:= lists:foreach(fun (StreamName) ->
+        Key = key(Flow, StreamName),
+        Stream = #stream {
+            flow_id = FlowId,
+            flow_mod = FlowMod,
+            flow_mod_vsn = FlowModVsn,
+            start_node = StartNode,
+            exp_tree = expession_tree(StreamFilter),
+            mapper_opts = MapperOpts,
+            table_id = TableId
+        },
+        KeyValue = {Key, Stream},
+        ets:insert(?TABLE_NAME_STREAMS, KeyValue)
+    end, StreamNames).
 
 -spec unregister(flow(), ets:tab()) -> true.
-unregister(#flow {} = Flow, TableId) ->
-    DeleteSpec = match_delete_spec(Flow, TableId),
-    ets:select_delete(?TABLE_NAME_STREAMS, DeleteSpec),
-    true.
+unregister(#flow {stream_names = StreamNames} = Flow, TableId) ->
+    ok =:= lists:foreach(fun (StreamName) ->
+        DeleteSpec = match_delete_spec(Flow, StreamName, TableId),
+        ets:select_delete(?TABLE_NAME_STREAMS, DeleteSpec)
+    end, StreamNames).
 
 %% private
 evaluate(_StreamName, _Event, []) ->
@@ -66,7 +72,8 @@ evaluate(StreamName, Event, [{#stream {
     } = Stream} | T]) ->
 
     case swirl_ql:evaluate(ExpTree, Event) of
-        true -> swirl_mapper:map(StreamName, Event, Stream);
+        true ->
+            swirl_mapper:map(StreamName, Event, Stream);
         false -> ok
     end,
     evaluate(StreamName, Event, T).
@@ -77,12 +84,12 @@ expession_tree(StreamFilter) ->
     {ok, ExpTree} = swirl_ql:parse(StreamFilter),
     ExpTree.
 
-key(#flow {id = FlowId, stream_name = StreamName}) ->
+key(#flow {id = FlowId}, StreamName) ->
     {FlowId, StreamName}.
 
-match_lookup_spec(#flow {stream_name = StreamName}) ->
+match_lookup_spec(StreamName) ->
     [{{{'$1', '$2'}, '$3'}, [{'orelse', {'=:=', '$2', StreamName},
         {'=:=', '$2', undefined}}], [{{'$3'}}]}].
 
-match_delete_spec(#flow {id = FlowId, stream_name = StreamName}, TableId) ->
+match_delete_spec(#flow {id = FlowId}, StreamName, TableId) ->
     [{{{FlowId, StreamName}, #stream {table_id = TableId}}, [], [true]}].
