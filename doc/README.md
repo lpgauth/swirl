@@ -4,7 +4,7 @@
 
 __Authors:__ Louis-Philippe Gauthier.
 
-Lightweight distributed stream processor
+Lightweight Distributed Stream Processor
 
 #### Examples: ####
 
