@@ -8,7 +8,7 @@
 
 -include_lib("etest/include/etest.hrl").
 
--define(N, 10000).
+-define(N, 1000).
 
 after_suite() ->
     ok = application:stop(swirl).
