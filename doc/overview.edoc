@@ -1,0 +1,60 @@
+@author Louis-Philippe Gauthier
+@doc Lightweight distributed stream processor
+
+#### Examples: ####
+
+##### Starting a flow: #####
+    ok = application:start(swirl),
+    ..
+    FlowMod = swirl_flow_example,
+    FlowOpts = [
+        {stream_names, [delivery]},
+        {stream_filter, "exchange_id = 3 AND bidder_id IS NOT NULL"}
+    ],
+    MapperNodes = [node()],
+    ReducerNode = node(),
+    {ok, Flow} = swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
+    ..
+    swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
+    ..
+    ok = swirl_flow:stop(Flow).
+
+##### Implementing a flow: #####
+    -module(swirl_flow_example).
+
+    -behavior(swirl_flow).
+    -export([
+        map/3,
+        reduce/3,
+        output/4
+    ]).
+
+    %% swirl_flow callbacks
+    map(_StreamName, Event, _MapperOpts) ->
+        {{l(type, Event), l(exchange_id, Event), l(bidder_id, Event)}, {1, 10}}.
+
+    reduce(_Flow, Row, _ReducerOpts) ->
+        Row.
+
+    output(_Flow, _Period, Rows, OutputOpts) ->
+        case l(send_to , OutputOpts) of
+            undefined -> ok;
+            Pid -> Pid ! Rows
+        end.
+
+    %% helpers
+    l(Key, Event) ->
+        swirl_utils:lookup(Key, Event).
+
+#### Resource Limitation: ####
+
+configurable via:
+
+    application:set_env(swirl, mappers_max, 140))
+    application:set_env(swirl, reducers_max, 200))
+
+#### TODO: ####
+- node discovery
+- boolean expression indexing
+
+@end
