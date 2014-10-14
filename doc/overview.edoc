@@ -5,7 +5,7 @@
 
 ##### Starting a flow: #####
 
-<pre><code>ok = application:start(swirl),
+<pre>ok = application:start(swirl),
 ..
 FlowMod = swirl_flow_example,
 FlowOpts = [
@@ -19,10 +19,10 @@ ReducerNode = node(),
 swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
 ..
 ok = swirl_flow:stop(Flow).
-</code></pre>
+</pre>
 
 ##### Implementing a flow: #####
-<pre><code>-module(swirl_flow_example).
+<pre>module(swirl_flow_example).
 
 -behavior(swirl_flow).
 -export([
@@ -47,15 +47,15 @@ output(_Flow, _Period, Rows, OutputOpts) ->
 %% helpers
 l(Key, Event) ->
     swirl_utils:lookup(Key, Event).
-</code></pre>
+</pre>
 
 #### Resource Limitation: ####
 
 configurable via:
 
-<pre><code>application:set_env(swirl, mappers_max, 140))
+<pre>application:set_env(swirl, mappers_max, 140))
 application:set_env(swirl, reducers_max, 200))
-</code></pre>
+</pre>
 
 #### TODO: ####
 - node discovery

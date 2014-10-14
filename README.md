@@ -11,7 +11,7 @@ Lightweight distributed stream processor
 ##### Starting a flow: #####
 
 ```
-<code>ok = application:start(swirl),
+ok = application:start(swirl),
 ..
 FlowMod = swirl_flow_example,
 FlowOpts = [
@@ -25,12 +25,12 @@ ReducerNode = node(),
 swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
 ..
 ok = swirl_flow:stop(Flow).
-</code>
+
 ```
 ##### Implementing a flow: #####
 
 ```
-<code>-module(swirl_flow_example).
+module(swirl_flow_example).
 
 -behavior(swirl_flow).
 -export([
@@ -55,7 +55,7 @@ output(_Flow, _Period, Rows, OutputOpts) ->
 %% helpers
 l(Key, Event) ->
     swirl_utils:lookup(Key, Event).
-</code>
+
 ```
 
 #### Resource Limitation: ####
@@ -63,9 +63,9 @@ l(Key, Event) ->
 configurable via:
 
 ```
-<code>application:set_env(swirl, mappers_max, 140))
+application:set_env(swirl, mappers_max, 140))
 application:set_env(swirl, reducers_max, 200))
-</code>
+
 ```
 #### TODO: ####
 - node discovery
