@@ -6,6 +6,8 @@ __Authors:__ Louis-Philippe Gauthier.
 
 Lightweight Distributed Stream Processor
 
+[![Build Status](https://travis-ci.org/lpgauth/swirl.svg?branch=master)](https://travis-ci.org/lpgauth/swirl)
+
 #### Examples: ####
 
 ##### Starting a flow: #####
