@@ -25,7 +25,6 @@ ReducerNode = node(),
 swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
 ..
 ok = swirl_flow:stop(Flow).
-
 ```
 ##### Implementing a flow: #####
 
@@ -55,7 +54,6 @@ output(_Flow, _Period, Rows, OutputOpts) ->
 %% helpers
 l(Key, Event) ->
     swirl_utils:lookup(Key, Event).
-
 ```
 
 #### Resource Limitation: ####
@@ -65,7 +63,6 @@ configurable via:
 ```
 application:set_env(swirl, mappers_max, 140))
 application:set_env(swirl, reducers_max, 200))
-
 ```
 #### TODO: ####
 - node discovery
