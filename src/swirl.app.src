@@ -1,12 +1,15 @@
 {application, swirl, [
   {description, "lightweight distributed stream processor"},
-  {vsn, "0.1.5"},
-  {registered, []},
+  {vsn, "0.2.0"},
+  {registered, [
+    swirl_ets_manager,
+    swirl_sup,
+    swirl_tracker
+  ]},
   {applications, [
     kernel,
     stdlib,
-    swirl_ql,
-    swirl_ui
+    swirl_ql
   ]},
   {mod, {swirl, []}},
   {env, []}

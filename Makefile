@@ -1,9 +1,9 @@
 PROJECT=swirl
 REBAR=./rebar
 
-.PHONY: deps
+.PHONY: deps doc
 
-all: deps compile
+all: deps compile doc
 
 build-plt: all
 	@dialyzer --build_plt --output_plt ~/.$(PROJECT).plt \
@@ -14,7 +14,7 @@ check-plt:
 
 clean:
 	@$(REBAR) clean
-	@rm -rf deps ebin
+	@rm -rf deps ebin doc/edoc-info doc/*.md README.md
 
 compile:
 	@echo "Running rebar compile..."
@@ -26,6 +26,10 @@ deps:
 
 dialyze:
 	@dialyzer ebin/*.beam --plt ~/.$(PROJECT).plt
+
+doc:
+	@echo "Running rebar doc..."
+	@$(REBAR) skip_deps=true doc
 
 eunit:
 	@echo "Running EUnit suite..."

@@ -6,21 +6,17 @@
     unregister/1
 ]}).
 
-%% public
+%% internal
 -export([
     lookup/2,
     message/3,
-    register/4,
-    start_mappers/5,
-    start_reducer/5,
-    stop_mappers/2,
-    stop_reducer/2,
+    register/3,
+    start_link/0,
+    start_mappers/1,
+    start_reducer/1,
+    stop_mappers/1,
+    stop_reducer/1,
     unregister/2
-]).
-
-%% internal
--export([
-    start_link/0
 ]).
 
 -behaviour(gen_server).
@@ -38,56 +34,57 @@
 
 -record(state, {}).
 
-%% public
--spec lookup(atom(), tuple()) -> term().
-lookup(Table, Key) ->
-    swirl_utils:safe_ets_lookup_element(Table, Key).
+%% internal
+-spec lookup(ets:tab(), term()) -> term().
+lookup(TableId, Key) ->
+    swirl_utils:safe_ets_lookup_element(TableId, Key).
 
 -spec message(node(), binary(), term()) -> ok.
 message(Node, FlowId, Msg) ->
     {?SERVER, Node} ! {flow, FlowId, Msg},
     ok.
 
--spec register(atom(), tuple(), pid(), term()) -> true.
-register(Table, Key, Pid, Info) ->
-    ets:insert(Table, {Key, Pid, Info}).
+-spec register(ets:tab(), term(), term()) -> true.
+register(TableId, Key, Value) ->
+    ets:insert(TableId, {Key, Value}).
 
--spec start_mappers(binary(), atom(), [flow_opts()], [node()], node()) -> ok.
-start_mappers(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
-    Msg = {start_mapper, FlowMod, FlowOpts, ReducerNode},
-    [message(Node, FlowId, Msg) || Node <- MapperNodes],
+-spec start_link() -> {'ok', pid()}.
+start_link() ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
+-spec start_mappers(flow()) -> ok.
+start_mappers(#flow {id = FlowId, mapper_nodes = MapperNodes} = Flow) ->
+    FlowProp = swirl_utils:record_to_proplist(Flow),
+    [message(Node, FlowId, {start_mapper, FlowProp}) || Node <- MapperNodes],
     ok.
 
--spec start_reducer(binary(), atom(), [flow_opts()], [node()], node()) -> ok.
-start_reducer(FlowId, FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
-    Msg = {start_reducer, FlowMod, FlowOpts, MapperNodes},
-    message(ReducerNode, FlowId, Msg).
+-spec start_reducer(flow()) -> ok.
+start_reducer(#flow {id = FlowId, reducer_node = ReducerNode} = Flow) ->
+    FlowProp = swirl_utils:record_to_proplist(Flow),
+    message(ReducerNode, FlowId, {start_reducer, FlowProp}).
 
--spec stop_mappers(binary(), [node()]) -> ok.
-stop_mappers(FlowId, MapperNodes) ->
+-spec stop_mappers(flow()) -> ok.
+stop_mappers(#flow {id = FlowId, mapper_nodes = MapperNodes}) ->
     [message(Node, FlowId, stop_mapper) || Node <- MapperNodes],
     ok.
 
--spec stop_reducer(binary(), node()) -> ok.
-stop_reducer(FlowId, ReducerNode) ->
+-spec stop_reducer(flow()) -> ok.
+stop_reducer(#flow {id = FlowId, reducer_node = ReducerNode}) ->
     message(ReducerNode, FlowId, stop_reducer),
     ok.
 
--spec unregister(atom(), tuple()) -> true.
-unregister(Table, Key) ->
-    ets:delete(Table, Key).
-
-%% internal
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+-spec unregister(ets:tab(), term()) -> true.
+unregister(TableId, Key) ->
+    ets:delete(TableId, Key).
 
 %% gen_server callbacks
 init([]) ->
     process_flag(trap_exit, true),
+    swirl_ets_manager:table(?TABLE_NAME_FLOWS, ?TABLE_OPTS, ?SERVER),
     swirl_ets_manager:table(?TABLE_NAME_MAPPERS, ?TABLE_OPTS, ?SERVER),
     swirl_ets_manager:table(?TABLE_NAME_REDUCERS, ?TABLE_OPTS, ?SERVER),
-    swirl_ets_manager:table(?TABLE_NAME_FLOWS, ?TABLE_OPTS, ?SERVER),
-    {ok, #state{}}.
+    swirl_ets_manager:table(?TABLE_NAME_STREAMS, ?TABLE_OPTS, ?SERVER),
+    {ok, #state {}}.
 
 handle_call(Request, _From, State) ->
     io:format("unexpected message: ~p~n", [Request]),
@@ -114,7 +111,7 @@ code_change(_OldVsn, State, _Extra) ->
     {ok, State}.
 
 %% private
-handler_flow_msg(FlowId, {mapper_flush, _Period, _Aggregates} = Msg, State) ->
+handler_flow_msg(FlowId, {mapper_window, _Period, _Rows} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
 handler_flow_msg(FlowId, {ping, _Node} = Msg, State) ->
@@ -123,11 +120,13 @@ handler_flow_msg(FlowId, {ping, _Node} = Msg, State) ->
 handler_flow_msg(FlowId, {pong, _Node} = Msg, State) ->
     message(swirl_reducer:lookup(FlowId), Msg),
     {noreply, State};
-handler_flow_msg(FlowId, {start_mapper, FlowMod, FlowOpts, ReducerNode}, State) ->
-    swirl_mapper:start(FlowId, FlowMod, FlowOpts, ReducerNode),
+handler_flow_msg(_FlowId, {start_mapper, FlowProp}, State) ->
+    Flow = swirl_utils:proplist_to_record(FlowProp, flow),
+    swirl_mapper:start(Flow),
     {noreply, State};
-handler_flow_msg(FlowId, {start_reducer, FlowMod, FlowOpts, MapperNodes}, State) ->
-    swirl_reducer:start(FlowId, FlowMod, FlowOpts, MapperNodes),
+handler_flow_msg(_FlowId, {start_reducer, FlowProp}, State) ->
+    Flow = swirl_utils:proplist_to_record(FlowProp, flow),
+    swirl_reducer:start(Flow),
     {noreply, State};
 handler_flow_msg(FlowId, stop_mapper, State) ->
     message(swirl_mapper:lookup(FlowId), stop),

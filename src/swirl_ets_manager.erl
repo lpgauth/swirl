@@ -1,15 +1,11 @@
 -module(swirl_ets_manager).
 -include("swirl.hrl").
 
-%% public
--export([
-    new_table/3,
-    table/3
-]).
-
 %% internal
 -export([
-    start_link/0
+    new_table/3,
+    start_link/0,
+    table/3
 ]).
 
 -behaviour(gen_server).
@@ -28,18 +24,18 @@
     tables
 }).
 
-%% public
+%% internal
 -spec new_table(atom(), list(atom() | tuple()), atom() | pid()) -> ok.
 new_table(Name, Options, Server) ->
     gen_server:cast(?SERVER, {new_table, {Name, Options, Server}}).
 
+-spec start_link() -> {ok, pid()}.
+start_link() ->
+    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
+
 -spec table(atom(), list(atom() | tuple()), atom() | pid()) -> ok.
 table(Name, Options, Server) ->
     gen_server:cast(?SERVER, {table, {Name, Options, Server}}).
-
-%% internal
-start_link() ->
-    gen_server:start_link({local, ?SERVER}, ?MODULE, [], []).
 
 %% gen_server callbacks
 init([]) ->

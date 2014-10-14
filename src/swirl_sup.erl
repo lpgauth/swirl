@@ -12,6 +12,7 @@
 ]).
 
 %% internal
+-spec start_link() -> {ok, pid()}.
 start_link() ->
     supervisor:start_link({local, ?MODULE}, ?MODULE, []).
 
@@ -19,6 +20,7 @@ start_link() ->
 init([]) ->
     Workers = [
         ?CHILD(swirl_ets_manager, worker),
+        ?CHILD(swirl_code_server, worker),
         ?CHILD(swirl_tracker, worker)
     ],
     {ok, {{one_for_one, 5, 10}, Workers}}.

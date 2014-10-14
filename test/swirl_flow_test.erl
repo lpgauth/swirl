@@ -18,33 +18,28 @@ before_suite() ->
     application:ensure_all_started(swirl).
 
 test_benchmark_emit() ->
-    FlowIds = lists:map(fun (_) ->
-        swirl_flow:start(swirl_flow_example, [
-            {stream_name, video}
-        ], [node()], node())
-    end, lists:seq(1, 100)),
-
+    Flows = [new_flow() || _ <- lists:seq(1, 100)],
     timer:sleep(timer:seconds(1)),
 
     Timestamp = os:timestamp(),
     emit_loop(?N),
     Delta = timer:now_diff(os:timestamp(), Timestamp),
-
     io:format("~p microseconds~n", [Delta / ?N]),
 
-    lists:map(fun (FlowId) ->
-        swirl_flow:stop(FlowId, [node()], node())
-    end, FlowIds).
+    [swirl_flow:stop(Flow) || Flow <- Flows].
 
 test_swirl_flow() ->
-    FlowId = swirl_flow:start(swirl_flow_example, [
-        {stream_name, delivery},
+    {ok, Flow} = swirl_flow:start(swirl_flow_example, [
+        {heartbeat, timer:seconds(10)},
+        {mapper_opts, []},
+        {mapper_window, timer:seconds(1)},
+        {output_opts, [{send_to, self()}]},
+        {reducer_opts, []},
+        {reducer_skip, true},
+        {reducer_window, timer:seconds(1)},
         {stream_filter, "exchange_id = 3"},
-        {mapper_flush, timer:seconds(1)},
-        {reducer_flush, timer:seconds(1)},
-        {reducer_opts, [
-          {send_to, self()}
-        ]}
+        {stream_names, [delivery, requests]},
+        {window_sync, true}
     ], [node()], node()),
 
     timer:sleep(timer:seconds(1)),
@@ -52,12 +47,17 @@ test_swirl_flow() ->
     swirl_stream:emit(delivery, [{type, start}, {exchange_id, 1}, {bidder_id, 10}]),
     swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 1}]),
     swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 10}]),
+    swirl_stream:emit(requests, [{type, start}, {exchange_id, 3}, {bidder_id, 50}]),
 
-    Aggregates = receive_loop(),
-    Expected = [{{start,3,10},1,10}, {{start,3,1},1,10}],
+    Rows = receive_loop(),
+    Expected = [
+        {{start,requests,3,50},{1,10}},
+        {{start,delivery,3,1},{1,10}},
+        {{start,delivery,3,10},{1,10}}
+    ],
 
-    ?assert_equal(Expected, Aggregates),
-    swirl_flow:stop(FlowId, [node()], node()).
+    ?assert_equal(Expected, Rows),
+    swirl_flow:stop(Flow).
 
 receive_loop() ->
     receive
@@ -73,6 +73,14 @@ emit_loop(0) ->
 emit_loop(N) ->
     swirl_stream:emit(video, random_event()),
     emit_loop(N-1).
+
+new_flow() ->
+    FlowOpts = [
+        {stream_names, [video]},
+        {reducer_skip, true}
+    ],
+    {ok, Flow} = swirl_flow:start(swirl_flow_example, FlowOpts, [node()], node()),
+    Flow.
 
 random_event() ->
     Type = random_type(),
