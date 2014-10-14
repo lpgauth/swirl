@@ -8,8 +8,7 @@
   ]},
   {applications, [
     kernel,
-    stdlib,
-    swirl_ql
+    stdlib
   ]},
   {mod, {swirl, []}},
   {env, []}
