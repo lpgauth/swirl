@@ -8,29 +8,27 @@
 ]).
 
 %% public
--spec evaluate(exp_tree(), [{atom(), value()}]) -> boolean().
-
+-spec evaluate(exp_tree(), event()) -> boolean().
 evaluate({'and', A, B}, Vars) ->
     evaluate(A, Vars) andalso evaluate(B, Vars);
 evaluate({'or', A, B}, Vars) ->
     evaluate(A, Vars) orelse evaluate(B, Vars);
 evaluate({comp, Comparator, Var, Value}, Vars) ->
-    compare(Comparator, lookup(Var, Vars), Value);
+    compare(Comparator, ?LM(Var, Vars), Value);
 evaluate({in, Var, List}, Vars) ->
-    lists:member(lookup(Var, Vars), List);
+    lists:member(?LM(Var, Vars), List);
 evaluate({notin, Var, List}, Vars) ->
-    not lists:member(lookup(Var, Vars), List);
+    not lists:member(?LM(Var, Vars), List);
 evaluate({in_var, Item, Var}, Vars) ->
-    lists:member(Item, lookup(Var, Vars));
+    lists:member(Item, ?LM(Var, Vars));
 evaluate({notin_var, Item, Var}, Vars) ->
-    not lists:member(Item, lookup(Var, Vars));
+    not lists:member(Item, ?LM(Var, Vars));
 evaluate({null, Var}, Vars) ->
-    lookup(Var, Vars) =:= ?NULL;
+    ?LM(Var, Vars) =:= ?NULL;
 evaluate({notnull, Var}, Vars) ->
-    lookup(Var, Vars) =/= ?NULL.
+    ?LM(Var, Vars) =/= ?NULL.
 
 -spec parse(string() | binary()) -> {ok, exp_tree()} | {error, term()}.
-
 parse(String) when is_binary(String) ->
     parse(binary_to_list(String));
 parse(String) when is_list(String) ->
@@ -69,12 +67,6 @@ compare('<>', A, B) when is_number(A) or
                          is_binary(B) ->
     A /= B.
 
-lookup(Key, List) ->
-    case lists:keyfind(Key, 1, List) of
-        false -> ?NULL;
-        {_, Value} -> Value
-    end.
-
 -ifdef(TEST).
 -include_lib("eunit/include/eunit.hrl").
 
@@ -82,58 +74,58 @@ lookup(Key, List) ->
 benchmark_test() ->
     {ok, ExpTree} = parse("exchange_id = 1 AND exchange_seller_id = 181 AND bidder_id IN (1, 5) AND buyer_spend > 150"),
 
-    Vars = [
-        {exchange_id, 1},
-        {exchange_seller_id, 181},
-        {bidder_id, 1},
-        {buyer_spend, 200}
-    ],
+    Vars = # {
+        exchange_id => 1,
+        exchange_seller_id => 181,
+        bidder_id => 1,
+        buyer_spend => 200
+    },
 
     FunEvaluate = fun() -> evaluate(ExpTree, Vars) end,
     benchmark(evaluate, FunEvaluate, 10000000).
 
 evaluate_test() ->
     % comp predictate
-    assert_eval({comp, '=', bidder_id, 1}, [{bidder_id, 1}]),
-    assert_not_eval({comp, '=', bidder_id, 1}, [{bidder_id, 2}]),
-    assert_eval({comp, '<', price, 100}, [{price, 60}]),
-    assert_not_eval({comp, '<', price, 100}, [{price, 160}]),
-    assert_eval({comp, '<=', price, 100}, [{price, 100}]),
-    assert_not_eval({comp, '<=', price, 100}, [{price, 160}]),
-    assert_eval({comp, '>=', price, 100}, [{price, 100}]),
-    assert_not_eval({comp, '>=', price, 160}, [{price, 100}]),
-    assert_eval({comp, '>', price, 100}, [{price, 160}]),
-    assert_not_eval({comp, '>', price, 100}, [{price, 60}]),
-    assert_eval({comp, '<>', price, 100}, [{price, 160}]),
-    assert_not_eval({comp, '<>', price, 100}, [{price, 100}]),
+    assert_eval({comp, '=', bidder_id, 1}, #{bidder_id => 1}),
+    assert_not_eval({comp, '=', bidder_id, 1}, #{bidder_id => 2}),
+    assert_eval({comp, '<', price, 100}, #{price => 60}),
+    assert_not_eval({comp, '<', price, 100}, #{price => 160}),
+    assert_eval({comp, '<=', price, 100}, #{price => 100}),
+    assert_not_eval({comp, '<=', price, 100}, #{price => 160}),
+    assert_eval({comp, '>=', price, 100}, #{price => 100}),
+    assert_not_eval({comp, '>=', price, 160}, #{price => 100}),
+    assert_eval({comp, '>', price, 100}, #{price => 160}),
+    assert_not_eval({comp, '>', price, 100}, #{price => 60}),
+    assert_eval({comp, '<>', price, 100}, #{price => 160}),
+    assert_not_eval({comp, '<>', price, 100}, #{price => 100}),
 
     % in predictate
-    assert_eval({in, exchange_id, [1 , 2]}, [{exchange_id, 2}]),
-    assert_not_eval({in, exchange_id, [1 , 2]}, [{exchange_id, 3}]),
-    assert_eval({notin, exchange_id, [1 , 2]}, [{exchange_id, 3}]),
-    assert_not_eval({notin, exchange_id, [1 , 2]}, [{exchange_id, 2}]),
-    assert_eval({in_var, 54, segment_ids}, [{segment_ids, [12, 54]}]),
-    assert_not_eval({in_var, 54, segment_ids}, [{segment_ids, [12]}]),
-    assert_eval({notin_var, 54, segment_ids}, [{segment_ids, [12]}]),
-    assert_not_eval({notin_var, 54, segment_ids}, [{segment_ids, [12, 54]}]),
+    assert_eval({in, exchange_id, [1 , 2]}, #{exchange_id => 2}),
+    assert_not_eval({in, exchange_id, [1 , 2]}, #{exchange_id => 3}),
+    assert_eval({notin, exchange_id, [1 , 2]}, #{exchange_id => 3}),
+    assert_not_eval({notin, exchange_id, [1 , 2]}, #{exchange_id => 2}),
+    assert_eval({in_var, 54, segment_ids}, #{segment_ids => [12, 54]}),
+    assert_not_eval({in_var, 54, segment_ids}, #{segment_ids => [12]}),
+    assert_eval({notin_var, 54, segment_ids}, #{segment_ids => [12]}),
+    assert_not_eval({notin_var, 54, segment_ids}, #{segment_ids => [12, 54]}),
 
     % null predictate
-    assert_eval({null, exchange_id}, []),
-    assert_not_eval({null, exchange_id}, [{exchange_id, 3}]),
-    assert_eval({notnull, exchange_id}, [{exchange_id, 3}]),
-    assert_not_eval({notnull, exchange_id}, [{exchange_id, ?NULL}]),
+    assert_eval({null, exchange_id}, #{}),
+    assert_not_eval({null, exchange_id}, #{exchange_id => 3}),
+    assert_eval({notnull, exchange_id}, #{exchange_id => 3}),
+    assert_not_eval({notnull, exchange_id}, #{exchange_id => ?NULL}),
 
     % and
     assert_eval({'and', {comp, '=', bidder_id, 1}, {comp, '=', bidder_id, 1}},
-        [{bidder_id, 1}]),
+        #{bidder_id => 1}),
     assert_not_eval({'and', {comp, '=', bidder_id, 1}, {comp, '=', exchange_id, 1}},
-        [{bidder_id, 1}, {exchange_id, 2}]),
+        #{bidder_id => 1, exchange_id => 2}),
 
     % or
     assert_eval({'or', {comp, '=', bidder_id, 2}, {comp, '=', bidder_id, 1}},
-        [{bidder_id, 1}]),
+        #{bidder_id => 1}),
     assert_not_eval({'or', {comp, '=', bidder_id, 2}, {comp, '=', bidder_id, 3}},
-        [{bidder_id, 1}]).
+        #{bidder_id => 1}).
 
 parse_test() ->
     assert_parse({comp, '=', bidder_id, 1}, "bidder_id = 1"),

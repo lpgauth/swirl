@@ -9,7 +9,7 @@
 
 %% swirl_flow callbacks
 map(StreamName, Event, _MapperOpts) ->
-    {{l(type, Event), StreamName, l(exchange_id, Event), l(bidder_id, Event)}, {1, 10}}.
+    {{lm(type, Event), StreamName, lm(exchange_id, Event), lm(bidder_id, Event)}, {1, 10}}.
 
 reduce(_Flow, Row, _ReducerOpts) ->
     Row.
@@ -22,4 +22,7 @@ output(_Flow, _Period, Rows, OutputOpts) ->
 
 %% helpers
 l(Key, Event) ->
-    swirl_utils:lookup(Key, Event).
+    swirl_utils:lookup(Key, Event, undefined).
+
+lm(Key, Event) ->
+    maps:get(Key, Event, undefined).

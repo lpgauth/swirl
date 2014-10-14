@@ -38,6 +38,18 @@ comparison_op() = '&lt;' | '&lt;=' | '=' | '&gt;=' | '&gt;' | '&lt;&gt;'
 
 
 
+### <a name="type-event">event()</a> ###
+
+
+
+<pre><code>
+event() = #{}
+</code></pre>
+
+
+
+
+
 ### <a name="type-exp_tree">exp_tree()</a> ###
 
 
@@ -101,7 +113,7 @@ value() = integer() | float() | binary()
 
 
 <pre><code>
-evaluate(X1::<a href="#type-exp_tree">exp_tree()</a>, Vars::[{atom(), <a href="#type-value">value()</a>}]) -&gt; boolean()
+evaluate(X1::<a href="#type-exp_tree">exp_tree()</a>, Vars::<a href="#type-event">event()</a>) -&gt; boolean()
 </code></pre>
 <br />
 

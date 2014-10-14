@@ -16,6 +16,8 @@
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 -define(L(Key, List), swirl_utils:lookup(Key, List)).
 -define(L(Key, List, Default), swirl_utils:lookup(Key, List, Default)).
+-define(LM(Key, Map), ?LM(Key, Map, undefined)).
+-define(LM(Key, Map, Default), maps:get(Key, Map, Default)).
 -define(NULL, undefined).
 
 %% records
@@ -77,7 +79,7 @@
 -type stream_names() :: [stream_name()].
 -type update()       :: {tuple(), tuple()}.
 
--type event()        :: list(tuple(atom(), value())).
+-type event()        :: map().
 
 -type boolean_op() :: 'and' | 'or'.
 -type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.
