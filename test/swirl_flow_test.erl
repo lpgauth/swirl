@@ -2,7 +2,7 @@
 -export([
     after_suite/0,
     before_suite/0,
-    % test_benchmark_emit/0,
+    test_benchmark_emit/0,
     test_swirl_flow/0
 ]).
 
