@@ -50,14 +50,14 @@ l(Key, Event) ->
     swirl_utils:lookup(Key, Event, undefined).
 
 lm(Key, Event) ->
-    maps:get(Key, Event, undefined)</pre>
+    maps:get(Key, Event, undefined).</pre>
 
 #### Resource Limitation: ####
 
 configurable via:
 
-<pre lang="erlang">application:set_env(swirl, mappers_max, 140))
-application:set_env(swirl, reducers_max, 200))</pre>
+<pre lang="erlang">application:set_env(swirl, mappers_max, 140)
+application:set_env(swirl, reducers_max, 200)</pre>
 
 #### TODO: ####
 - node discovery
