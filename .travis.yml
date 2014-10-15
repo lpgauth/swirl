@@ -1,7 +1,7 @@
 language: erlang
-notifications:
-  email: false
+script: "make eunit etest"
 otp_release:
   - 17.1
   - 17.3
-
+notifications:
+  email: false
