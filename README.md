@@ -8,7 +8,8 @@ Lightweight Distributed Stream Processor
 
 [![Build Status](https://travis-ci.org/lpgauth/swirl.svg?branch=master)](https://travis-ci.org/lpgauth/swirl)
 
-#### Examples: ####
+#### Requirements: ####
+- Erlang 17.0+
 
 ##### Starting a flow: #####
 
@@ -28,6 +29,7 @@ swirl_stream:emit(delivery, #{exchange_id => 1, bidder_id => 10}),
 
 ok = swirl_flow:stop(Flow)
 ```
+
 ##### Implementing a flow: #####
 
 ```erlang
@@ -69,6 +71,7 @@ configurable via:
 application:set_env(swirl, mappers_max, 140)
 application:set_env(swirl, reducers_max, 200)
 ```
+
 #### TODO: ####
 - node discovery
 - boolean expression indexing
