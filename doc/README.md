@@ -11,6 +11,8 @@ Lightweight Distributed Stream Processor
 #### Requirements: ####
 - Erlang 17.0+
 
+#### Examples: ####
+
 ##### Starting a flow: #####
 
 ```erlang
