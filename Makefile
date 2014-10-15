@@ -25,7 +25,8 @@ deps:
 	@$(REBAR) update-deps
 
 dialyze:
-	@dialyzer ebin/*.beam --plt ~/.$(PROJECT).plt
+	@dialyzer ebin/*.beam --plt ~/.$(PROJECT).plt | \
+	fgrep -v -f ./priv/dialyzer.ignore-warnings
 
 doc:
 	@echo "Running rebar doc..."
