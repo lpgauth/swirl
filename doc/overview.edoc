@@ -6,6 +6,8 @@
 #### Requirements: ####
 - Erlang 17.0+
 
+#### Examples: ####
+
 ##### Starting a flow: #####
 
 <pre lang="erlang">ok = application:start(swirl),
