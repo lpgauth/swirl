@@ -3,7 +3,8 @@
 
 [![Build Status](https://travis-ci.org/lpgauth/swirl.svg?branch=master)](https://travis-ci.org/lpgauth/swirl)
 
-#### Examples: ####
+#### Requirements: ####
+- Erlang 17.0+
 
 ##### Starting a flow: #####
 
@@ -23,6 +24,7 @@ swirl_stream:emit(delivery, #{exchange_id => 1, bidder_id => 10}),
 ok = swirl_flow:stop(Flow)</pre>
 
 ##### Implementing a flow: #####
+
 <pre lang="erlang">module(swirl_flow_example).
 
 -behavior(swirl_flow).
@@ -60,6 +62,7 @@ configurable via:
 application:set_env(swirl, reducers_max, 200)</pre>
 
 #### TODO: ####
+
 - node discovery
 - boolean expression indexing
 
