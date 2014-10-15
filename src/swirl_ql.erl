@@ -82,7 +82,7 @@ benchmark_test() ->
     },
 
     FunEvaluate = fun() -> evaluate(ExpTree, Vars) end,
-    benchmark(evaluate, FunEvaluate, 10000000).
+    benchmark(evaluate, FunEvaluate, 100000).
 
 evaluate_test() ->
     % comp predictate
