@@ -1,12 +1,14 @@
 @author Louis-Philippe Gauthier
-@doc Lightweight distributed stream processor
+@doc Lightweight Distributed Stream Processor
+
+[![Build Status](https://travis-ci.org/lpgauth/swirl.svg?branch=master)](https://travis-ci.org/lpgauth/swirl)
 
 #### Examples: ####
 
 ##### Starting a flow: #####
 
-<pre>ok = application:start(swirl),
-..
+<pre lang="erlang">ok = application:start(swirl),
+
 FlowMod = swirl_flow_example,
 FlowOpts = [
     {stream_names, [delivery]},
@@ -15,13 +17,13 @@ FlowOpts = [
 MapperNodes = [node()],
 ReducerNode = node(),
 {ok, Flow} = swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
-..
-swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
-..
-ok = swirl_flow:stop(Flow).</pre>
+
+swirl_stream:emit(delivery, #{exchange_id => 1, bidder_id => 10}),
+
+ok = swirl_flow:stop(Flow)</pre>
 
 ##### Implementing a flow: #####
-<pre>module(swirl_flow_example).
+<pre lang="erlang">module(swirl_flow_example).
 
 -behavior(swirl_flow).
 -export([
@@ -32,7 +34,7 @@ ok = swirl_flow:stop(Flow).</pre>
 
 %% swirl_flow callbacks
 map(_StreamName, Event, _MapperOpts) ->
-    {{l(type, Event), l(exchange_id, Event), l(bidder_id, Event)}, {1, 10}}.
+    {{lm(type, Event), lm(exchange_id, Event), lm(bidder_id, Event)}, {1, 10}}.
 
 reduce(_Flow, Row, _ReducerOpts) ->
     Row.
@@ -45,14 +47,17 @@ output(_Flow, _Period, Rows, OutputOpts) ->
 
 %% helpers
 l(Key, Event) ->
-    swirl_utils:lookup(Key, Event).</pre>
+    swirl_utils:lookup(Key, Event, undefined).
+
+lm(Key, Event) ->
+    maps:get(Key, Event, undefined).</pre>
 
 #### Resource Limitation: ####
 
 configurable via:
 
-<pre>application:set_env(swirl, mappers_max, 140))
-application:set_env(swirl, reducers_max, 200))</pre>
+<pre lang="erlang">application:set_env(swirl, mappers_max, 140)
+application:set_env(swirl, reducers_max, 200)</pre>
 
 #### TODO: ####
 - node discovery

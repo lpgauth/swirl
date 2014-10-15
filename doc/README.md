@@ -4,15 +4,17 @@
 
 __Authors:__ Louis-Philippe Gauthier.
 
-Lightweight distributed stream processor
+Lightweight Distributed Stream Processor
+
+[![Build Status](https://travis-ci.org/lpgauth/swirl.svg?branch=master)](https://travis-ci.org/lpgauth/swirl)
 
 #### Examples: ####
 
 ##### Starting a flow: #####
 
-```
+```erlang
 ok = application:start(swirl),
-..
+
 FlowMod = swirl_flow_example,
 FlowOpts = [
     {stream_names, [delivery]},
@@ -21,14 +23,14 @@ FlowOpts = [
 MapperNodes = [node()],
 ReducerNode = node(),
 {ok, Flow} = swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
-..
-swirl_stream:emit(delivery, [{exchange_id, 1}, {bidder_id, 10}]),
-..
-ok = swirl_flow:stop(Flow).
+
+swirl_stream:emit(delivery, #{exchange_id => 1, bidder_id => 10}),
+
+ok = swirl_flow:stop(Flow)
 ```
 ##### Implementing a flow: #####
 
-```
+```erlang
 module(swirl_flow_example).
 
 -behavior(swirl_flow).
@@ -40,7 +42,7 @@ module(swirl_flow_example).
 
 %% swirl_flow callbacks
 map(_StreamName, Event, _MapperOpts) ->
-    {{l(type, Event), l(exchange_id, Event), l(bidder_id, Event)}, {1, 10}}.
+    {{lm(type, Event), lm(exchange_id, Event), lm(bidder_id, Event)}, {1, 10}}.
 
 reduce(_Flow, Row, _ReducerOpts) ->
     Row.
@@ -53,16 +55,19 @@ output(_Flow, _Period, Rows, OutputOpts) ->
 
 %% helpers
 l(Key, Event) ->
-    swirl_utils:lookup(Key, Event).
+    swirl_utils:lookup(Key, Event, undefined).
+
+lm(Key, Event) ->
+    maps:get(Key, Event, undefined).
 ```
 
 #### Resource Limitation: ####
 
 configurable via:
 
-```
-application:set_env(swirl, mappers_max, 140))
-application:set_env(swirl, reducers_max, 200))
+```erlang
+application:set_env(swirl, mappers_max, 140)
+application:set_env(swirl, reducers_max, 200)
 ```
 #### TODO: ####
 - node discovery
@@ -79,6 +84,9 @@ application:set_env(swirl, reducers_max, 200))
 <tr><td><a href="swirl_ets_manager.md" class="module">swirl_ets_manager</a></td></tr>
 <tr><td><a href="swirl_flow.md" class="module">swirl_flow</a></td></tr>
 <tr><td><a href="swirl_mapper.md" class="module">swirl_mapper</a></td></tr>
+<tr><td><a href="swirl_ql.md" class="module">swirl_ql</a></td></tr>
+<tr><td><a href="swirl_ql_lexer.md" class="module">swirl_ql_lexer</a></td></tr>
+<tr><td><a href="swirl_ql_parser.md" class="module">swirl_ql_parser</a></td></tr>
 <tr><td><a href="swirl_reducer.md" class="module">swirl_reducer</a></td></tr>
 <tr><td><a href="swirl_stream.md" class="module">swirl_stream</a></td></tr>
 <tr><td><a href="swirl_sup.md" class="module">swirl_sup</a></td></tr>

@@ -44,10 +44,10 @@ test_swirl_flow() ->
 
     timer:sleep(timer:seconds(1)),
 
-    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 1}, {bidder_id, 10}]),
-    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 1}]),
-    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 10}]),
-    swirl_stream:emit(requests, [{type, start}, {exchange_id, 3}, {bidder_id, 50}]),
+    swirl_stream:emit(delivery, #{type => start, exchange_id => 1, bidder_id => 10}),
+    swirl_stream:emit(delivery, #{type => start, exchange_id => 3, bidder_id => 1}),
+    swirl_stream:emit(delivery, #{type => start, exchange_id => 3, bidder_id => 10}),
+    swirl_stream:emit(requests, #{type => start, exchange_id => 3, bidder_id => 50}),
 
     Rows = receive_loop(),
     Expected = [
@@ -86,7 +86,7 @@ random_event() ->
     Type = random_type(),
     ExchangeId = random:uniform(1000000),
     BidderId = random:uniform(100000),
-    [{type, Type}, {exchange_id, ExchangeId}, {bidder_id, BidderId}].
+    #{type => Type, exchange_id => ExchangeId, bidder_id => BidderId}.
 
 random_type() ->
     lists:nth(random:uniform(11), [

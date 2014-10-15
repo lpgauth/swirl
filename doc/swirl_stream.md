@@ -19,7 +19,7 @@
 
 
 <pre><code>
-event() = [{atom(), <a href="#type-value">value()</a>}]
+event() = #{}
 </code></pre>
 
 
@@ -104,18 +104,6 @@ stream_name() = atom()
 
 <pre><code>
 stream_names() = [<a href="#type-stream_name">stream_name()</a>]
-</code></pre>
-
-
-
-
-
-### <a name="type-value">value()</a> ###
-
-
-
-<pre><code>
-value() = integer() | float() | binary()
 </code></pre>
 
 
