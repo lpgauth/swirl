@@ -1,4 +1,6 @@
 -module(swirl_flow_test).
+-include_lib("etest/include/etest.hrl").
+
 -export([
     after_suite/0,
     before_suite/0,
@@ -6,10 +8,9 @@
     test_swirl_flow/0
 ]).
 
--include_lib("etest/include/etest.hrl").
-
 -define(N, 10000).
 
+%% public
 after_suite() ->
     ok = application:stop(swirl).
 
@@ -59,14 +60,6 @@ test_swirl_flow() ->
     ?assert_equal(Expected, Rows),
     swirl_flow:stop(Flow).
 
-receive_loop() ->
-    receive
-        [] ->
-            receive_loop();
-        Aggregates ->
-            Aggregates
-    end.
-
 %% private
 emit_loop(0) ->
     ok;
@@ -102,3 +95,11 @@ random_type() ->
         thirdQuartile,
         unmute
     ]).
+
+receive_loop() ->
+    receive
+        [] ->
+            receive_loop();
+        Aggregates ->
+            Aggregates
+    end.
