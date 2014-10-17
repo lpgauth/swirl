@@ -21,7 +21,10 @@ MapperNodes = [node()],
 ReducerNode = node(),
 {ok, Flow} = swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
 
-swirl_stream:emit(delivery, #{exchange_id => 1, bidder_id => 10}),
+StreamName = delivery,
+Event = #{exchange_id => 1, bidder_id => 10},
+
+swirl_stream:emit(StreamName, Event),
 
 ok = swirl_flow:stop(Flow)</pre>
 
