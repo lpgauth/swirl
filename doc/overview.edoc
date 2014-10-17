@@ -39,16 +39,22 @@ ok = swirl_flow:stop(Flow)</pre>
 
 %% swirl_flow callbacks
 map(StreamName, Event, _MapperOpts) ->
-    {{?LM(type, Event), StreamName, ?LM(exchange_id, Event), ?LM(bidder_id, Event)}, {1, 10}}.
+    Type = ?LM(type, Event),
+    ExchangeId = ?LM(exchange_id, Event),
+    BidderId = ?LM(bidder_id, Event),
+
+    Key = {Type, StreamName, ExchangeId, BidderId},
+    CounterIncrements = {1, 10},
+
+    {Key, CounterIncrements}.
 
 reduce(_Flow, Row, _ReducerOpts) ->
     Row.
 
 output(_Flow, _Period, Rows, OutputOpts) ->
-    case ?L(send_to , OutputOpts) of
-        undefined -> ok;
-        Pid -> Pid ! Rows
-    end.</pre>
+    %% do something with the output
+    io:format("rows: ~p~n", [Rows]),
+    </pre>
 
 #### Stream Filter: ####
 
@@ -58,29 +64,24 @@ exchange_id = 3 AND bidder_id IS NOT NULL
 flight_id in (10, 12, 23) OR tag_id = 20
 buyer_id notnull AND seller_id > 103</pre>
 
+##### Swirl QL: #####
 Variables:
-<pre>
-atom()</pre>
+<pre>atom()</pre>
 
 Values:
-<pre>
-integer() | float() | binary()</pre>
+<pre>integer() | float() | binary()</pre>
 
 Boolean Operators:
-<pre>
-'and' | 'or'</pre>
+<pre>'and' | 'or'</pre>
 
 Comparison Operators:
-<pre>
-<![CDATA['<' | '<=' | '=' | '>=' | '>' | '<>']]></pre>
+<pre><![CDATA['<' | '<=' | '=' | '>=' | '>' | '<>']]></pre>
 
 Inclusion Operators:
-<pre>
-in | notin</pre>
+<pre>in | notin</pre>
 
 Null Operators:
-<pre>
-null | notnull</pre>
+<pre>null | notnull</pre>
 
 #### Resource Limitation: ####
 

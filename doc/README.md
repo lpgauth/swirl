@@ -47,16 +47,21 @@ ok = swirl_flow:stop(Flow)
 
 %% swirl_flow callbacks
 map(StreamName, Event, _MapperOpts) ->
-    {{?LM(type, Event), StreamName, ?LM(exchange_id, Event), ?LM(bidder_id, Event)}, {1, 10}}.
+    Type = ?LM(type, Event),
+    ExchangeId = ?LM(exchange_id, Event),
+    BidderId = ?LM(bidder_id, Event),
+
+    Key = {Type, StreamName, ExchangeId, BidderId},
+    CounterIncrements = {1, 10},
+
+    {Key, CounterIncrements}.
 
 reduce(_Flow, Row, _ReducerOpts) ->
     Row.
 
 output(_Flow, _Period, Rows, OutputOpts) ->
-    case ?L(send_to , OutputOpts) of
-        undefined -> ok;
-        Pid -> Pid ! Rows
-    end.
+    %% do something with the output
+    io:format("rows: ~p~n", [Rows]),
 ```
 
 #### Stream Filter: ####
@@ -68,40 +73,35 @@ exchange_id = 3 AND bidder_id IS NOT NULL
 flight_id in (10, 12, 23) OR tag_id = 20
 buyer_id notnull AND seller_id > 103
 ```
+##### Swirl QL: #####
 Variables:
 
 ```
-
 atom()
 ```
 Values:
 
 ```
-
 integer() | float() | binary()
 ```
 Boolean Operators:
 
 ```
-
 'and' | 'or'
 ```
 Comparison Operators:
 
 ```
-
 '<' | '<=' | '=' | '>=' | '>' | '<>'
 ```
 Inclusion Operators:
 
 ```
-
 in | notin
 ```
 Null Operators:
 
 ```
-
 null | notnull
 ```
 
