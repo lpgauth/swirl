@@ -74,38 +74,38 @@ exchange_id = 3 AND bidder_id IS NOT NULL
 flight_id in (10, 12, 23) OR tag_id = 20
 buyer_id notnull AND seller_id > 103
 ```
-##### Variables: #####
+###### Variables: ######
 
 ```erlang
 
 atom()
 ```
 
-##### Values: #####
+###### Values: ######
 
 ```erlang
 
 integer() | float() | binary()
 ```
-##### Boolean Operators: #####
+###### Boolean Operators: ######
 
 ```erlang
 
 'and' | 'or'
 ```
-##### Comparison Operators: #####
+###### Comparison Operators: ######
 
 ```erlang
 
 '<' | '<=' | '=' | '>=' | '>' | '<>'
 ```
-##### Inclusion Operators: #####
+###### Inclusion Operators: ######
 
 ```erlang
 
 in | notin
 ```
-##### Null Operators: #####
+###### Null Operators: ######
 
 ```erlang
 

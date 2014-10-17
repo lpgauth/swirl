@@ -64,28 +64,28 @@ exchange_id = 3 AND bidder_id IS NOT NULL
 flight_id in (10, 12, 23) OR tag_id = 20
 buyer_id notnull AND seller_id > 103</pre>
 
-##### Variables: #####
+###### Variables: ######
 <pre lang="erlang">
 atom()</pre>
 
-##### Values: #####
+###### Values: ######
 
 <pre lang="erlang">
 integer() | float() | binary()</pre>
 
-##### Boolean Operators: #####
+###### Boolean Operators: ######
 <pre lang="erlang">
 'and' | 'or'</pre>
 
-##### Comparison Operators: #####
+###### Comparison Operators: ######
 <pre lang="erlang">
 <![CDATA['<' | '<=' | '=' | '>=' | '>' | '<>']]></pre>
 
-##### Inclusion Operators: #####
+###### Inclusion Operators: ######
 <pre lang="erlang">
 in | notin</pre>
 
-##### Null Operators: #####
+###### Null Operators: ######
 <pre lang="erlang">
 null | notnull</pre>
 
