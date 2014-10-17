@@ -79,27 +79,27 @@ Variables:
 ```
 atom()
 ```
-Values:
+values:
 
 ```
 integer() | float() | binary()
 ```
-Boolean Operators:
+boolean operators:
 
 ```
 'and' | 'or'
 ```
-Comparison Operators:
+comparison operators:
 
 ```
 '<' | '<=' | '=' | '>=' | '>' | '<>'
 ```
-Inclusion Operators:
+inclusion operators:
 
 ```
 in | notin
 ```
-Null Operators:
+null operators:
 
 ```
 null | notnull

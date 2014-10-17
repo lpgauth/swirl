@@ -68,19 +68,19 @@ buyer_id notnull AND seller_id > 103</pre>
 Variables:
 <pre>atom()</pre>
 
-Values:
+values:
 <pre>integer() | float() | binary()</pre>
 
-Boolean Operators:
+boolean operators:
 <pre>'and' | 'or'</pre>
 
-Comparison Operators:
+comparison operators:
 <pre><![CDATA['<' | '<=' | '=' | '>=' | '>' | '<>']]></pre>
 
-Inclusion Operators:
+inclusion operators:
 <pre>in | notin</pre>
 
-Null Operators:
+null operators:
 <pre>null | notnull</pre>
 
 #### Resource Limitation: ####
