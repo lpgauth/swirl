@@ -27,7 +27,10 @@ MapperNodes = [node()],
 ReducerNode = node(),
 {ok, Flow} = swirl_flow:start(FlowMod, FlowOpts, MapperNodes, ReducerNode),
 
-swirl_stream:emit(delivery, #{exchange_id => 1, bidder_id => 10}),
+StreamName = delivery,
+Event = #{exchange_id => 1, bidder_id => 10},
+
+swirl_stream:emit(StreamName, Event),
 
 ok = swirl_flow:stop(Flow)
 ```
@@ -123,18 +126,18 @@ application:set_env(swirl, reducers_max, 200)
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl.md" class="module">swirl</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_code_server.md" class="module">swirl_code_server</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_config.md" class="module">swirl_config</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_ets_manager.md" class="module">swirl_ets_manager</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_flow.md" class="module">swirl_flow</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_mapper.md" class="module">swirl_mapper</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_ql.md" class="module">swirl_ql</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_ql_lexer.md" class="module">swirl_ql_lexer</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_ql_parser.md" class="module">swirl_ql_parser</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_reducer.md" class="module">swirl_reducer</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_stream.md" class="module">swirl_stream</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_sup.md" class="module">swirl_sup</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_tracker.md" class="module">swirl_tracker</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/dev/doc/swirl_utils.md" class="module">swirl_utils</a></td></tr></table>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl.md" class="module">swirl</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_code_server.md" class="module">swirl_code_server</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_config.md" class="module">swirl_config</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ets_manager.md" class="module">swirl_ets_manager</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_flow.md" class="module">swirl_flow</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_mapper.md" class="module">swirl_mapper</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql.md" class="module">swirl_ql</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql_lexer.md" class="module">swirl_ql_lexer</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql_parser.md" class="module">swirl_ql_parser</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_reducer.md" class="module">swirl_reducer</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_stream.md" class="module">swirl_stream</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_sup.md" class="module">swirl_sup</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_tracker.md" class="module">swirl_tracker</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_utils.md" class="module">swirl_utils</a></td></tr></table>
 
