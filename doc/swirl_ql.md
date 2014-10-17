@@ -55,7 +55,7 @@ event() = #{}
 
 
 <pre><code>
-exp_tree() = {<a href="#type-boolean_op">boolean_op()</a>, <a href="#type-exp_tree">exp_tree()</a>, <a href="#type-exp_tree">exp_tree()</a>} | {<a href="#type-comparison_op">comparison_op()</a>, atom(), <a href="#type-value">value()</a>} | {<a href="#type-inclusion_op">inclusion_op()</a>, atom(), [<a href="#type-value">value()</a>, ...]} | {<a href="#type-null_op">null_op()</a>, atom()}
+exp_tree() = {<a href="#type-boolean_op">boolean_op()</a>, <a href="#type-exp_tree">exp_tree()</a>, <a href="#type-exp_tree">exp_tree()</a>} | {<a href="#type-comparison_op">comparison_op()</a>, <a href="#type-variable">variable()</a>, <a href="#type-value">value()</a>} | {<a href="#type-inclusion_op">inclusion_op()</a>, <a href="#type-variable">variable()</a>, [<a href="#type-value">value()</a>, ...]} | {<a href="#type-null_op">null_op()</a>, <a href="#type-variable">variable()</a>}
 </code></pre>
 
 
@@ -92,6 +92,18 @@ null_op() = null | notnull
 
 <pre><code>
 value() = integer() | float() | binary()
+</code></pre>
+
+
+
+
+
+### <a name="type-variable">variable()</a> ###
+
+
+
+<pre><code>
+variable() = atom()
 </code></pre>
 
 

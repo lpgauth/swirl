@@ -65,6 +65,53 @@ lm(Key, Event) ->
     maps:get(Key, Event, undefined).
 ```
 
+#### Stream filter: ####
+##### Variables: #####
+
+```erlang
+
+atom()
+```
+
+##### Values: #####
+
+```erlang
+
+integer() | float() | binary()
+```
+##### Boolean Operators: #####
+
+```erlang
+
+'and' | 'or'
+```
+##### Comparison Operators: #####
+
+```erlang
+
+'<' | '<=' | '=' | '>=' | '>' | '<>'
+```
+##### Inclusion Operators: #####
+
+```erlang
+
+in | notin
+```
+##### Null Operators: #####
+
+```erlang
+
+null | notnull
+```
+##### Examples: #####
+
+```erlang
+
+exchange_id = 3 AND bidder_id IS NOT NULL
+flight_id in (10, 12, 23) OR tag_id = 20
+buyer_id notnull AND seller_id > 103
+```
+
 #### Resource Limitation: ####
 
 configurable via:

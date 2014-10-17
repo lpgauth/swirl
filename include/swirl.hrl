@@ -85,9 +85,10 @@
 -type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.
 -type inclusion_op() :: in | notin.
 -type null_op() :: null | notnull.
+-type variable() :: atom().
 -type value() :: integer() | float() | binary().
 
 -type exp_tree() :: {boolean_op(), exp_tree(), exp_tree()} |
-                    {comparison_op(), atom(), value()} |
-                    {inclusion_op(), atom(), [value(), ...]} |
-                    {null_op(), atom()}.
+                    {comparison_op(), variable(), value()} |
+                    {inclusion_op(), variable(), [value(), ...]} |
+                    {null_op(), variable()}.
