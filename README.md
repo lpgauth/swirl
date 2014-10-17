@@ -35,7 +35,8 @@ ok = swirl_flow:stop(Flow)
 ##### Implementing a flow: #####
 
 ```erlang
-module(swirl_flow_example).
+-module(swirl_flow_example).
+-include_lib("swirl/include/swirl.hrl").
 
 -behavior(swirl_flow).
 -export([
@@ -45,24 +46,17 @@ module(swirl_flow_example).
 ]).
 
 %% swirl_flow callbacks
-map(_StreamName, Event, _MapperOpts) ->
-    {{lm(type, Event), lm(exchange_id, Event), lm(bidder_id, Event)}, {1, 10}}.
+map(StreamName, Event, _MapperOpts) ->
+    {{?LM(type, Event), StreamName, ?LM(exchange_id, Event), ?LM(bidder_id, Event)}, {1, 10}}.
 
 reduce(_Flow, Row, _ReducerOpts) ->
     Row.
 
 output(_Flow, _Period, Rows, OutputOpts) ->
-    case l(send_to , OutputOpts) of
+    case ?L(send_to , OutputOpts) of
         undefined -> ok;
         Pid -> Pid ! Rows
     end.
-
-%% helpers
-l(Key, Event) ->
-    swirl_utils:lookup(Key, Event, undefined).
-
-lm(Key, Event) ->
-    maps:get(Key, Event, undefined).
 ```
 
 #### Stream Filter: ####
@@ -74,40 +68,39 @@ exchange_id = 3 AND bidder_id IS NOT NULL
 flight_id in (10, 12, 23) OR tag_id = 20
 buyer_id notnull AND seller_id > 103
 ```
-###### Variables: ######
+Variables:
 
-```erlang
+```
 
 atom()
 ```
+Values:
 
-###### Values: ######
-
-```erlang
+```
 
 integer() | float() | binary()
 ```
-###### Boolean Operators: ######
+Boolean Operators:
 
-```erlang
+```
 
 'and' | 'or'
 ```
-###### Comparison Operators: ######
+Comparison Operators:
 
-```erlang
+```
 
 '<' | '<=' | '=' | '>=' | '>' | '<>'
 ```
-###### Inclusion Operators: ######
+Inclusion Operators:
 
-```erlang
+```
 
 in | notin
 ```
-###### Null Operators: ######
+Null Operators:
 
-```erlang
+```
 
 null | notnull
 ```
