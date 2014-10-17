@@ -65,7 +65,15 @@ lm(Key, Event) ->
     maps:get(Key, Event, undefined).
 ```
 
-#### Stream filter: ####
+#### Stream Filter: ####
+##### Examples: #####
+
+```erlang
+
+exchange_id = 3 AND bidder_id IS NOT NULL
+flight_id in (10, 12, 23) OR tag_id = 20
+buyer_id notnull AND seller_id > 103
+```
 ##### Variables: #####
 
 ```erlang
@@ -102,14 +110,6 @@ in | notin
 ```erlang
 
 null | notnull
-```
-##### Examples: #####
-
-```erlang
-
-exchange_id = 3 AND bidder_id IS NOT NULL
-flight_id in (10, 12, 23) OR tag_id = 20
-buyer_id notnull AND seller_id > 103
 ```
 
 #### Resource Limitation: ####
