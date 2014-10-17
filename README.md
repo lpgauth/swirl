@@ -74,7 +74,7 @@ flight_id in (10, 12, 23) OR tag_id = 20
 buyer_id notnull AND seller_id > 103
 ```
 ##### Swirl QL: #####
-Variables:
+variables:
 
 ```
 atom()
