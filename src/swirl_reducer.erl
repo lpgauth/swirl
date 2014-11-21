@@ -118,7 +118,8 @@ handle_info(heartbeat, #state {
         not lists:member(Node, HbeatNodes)
     end, MapperNodes),
 
-    Msg = {start_mapper, Flow},
+    FlowProp = swirl_utils:record_to_proplist(Flow),
+    Msg = {start_mapper, FlowProp},
     [swirl_tracker:message(Node, FlowId, Msg) || Node <- DeadNodes],
 
     Msg2 = {ping, node()},
