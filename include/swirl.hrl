@@ -16,8 +16,8 @@
 -define(CHILD(I, Type), {I, {I, start_link, []}, permanent, 5000, Type, [I]}).
 -define(L(Key, List), swirl_utils:lookup(Key, List)).
 -define(L(Key, List, Default), swirl_utils:lookup(Key, List, Default)).
--define(LM(Key, Map), ?LM(Key, Map, undefined)).
--define(LM(Key, Map, Default), maps:get(Key, Map, Default)).
+-define(LM(Key, List), swirl_utils:lookup(Key, List)).
+-define(LM(Key, List, Default), swirl_utils:lookup(Key, List, Default)).
 -define(NULL, undefined).
 
 %% records
