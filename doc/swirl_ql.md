@@ -43,7 +43,7 @@ comparison_op() = '&lt;' | '&lt;=' | '=' | '&gt;=' | '&gt;' | '&lt;&gt;'
 
 
 <pre><code>
-event() = #{}
+event() = [{atom(), <a href="#type-value">value()</a>}]
 </code></pre>
 
 
