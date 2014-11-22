@@ -14,19 +14,19 @@ evaluate({'and', A, B}, Vars) ->
 evaluate({'or', A, B}, Vars) ->
     evaluate(A, Vars) orelse evaluate(B, Vars);
 evaluate({comp, Comparator, Var, Value}, Vars) ->
-    compare(Comparator, ?LM(Var, Vars), Value);
+    compare(Comparator, ?L(Var, Vars), Value);
 evaluate({in, Var, List}, Vars) ->
-    lists:member(?LM(Var, Vars), List);
+    lists:member(?L(Var, Vars), List);
 evaluate({notin, Var, List}, Vars) ->
-    not lists:member(?LM(Var, Vars), List);
+    not lists:member(?L(Var, Vars), List);
 evaluate({in_var, Item, Var}, Vars) ->
-    lists:member(Item, ?LM(Var, Vars));
+    lists:member(Item, ?L(Var, Vars));
 evaluate({notin_var, Item, Var}, Vars) ->
-    not lists:member(Item, ?LM(Var, Vars));
+    not lists:member(Item, ?L(Var, Vars));
 evaluate({null, Var}, Vars) ->
-    ?LM(Var, Vars) =:= ?NULL;
+    ?L(Var, Vars) =:= ?NULL;
 evaluate({notnull, Var}, Vars) ->
-    ?LM(Var, Vars) =/= ?NULL.
+    ?L(Var, Vars) =/= ?NULL.
 
 -spec parse(string() | binary()) -> {ok, exp_tree()} | {error, term()}.
 parse(String) when is_binary(String) ->
