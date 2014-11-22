@@ -42,9 +42,9 @@ ok = swirl_flow:stop(Flow)</pre>
 
 %% swirl_flow callbacks
 map(StreamName, Event, _MapperOpts) ->
-    Type = ?LM(type, Event),
-    ExchangeId = ?LM(exchange_id, Event),
-    BidderId = ?LM(bidder_id, Event),
+    Type = ?L(type, Event),
+    ExchangeId = ?L(exchange_id, Event),
+    BidderId = ?L(bidder_id, Event),
 
     Key = {Type, StreamName, ExchangeId, BidderId},
     CounterIncrements = {1, 10},

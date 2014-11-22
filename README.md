@@ -50,9 +50,9 @@ ok = swirl_flow:stop(Flow)
 
 %% swirl_flow callbacks
 map(StreamName, Event, _MapperOpts) ->
-    Type = ?LM(type, Event),
-    ExchangeId = ?LM(exchange_id, Event),
-    BidderId = ?LM(bidder_id, Event),
+    Type = ?L(type, Event),
+    ExchangeId = ?L(exchange_id, Event),
+    BidderId = ?L(bidder_id, Event),
 
     Key = {Type, StreamName, ExchangeId, BidderId},
     CounterIncrements = {1, 10},
@@ -122,22 +122,22 @@ application:set_env(swirl, reducers_max, 200)
 - boolean expression indexing
 
 
-#### Modules: ####
+## Modules ##
 
 
 <table width="100%" border="0" summary="list of modules">
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl.md" class="module">swirl</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_code_server.md" class="module">swirl_code_server</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_config.md" class="module">swirl_config</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ets_manager.md" class="module">swirl_ets_manager</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_flow.md" class="module">swirl_flow</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_mapper.md" class="module">swirl_mapper</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql.md" class="module">swirl_ql</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql_lexer.md" class="module">swirl_ql_lexer</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql_parser.md" class="module">swirl_ql_parser</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_reducer.md" class="module">swirl_reducer</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_stream.md" class="module">swirl_stream</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_sup.md" class="module">swirl_sup</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_tracker.md" class="module">swirl_tracker</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_utils.md" class="module">swirl_utils</a></td></tr></table>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl.md" class="module">swirl</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_code_server.md" class="module">swirl_code_server</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_config.md" class="module">swirl_config</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_ets_manager.md" class="module">swirl_ets_manager</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_flow.md" class="module">swirl_flow</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_mapper.md" class="module">swirl_mapper</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_ql.md" class="module">swirl_ql</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_ql_lexer.md" class="module">swirl_ql_lexer</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_ql_parser.md" class="module">swirl_ql_parser</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_reducer.md" class="module">swirl_reducer</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_stream.md" class="module">swirl_stream</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_sup.md" class="module">swirl_sup</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_tracker.md" class="module">swirl_tracker</a></td></tr>
+<tr><td><a href="http://github.com/lpgauth/swirl/blob/proplists/doc/swirl_utils.md" class="module">swirl_utils</a></td></tr></table>
 
