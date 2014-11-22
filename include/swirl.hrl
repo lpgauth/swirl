@@ -77,14 +77,14 @@
 -type stream_names() :: [stream_name()].
 -type update()       :: {tuple(), tuple()}.
 
--type event()        :: map().
+-type event() :: [{atom(), value()}].
 
--type boolean_op() :: 'and' | 'or'.
+-type boolean_op()    :: 'and' | 'or'.
 -type comparison_op() :: '<' | '<=' | '=' | '>=' | '>' | '<>'.
--type inclusion_op() :: in | notin.
--type null_op() :: null | notnull.
--type variable() :: atom().
--type value() :: integer() | float() | binary().
+-type inclusion_op()  :: in | notin.
+-type null_op()       :: null | notnull.
+-type variable()      :: atom().
+-type value()         :: integer() | float() | binary().
 
 -type exp_tree() :: {boolean_op(), exp_tree(), exp_tree()} |
                     {comparison_op(), variable(), value()} |
