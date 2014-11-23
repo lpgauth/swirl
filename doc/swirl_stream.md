@@ -124,7 +124,7 @@ value() = integer() | float() | binary()
 ## Function Index ##
 
 
-<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#emit-2">emit/2</a></td><td></td></tr><tr><td valign="top"><a href="#lookup-1">lookup/1</a></td><td></td></tr><tr><td valign="top"><a href="#register-2">register/2</a></td><td></td></tr><tr><td valign="top"><a href="#unregister-2">unregister/2</a></td><td></td></tr></table>
+<table width="100%" border="1" cellspacing="0" cellpadding="2" summary="function index"><tr><td valign="top"><a href="#emit-2">emit/2</a></td><td></td></tr><tr><td valign="top"><a href="#lookup-1">lookup/1</a></td><td></td></tr><tr><td valign="top"><a href="#register-2">register/2</a></td><td></td></tr><tr><td valign="top"><a href="#unregister-1">unregister/1</a></td><td></td></tr></table>
 
 
 <a name="functions"></a>
@@ -164,13 +164,13 @@ register(Flow::<a href="#type-flow">flow()</a>, TableId::<a href="ets.md#type-ta
 <br />
 
 
-<a name="unregister-2"></a>
+<a name="unregister-1"></a>
 
-### unregister/2 ###
+### unregister/1 ###
 
 
 <pre><code>
-unregister(Flow::<a href="#type-flow">flow()</a>, TableId::<a href="ets.md#type-tab">ets:tab()</a>) -&gt; true
+unregister(Flow::<a href="#type-flow">flow()</a>) -&gt; true
 </code></pre>
 <br />
 
