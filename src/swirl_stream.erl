@@ -55,7 +55,7 @@ register(#flow {
 unregister(#flow {stream_names = StreamNames} = Flow) ->
     ok =:= lists:foreach(fun (StreamName) ->
         DeleteSpec = match_delete_spec(Flow, StreamName),
-        ets:select_delete(?TABLE_NAME_STREAMS, DeleteSpec)
+        ets:match_delete(?TABLE_NAME_STREAMS, DeleteSpec)
     end, StreamNames).
 
 %% private
