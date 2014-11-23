@@ -118,7 +118,6 @@ handle_info(flush, #state {
     WindowTimer = swirl_utils:new_timer(Window, flush, Sync),
     NewTableId = ets:new(?TABLE_NAME, ?TABLE_OPTS),
     swirl_stream:register(Flow, NewTableId),
-    swirl_stream:unregister(Flow, TableId),
 
     Period = #period {start_at = Tstamp, end_at = Tstamp2},
     spawn(fun() -> flush_window(Flow, Period, TableId) end),
@@ -168,12 +167,11 @@ handle_info(Msg, State) ->
 
 terminate(_Reason, #state {
         flow = Flow,
-        table_id = TableId,
         window_timer = WindowTimer,
         hbeat_timer = HbeatTimer
     }) ->
 
-    swirl_stream:unregister(Flow, TableId),
+    swirl_stream:unregister(Flow),
     swirl_flow:unregister(Flow),
     unregister(Flow),
     timer:cancel(WindowTimer),

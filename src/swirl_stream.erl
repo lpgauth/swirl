@@ -11,7 +11,7 @@
 -export([
     lookup/1,
     register/2,
-    unregister/2
+    unregister/1
 ]).
 
 %% public
@@ -51,10 +51,10 @@ register(#flow {
         ets:insert(?TABLE_NAME_STREAMS, KeyValue)
     end, StreamNames).
 
--spec unregister(flow(), ets:tab()) -> true.
-unregister(#flow {stream_names = StreamNames} = Flow, TableId) ->
+-spec unregister(flow()) -> true.
+unregister(#flow {stream_names = StreamNames} = Flow) ->
     ok =:= lists:foreach(fun (StreamName) ->
-        DeleteSpec = match_delete_spec(Flow, StreamName, TableId),
+        DeleteSpec = match_delete_spec(Flow, StreamName),
         ets:select_delete(?TABLE_NAME_STREAMS, DeleteSpec)
     end, StreamNames).
 
@@ -91,5 +91,5 @@ match_lookup_spec(StreamName) ->
     [{{{'$1', '$2'}, '$3'}, [{'orelse', {'=:=', '$2', StreamName},
         {'=:=', '$2', undefined}}], [{{'$3'}}]}].
 
-match_delete_spec(#flow {id = FlowId}, StreamName, TableId) ->
-    [{{{FlowId, StreamName}, #stream {table_id = TableId}}, [], [true]}].
+match_delete_spec(#flow {id = FlowId}, StreamName) ->
+    {{FlowId, StreamName}, '_'}.
