@@ -74,58 +74,58 @@ compare('<>', A, B) when is_number(A) or
 benchmark_test() ->
     {ok, ExpTree} = parse("exchange_id = 1 AND exchange_seller_id = 181 AND bidder_id IN (1, 5) AND buyer_spend > 150"),
 
-    Vars = # {
-        exchange_id => 1,
-        exchange_seller_id => 181,
-        bidder_id => 1,
-        buyer_spend => 200
-    },
+    Vars = [
+        {exchange_id, 1},
+        {exchange_seller_id, 181},
+        {bidder_id, 1},
+        {buyer_spend, 200}
+    ],
 
     FunEvaluate = fun() -> evaluate(ExpTree, Vars) end,
     benchmark(evaluate, FunEvaluate, 100000).
 
 evaluate_test() ->
     % comp predictate
-    assert_eval({comp, '=', bidder_id, 1}, #{bidder_id => 1}),
-    assert_not_eval({comp, '=', bidder_id, 1}, #{bidder_id => 2}),
-    assert_eval({comp, '<', price, 100}, #{price => 60}),
-    assert_not_eval({comp, '<', price, 100}, #{price => 160}),
-    assert_eval({comp, '<=', price, 100}, #{price => 100}),
-    assert_not_eval({comp, '<=', price, 100}, #{price => 160}),
-    assert_eval({comp, '>=', price, 100}, #{price => 100}),
-    assert_not_eval({comp, '>=', price, 160}, #{price => 100}),
-    assert_eval({comp, '>', price, 100}, #{price => 160}),
-    assert_not_eval({comp, '>', price, 100}, #{price => 60}),
-    assert_eval({comp, '<>', price, 100}, #{price => 160}),
-    assert_not_eval({comp, '<>', price, 100}, #{price => 100}),
+    assert_eval({comp, '=', bidder_id, 1}, [{bidder_id, 1}]),
+    assert_not_eval({comp, '=', bidder_id, 1}, [{bidder_id, 2}]),
+    assert_eval({comp, '<', price, 100}, [{price, 60}]),
+    assert_not_eval({comp, '<', price, 100}, [{price, 160}]),
+    assert_eval({comp, '<=', price, 100}, [{price, 100}]),
+    assert_not_eval({comp, '<=', price, 100}, [{price, 160}]),
+    assert_eval({comp, '>=', price, 100}, [{price, 100}]),
+    assert_not_eval({comp, '>=', price, 160}, [{price, 100}]),
+    assert_eval({comp, '>', price, 100}, [{price, 160}]),
+    assert_not_eval({comp, '>', price, 100}, [{price, 60}]),
+    assert_eval({comp, '<>', price, 100}, [{price, 160}]),
+    assert_not_eval({comp, '<>', price, 100}, [{price, 100}]),
 
     % in predictate
-    assert_eval({in, exchange_id, [1 , 2]}, #{exchange_id => 2}),
-    assert_not_eval({in, exchange_id, [1 , 2]}, #{exchange_id => 3}),
-    assert_eval({notin, exchange_id, [1 , 2]}, #{exchange_id => 3}),
-    assert_not_eval({notin, exchange_id, [1 , 2]}, #{exchange_id => 2}),
-    assert_eval({in_var, 54, segment_ids}, #{segment_ids => [12, 54]}),
-    assert_not_eval({in_var, 54, segment_ids}, #{segment_ids => [12]}),
-    assert_eval({notin_var, 54, segment_ids}, #{segment_ids => [12]}),
-    assert_not_eval({notin_var, 54, segment_ids}, #{segment_ids => [12, 54]}),
+    assert_eval({in, exchange_id, [1 , 2]}, [{exchange_id, 2}]),
+    assert_not_eval({in, exchange_id, [1 , 2]}, [{exchange_id, 3}]),
+    assert_eval({notin, exchange_id, [1 , 2]}, [{exchange_id, 3}]),
+    assert_not_eval({notin, exchange_id, [1 , 2]}, [{exchange_id, 2}]),
+    assert_eval({in_var, 54, segment_ids}, [{segment_ids, [12, 54]}]),
+    assert_not_eval({in_var, 54, segment_ids}, [{segment_ids, [12]}]),
+    assert_eval({notin_var, 54, segment_ids}, [{segment_ids, [12]}]),
+    assert_not_eval({notin_var, 54, segment_ids}, [{segment_ids, [12, 54]}]),
 
     % null predictate
-    assert_eval({null, exchange_id}, #{}),
-    assert_not_eval({null, exchange_id}, #{exchange_id => 3}),
-    assert_eval({notnull, exchange_id}, #{exchange_id => 3}),
-    assert_not_eval({notnull, exchange_id}, #{exchange_id => ?NULL}),
+    assert_eval({null, exchange_id}, []),
+    assert_not_eval({null, exchange_id}, [{exchange_id, 3}]),
+    assert_eval({notnull, exchange_id}, [{exchange_id, 3}]),
+    assert_not_eval({notnull, exchange_id}, [{exchange_id, ?NULL}]),
 
     % and
     assert_eval({'and', {comp, '=', bidder_id, 1}, {comp, '=', bidder_id, 1}},
-        #{bidder_id => 1}),
+        [{bidder_id, 1}]),
     assert_not_eval({'and', {comp, '=', bidder_id, 1}, {comp, '=', exchange_id, 1}},
-        #{bidder_id => 1, exchange_id => 2}),
+        [{bidder_id, 1}, {exchange_id, 2}]),
 
     % or
     assert_eval({'or', {comp, '=', bidder_id, 2}, {comp, '=', bidder_id, 1}},
-        #{bidder_id => 1}),
+        [{bidder_id, 1}]),
     assert_not_eval({'or', {comp, '=', bidder_id, 2}, {comp, '=', bidder_id, 3}},
-        #{bidder_id => 1}).
+        [{bidder_id, 1}]).
 
 parse_test() ->
     assert_parse({comp, '=', bidder_id, 1}, "bidder_id = 1"),
