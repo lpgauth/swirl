@@ -134,7 +134,6 @@ null | notnull
 
 ```makefile
 make eunit
-make etest
 make build-plt && make dialyze
 ```
 
