@@ -1,16 +1,12 @@
 PROJECT=swirl
 REBAR=./rebar
 
-.PHONY: deps doc
 
 all: deps compile doc
 
 build-plt: all
 	@dialyzer --build_plt --output_plt ~/.$(PROJECT).plt \
 		--apps erts kernel stdlib crypto public_key ssl
-
-check-plt:
-	@dialyzer --check_plt --plt ~/.$(PROJECT).plt
 
 clean:
 	@$(REBAR) clean
@@ -42,3 +38,5 @@ etest:
 	@priv/etest-runner
 
 test: all eunit etest
+
+.PHONY: deps doc

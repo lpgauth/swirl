@@ -4,7 +4,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
 <a name="index"></a>
 
 ## Function Index ##
@@ -21,87 +20,71 @@
 
 ### flows/0 ###
 
-
 <pre><code>
 flows() -&gt; [tuple()]
 </code></pre>
 <br />
 
-
 <a name="flows_count-0"></a>
 
 ### flows_count/0 ###
-
 
 <pre><code>
 flows_count() -&gt; non_neg_integer()
 </code></pre>
 <br />
 
-
 <a name="mappers-0"></a>
 
 ### mappers/0 ###
-
 
 <pre><code>
 mappers() -&gt; [tuple()]
 </code></pre>
 <br />
 
-
 <a name="mappers_count-0"></a>
 
 ### mappers_count/0 ###
-
 
 <pre><code>
 mappers_count() -&gt; non_neg_integer()
 </code></pre>
 <br />
 
-
 <a name="mappers_max-0"></a>
 
 ### mappers_max/0 ###
-
 
 <pre><code>
 mappers_max() -&gt; non_neg_integer()
 </code></pre>
 <br />
 
-
 <a name="reducers-0"></a>
 
 ### reducers/0 ###
-
 
 <pre><code>
 reducers() -&gt; [tuple()]
 </code></pre>
 <br />
 
-
 <a name="reducers_count-0"></a>
 
 ### reducers_count/0 ###
-
 
 <pre><code>
 reducers_count() -&gt; non_neg_integer()
 </code></pre>
 <br />
 
-
 <a name="reducers_max-0"></a>
 
 ### reducers_max/0 ###
-
 
 <pre><code>
 reducers_max() -&gt; non_neg_integer()
 </code></pre>
 <br />
-
 

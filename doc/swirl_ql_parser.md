@@ -5,8 +5,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
-
 <a name="types"></a>
 
 ## Data Types ##
@@ -17,11 +15,9 @@
 ### <a name="type-yecc_ret">yecc_ret()</a> ###
 
 
-
 <pre><code>
 yecc_ret() = {error, term()} | {ok, term()}
 </code></pre>
-
 
 <a name="index"></a>
 
@@ -39,32 +35,26 @@ yecc_ret() = {error, term()} | {ok, term()}
 
 ### format_error/1 ###
 
-
 <pre><code>
 format_error(Message::any()) -&gt; [char() | list()]
 </code></pre>
 <br />
 
-
 <a name="parse-1"></a>
 
 ### parse/1 ###
-
 
 <pre><code>
 parse(Tokens::list()) -&gt; <a href="#type-yecc_ret">yecc_ret()</a>
 </code></pre>
 <br />
 
-
 <a name="parse_and_scan-1"></a>
 
 ### parse_and_scan/1 ###
-
 
 <pre><code>
 parse_and_scan(X1::{function() | {atom(), atom()}, [term()]} | {atom(), atom(), [term()]}) -&gt; <a href="#type-yecc_ret">yecc_ret()</a>
 </code></pre>
 <br />
-
 

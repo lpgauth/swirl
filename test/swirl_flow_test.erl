@@ -15,7 +15,7 @@ after_suite() ->
     ok = application:stop(swirl).
 
 before_suite() ->
-    random:seed(erlang:now()),
+    random:seed(os:timestamp()),
     application:ensure_all_started(swirl).
 
 test_benchmark_emit() ->
@@ -52,12 +52,12 @@ test_swirl_flow() ->
 
     Rows = receive_loop(),
     Expected = [
-        {{start,requests,3,50},{1,10}},
         {{start,delivery,3,1},{1,10}},
-        {{start,delivery,3,10},{1,10}}
+        {{start,delivery,3,10},{1,10}},
+        {{start,requests,3,50},{1,10}}
     ],
 
-    ?assert_equal(Expected, Rows),
+    ?assert_equal(Expected, lists:usort(Rows)),
     swirl_flow:stop(Flow).
 
 %% private

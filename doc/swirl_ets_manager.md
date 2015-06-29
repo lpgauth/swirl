@@ -5,6 +5,7 @@
 * [Function Details](#functions)
 
 __Behaviours:__ [`gen_server`](gen_server.md).
+
 <a name="index"></a>
 
 ## Function Index ##
@@ -23,13 +24,11 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 
 `code_change(OldVsn, State, Extra) -> any()`
 
-
 <a name="handle_call-3"></a>
 
 ### handle_call/3 ###
 
 `handle_call(Request, From, State) -> any()`
-
 
 <a name="handle_cast-2"></a>
 
@@ -37,13 +36,11 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 
 `handle_cast(Msg, State) -> any()`
 
-
 <a name="handle_info-2"></a>
 
 ### handle_info/2 ###
 
 `handle_info(Msg, State) -> any()`
-
 
 <a name="init-1"></a>
 
@@ -51,44 +48,36 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 
 `init(X1) -> any()`
 
-
 <a name="new_table-3"></a>
 
 ### new_table/3 ###
-
 
 <pre><code>
 new_table(Name::atom(), Options::[atom() | tuple()], Server::atom() | pid()) -&gt; ok
 </code></pre>
 <br />
 
-
 <a name="start_link-0"></a>
 
 ### start_link/0 ###
-
 
 <pre><code>
 start_link() -&gt; {ok, pid()}
 </code></pre>
 <br />
 
-
 <a name="table-3"></a>
 
 ### table/3 ###
-
 
 <pre><code>
 table(Name::atom(), Options::[atom() | tuple()], Server::atom() | pid()) -&gt; ok
 </code></pre>
 <br />
 
-
 <a name="terminate-2"></a>
 
 ### terminate/2 ###
 
 `terminate(Reason, State) -> any()`
-
 
