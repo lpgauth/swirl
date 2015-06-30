@@ -101,7 +101,8 @@ update_op(Counters) when is_list(Counters) ->
     update_op(Counters, 2).
 
 uuid() ->
-    uuid:get_v1(uuid:new(self(), os)).
+    {Uuid, _UuidState} = uuid:get_v1(uuid:new(self(), os)),
+    Uuid.
 
 %% private
 match_all('$end_of_table') ->

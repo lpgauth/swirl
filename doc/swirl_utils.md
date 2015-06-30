@@ -4,7 +4,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
 <a name="index"></a>
 
 ## Function Index ##
@@ -23,13 +22,11 @@
 
 `lookup(Key, List) -> any()`
 
-
 <a name="lookup-3"></a>
 
 ### lookup/3 ###
 
 `lookup(Key, List, Default) -> any()`
-
 
 <a name="new_timer-2"></a>
 
@@ -37,13 +34,11 @@
 
 `new_timer(Time, Msg) -> any()`
 
-
 <a name="new_timer-3"></a>
 
 ### new_timer/3 ###
 
 `new_timer(Time, Msg, X3) -> any()`
-
 
 <a name="proplist_to_record-2"></a>
 
@@ -51,13 +46,11 @@
 
 `proplist_to_record(Proplist, Record) -> any()`
 
-
 <a name="record_to_proplist-1"></a>
 
 ### record_to_proplist/1 ###
 
 `record_to_proplist(Flow) -> any()`
-
 
 <a name="safe_dict_fetch-2"></a>
 
@@ -65,13 +58,11 @@
 
 `safe_dict_fetch(Key, Dict) -> any()`
 
-
 <a name="safe_ets_delete-1"></a>
 
 ### safe_ets_delete/1 ###
 
 `safe_ets_delete(TableId) -> any()`
-
 
 <a name="safe_ets_increment-3"></a>
 
@@ -79,13 +70,11 @@
 
 `safe_ets_increment(TableId, Key, Counters) -> any()`
 
-
 <a name="safe_ets_lookup_element-2"></a>
 
 ### safe_ets_lookup_element/2 ###
 
 `safe_ets_lookup_element(TableId, Key) -> any()`
-
 
 <a name="tab2list-1"></a>
 
@@ -93,13 +82,11 @@
 
 `tab2list(Tid) -> any()`
 
-
 <a name="unix_tstamp_ms-0"></a>
 
 ### unix_tstamp_ms/0 ###
 
 `unix_tstamp_ms() -> any()`
-
 
 <a name="update_op-1"></a>
 
@@ -107,11 +94,9 @@
 
 `update_op(Counters) -> any()`
 
-
 <a name="uuid-0"></a>
 
 ### uuid/0 ###
 
 `uuid() -> any()`
-
 

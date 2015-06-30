@@ -5,8 +5,6 @@
 * [Function Index](#index)
 * [Function Details](#functions)
 
-
-
 <a name="types"></a>
 
 ## Data Types ##
@@ -17,7 +15,6 @@
 ### <a name="type-boolean_op">boolean_op()</a> ###
 
 
-
 <pre><code>
 boolean_op() = 'and' | 'or'
 </code></pre>
@@ -25,9 +22,7 @@ boolean_op() = 'and' | 'or'
 
 
 
-
 ### <a name="type-comparison_op">comparison_op()</a> ###
-
 
 
 <pre><code>
@@ -37,9 +32,7 @@ comparison_op() = '&lt;' | '&lt;=' | '=' | '&gt;=' | '&gt;' | '&lt;&gt;'
 
 
 
-
 ### <a name="type-event">event()</a> ###
-
 
 
 <pre><code>
@@ -49,9 +42,7 @@ event() = [{atom(), <a href="#type-value">value()</a>}]
 
 
 
-
 ### <a name="type-exp_tree">exp_tree()</a> ###
-
 
 
 <pre><code>
@@ -61,9 +52,7 @@ exp_tree() = {<a href="#type-boolean_op">boolean_op()</a>, <a href="#type-exp_tr
 
 
 
-
 ### <a name="type-inclusion_op">inclusion_op()</a> ###
-
 
 
 <pre><code>
@@ -73,9 +62,7 @@ inclusion_op() = in | notin
 
 
 
-
 ### <a name="type-null_op">null_op()</a> ###
-
 
 
 <pre><code>
@@ -85,9 +72,7 @@ null_op() = null | notnull
 
 
 
-
 ### <a name="type-value">value()</a> ###
-
 
 
 <pre><code>
@@ -97,15 +82,12 @@ value() = integer() | float() | binary()
 
 
 
-
 ### <a name="type-variable">variable()</a> ###
-
 
 
 <pre><code>
 variable() = atom()
 </code></pre>
-
 
 <a name="index"></a>
 
@@ -123,21 +105,17 @@ variable() = atom()
 
 ### evaluate/2 ###
 
-
 <pre><code>
 evaluate(X1::<a href="#type-exp_tree">exp_tree()</a>, Vars::<a href="#type-event">event()</a>) -&gt; boolean()
 </code></pre>
 <br />
 
-
 <a name="parse-1"></a>
 
 ### parse/1 ###
-
 
 <pre><code>
 parse(String::string() | binary()) -&gt; {ok, <a href="#type-exp_tree">exp_tree()</a>} | {error, term()}
 </code></pre>
 <br />
-
 

@@ -1,6 +1,4 @@
-
-
-# swirl #
+# swirl
 
 __Authors:__ Louis-Philippe Gauthier.
 
@@ -8,12 +6,36 @@ Lightweight Distributed Stream Processor
 
 [![Build Status](https://travis-ci.org/lpgauth/swirl.svg?branch=master)](https://travis-ci.org/lpgauth/swirl)
 
-#### Requirements: ####
-- Erlang 17.0+
+### Requirements
 
-#### Examples: ####
+* Erlang 17.0 +
 
-##### Starting a flow: #####
+### Environment variables
+
+<table width="100%">
+  <theader>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Description</th>
+  </theader>
+  <tr>
+    <td>mappers_max</td>
+    <td>pos_integer()</td>
+    <td>100</td>
+    <td>maximum number of mappers</td>
+  </tr>
+  <tr>
+    <td>reducers_max</td>
+    <td>pos_integer()</td>
+    <td>100</td>
+    <td>maximum number of reducers</td>
+  </tr>
+</table>
+
+## Examples
+
+#### Starting a flow
 
 ```erlang
 ok = application:start(swirl),
@@ -35,7 +57,7 @@ swirl_stream:emit(StreamName, Event),
 ok = swirl_flow:stop(Flow)
 ```
 
-##### Implementing a flow: #####
+#### Implementing a flow
 
 ```erlang
 -module(swirl_flow_example).
@@ -67,16 +89,16 @@ output(_Flow, _Period, Rows, OutputOpts) ->
     io:format("rows: ~p~n", [Rows]),
 ```
 
-#### Stream Filter: ####
-##### Examples: #####
+#### Stream Filter
 
 ```erlang
-
 exchange_id = 3 AND bidder_id IS NOT NULL
 flight_id in (10, 12, 23) OR tag_id = 20
 buyer_id notnull AND seller_id > 103
 ```
-##### Swirl QL: #####
+
+#### Swirl QL
+
 variables:
 
 ```
@@ -108,36 +130,39 @@ null operators:
 null | notnull
 ```
 
-#### Resource Limitation: ####
+## TODO
+* node discovery
+* boolean expression indexing
 
-configurable via:
+## Tests
 
-```erlang
-application:set_env(swirl, mappers_max, 140)
-application:set_env(swirl, reducers_max, 200)
+```makefile
+make eunit
+make build-plt && make dialyze
 ```
 
-#### TODO: ####
-- node discovery
-- boolean expression indexing
+## License
 
+```license
+The MIT License (MIT)
 
-## Modules ##
+Copyright (c) 2015 Louis-Philippe Gauthier
 
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
 
-<table width="100%" border="0" summary="list of modules">
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl.md" class="module">swirl</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_code_server.md" class="module">swirl_code_server</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_config.md" class="module">swirl_config</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ets_manager.md" class="module">swirl_ets_manager</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_flow.md" class="module">swirl_flow</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_mapper.md" class="module">swirl_mapper</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql.md" class="module">swirl_ql</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql_lexer.md" class="module">swirl_ql_lexer</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_ql_parser.md" class="module">swirl_ql_parser</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_reducer.md" class="module">swirl_reducer</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_stream.md" class="module">swirl_stream</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_sup.md" class="module">swirl_sup</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_tracker.md" class="module">swirl_tracker</a></td></tr>
-<tr><td><a href="http://github.com/lpgauth/swirl/blob/master/doc/swirl_utils.md" class="module">swirl_utils</a></td></tr></table>
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+```
