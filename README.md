@@ -8,7 +8,7 @@ Lightweight Distributed Stream Processor
 
 ### Requirements
 
-* Erlang 17.0 +
+* Erlang 16.0 +
 
 ### Environment variables
 
