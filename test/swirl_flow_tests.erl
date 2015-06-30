@@ -8,24 +8,12 @@ swirl_test_() ->
     {setup,
         fun () -> setup() end,
         fun (_) -> cleanup() end,
-    {inparallel, [
-        {timeout, 30, ?T(test_benchmark_emit)},
-        ?T(test_swirl_flow)
-    ]}}.
+    [
+        ?T(test_flow)
+    ]}.
 
 %% tests
-test_benchmark_emit() ->
-    Flows = [new_flow() || _ <- lists:seq(1, 100)],
-    timer:sleep(timer:seconds(1)),
-
-    Timestamp = os:timestamp(),
-    emit_loop(?N),
-    Delta = timer:now_diff(os:timestamp(), Timestamp),
-    ?debugFmt("~p microseconds~n", [Delta / ?N]),
-
-    [swirl_flow:stop(Flow) || Flow <- Flows].
-
-test_swirl_flow() ->
+test_flow() ->
     {ok, Flow} = swirl_flow:start(swirl_flow_example, [
         {heartbeat, timer:seconds(10)},
         {mapper_opts, []},
@@ -61,41 +49,6 @@ cleanup() ->
     error_logger:tty(false),
     application:stop(swirl),
     error_logger:tty(true).
-
-emit_loop(0) ->
-    ok;
-emit_loop(N) ->
-    swirl_stream:emit(video, random_event()),
-    emit_loop(N-1).
-
-new_flow() ->
-    FlowOpts = [
-        {stream_names, [video]},
-        {reducer_skip, true}
-    ],
-    {ok, Flow} = swirl_flow:start(swirl_flow_example, FlowOpts, [node()], node()),
-    Flow.
-
-random_event() ->
-    Type = random_type(),
-    ExchangeId = random:uniform(1000000),
-    BidderId = random:uniform(100000),
-    [{type, Type}, {exchange_id, ExchangeId}, {bidder_id, BidderId}].
-
-random_type() ->
-    lists:nth(random:uniform(11), [
-        complete,
-        firstQuartile,
-        fullscreen,
-        midpoint,
-        mute,
-        pause,
-        resume,
-        rewind,
-        start,
-        thirdQuartile,
-        unmute
-    ]).
 
 receive_loop() ->
     receive

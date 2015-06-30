@@ -3,20 +3,15 @@
 
 -compile(export_all).
 
-benchmark_test() ->
-    {ok, ExpTree} = swirl_ql:parse("exchange_id = 1 AND exchange_seller_id = 181 AND bidder_id IN (1, 5) AND buyer_spend > 150"),
+% runners
+swirl_test_() ->
+    {inparallel, [
+        ?T(test_evaluate),
+        ?T(test_parse)
+    ]}.
 
-    Vars = [
-        {exchange_id, 1},
-        {exchange_seller_id, 181},
-        {bidder_id, 1},
-        {buyer_spend, 200}
-    ],
-
-    FunEvaluate = fun() -> swirl_ql:evaluate(ExpTree, Vars) end,
-    benchmark(evaluate, FunEvaluate, 100000).
-
-evaluate_test() ->
+% tests
+test_evaluate() ->
     % comp predictate
     assert_eval({comp, '=', bidder_id, 1}, [{bidder_id, 1}]),
     assert_not_eval({comp, '=', bidder_id, 1}, [{bidder_id, 2}]),
@@ -59,7 +54,7 @@ evaluate_test() ->
     assert_not_eval({'or', {comp, '=', bidder_id, 2}, {comp, '=', bidder_id, 3}},
         [{bidder_id, 1}]).
 
-parse_test() ->
+test_parse() ->
     assert_parse({comp, '=', bidder_id, 1}, "bidder_id = 1"),
     assert_parse({comp, '=', domain, <<"ebay.ca">>}, "domain = 'ebay.ca'"),
     assert_parse({comp, '=', domain, <<"ebay.ca">>}, "domain = \"ebay.ca\""),
@@ -80,14 +75,5 @@ assert_parse(Expected, Expression) ->
     {ok, ExpTree} = swirl_ql:parse(Expression),
     ?assertEqual(Expected, ExpTree).
 
-benchmark(Name, Fun, N) ->
-    Timestamp = os:timestamp(),
-    ok = loop(Fun, N),
-    Time = timer:now_diff(os:timestamp(), Timestamp) / N,
-    ?debugFmt("~p: ~p microseconds", [Name, Time]).
-
-loop(_, 0) ->
-    ok;
-loop(Fun, N) ->
-    Fun(),
-    loop(Fun, N - 1).
+test(Test) ->
+    {atom_to_list(Test), ?MODULE, Test}.
