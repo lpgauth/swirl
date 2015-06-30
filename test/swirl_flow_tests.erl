@@ -9,7 +9,7 @@ swirl_test_() ->
         fun () -> setup() end,
         fun (_) -> cleanup() end,
     {inparallel, [
-        {timeout, 15, ?T(test_benchmark_emit)},
+        {timeout, 30, ?T(test_benchmark_emit)},
         ?T(test_swirl_flow)
     ]}}.
 
