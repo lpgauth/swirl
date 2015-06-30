@@ -2,6 +2,6 @@ language: erlang
 otp_release:
   - 17.1
   - 17.3
-script: "make compile build-plt eunit dialyze"
+script: "make build-plt dialyze eunit"
 notifications:
   email: false
