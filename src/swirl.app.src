@@ -1,6 +1,6 @@
 {application, swirl, [
   {description, "lightweight distributed stream processor"},
-  {vsn, "0.2.1"},
+  {vsn, "0.2.2"},
   {registered, [
     swirl_ets_manager,
     swirl_sup,
