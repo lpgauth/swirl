@@ -17,7 +17,6 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 ### <a name="type-boolean_op">boolean_op()</a> ###
 
 
-
 <pre><code>
 boolean_op() = 'and' | 'or'
 </code></pre>
@@ -25,9 +24,7 @@ boolean_op() = 'and' | 'or'
 
 
 
-
 ### <a name="type-comparison_op">comparison_op()</a> ###
-
 
 
 <pre><code>
@@ -37,9 +34,7 @@ comparison_op() = '&lt;' | '&lt;=' | '=' | '&gt;=' | '&gt;' | '&lt;&gt;'
 
 
 
-
 ### <a name="type-event">event()</a> ###
-
 
 
 <pre><code>
@@ -49,9 +44,7 @@ event() = [{atom(), <a href="#type-value">value()</a>}]
 
 
 
-
 ### <a name="type-exp_tree">exp_tree()</a> ###
-
 
 
 <pre><code>
@@ -61,9 +54,7 @@ exp_tree() = {<a href="#type-boolean_op">boolean_op()</a>, <a href="#type-exp_tr
 
 
 
-
 ### <a name="type-flow">flow()</a> ###
-
 
 
 <pre><code>
@@ -73,9 +64,7 @@ flow() = #flow{id = undefined | binary(), module = undefined | module(), module_
 
 
 
-
 ### <a name="type-inclusion_op">inclusion_op()</a> ###
-
 
 
 <pre><code>
@@ -85,9 +74,7 @@ inclusion_op() = in | notin
 
 
 
-
 ### <a name="type-mapper_opts">mapper_opts()</a> ###
-
 
 
 <pre><code>
@@ -97,9 +84,7 @@ mapper_opts() = term()
 
 
 
-
 ### <a name="type-module_vsn">module_vsn()</a> ###
-
 
 
 <pre><code>
@@ -109,9 +94,7 @@ module_vsn() = pos_integer()
 
 
 
-
 ### <a name="type-null_op">null_op()</a> ###
-
 
 
 <pre><code>
@@ -121,9 +104,7 @@ null_op() = null | notnull
 
 
 
-
 ### <a name="type-output_opts">output_opts()</a> ###
-
 
 
 <pre><code>
@@ -133,9 +114,7 @@ output_opts() = term()
 
 
 
-
 ### <a name="type-reducer_opts">reducer_opts()</a> ###
-
 
 
 <pre><code>
@@ -145,9 +124,7 @@ reducer_opts() = term()
 
 
 
-
 ### <a name="type-stream">stream()</a> ###
-
 
 
 <pre><code>
@@ -157,9 +134,7 @@ stream() = #stream{flow_id = undefined | binary(), flow_mod = undefined | module
 
 
 
-
 ### <a name="type-stream_name">stream_name()</a> ###
-
 
 
 <pre><code>
@@ -169,9 +144,7 @@ stream_name() = atom()
 
 
 
-
 ### <a name="type-stream_names">stream_names()</a> ###
-
 
 
 <pre><code>
@@ -181,9 +154,7 @@ stream_names() = [<a href="#type-stream_name">stream_name()</a>]
 
 
 
-
 ### <a name="type-value">value()</a> ###
-
 
 
 <pre><code>
@@ -193,15 +164,12 @@ value() = integer() | float() | binary()
 
 
 
-
 ### <a name="type-variable">variable()</a> ###
-
 
 
 <pre><code>
 variable() = atom()
 </code></pre>
-
 
 <a name="index"></a>
 
@@ -221,13 +189,11 @@ variable() = atom()
 
 `code_change(OldVsn, State, Extra) -> any()`
 
-
 <a name="handle_call-3"></a>
 
 ### handle_call/3 ###
 
 `handle_call(Request, From, State) -> any()`
-
 
 <a name="handle_cast-2"></a>
 
@@ -235,13 +201,11 @@ variable() = atom()
 
 `handle_cast(Msg, State) -> any()`
 
-
 <a name="handle_info-2"></a>
 
 ### handle_info/2 ###
 
 `handle_info(Msg, State) -> any()`
-
 
 <a name="init-1"></a>
 
@@ -249,50 +213,41 @@ variable() = atom()
 
 `init(Flow) -> any()`
 
-
 <a name="lookup-1"></a>
 
 ### lookup/1 ###
-
 
 <pre><code>
 lookup(FlowId::binary() | <a href="#type-flow">flow()</a>) -&gt; undefined | pid
 </code></pre>
 <br />
 
-
 <a name="map-3"></a>
 
 ### map/3 ###
-
 
 <pre><code>
 map(StreamName::atom(), Event::<a href="#type-event">event()</a>, Stream::<a href="#type-stream">stream()</a>) -&gt; ok
 </code></pre>
 <br />
 
-
 <a name="register-1"></a>
 
 ### register/1 ###
-
 
 <pre><code>
 register(Flow::<a href="#type-flow">flow()</a>) -&gt; true
 </code></pre>
 <br />
 
-
 <a name="start-1"></a>
 
 ### start/1 ###
-
 
 <pre><code>
 start(Flow::<a href="#type-flow">flow()</a>) -&gt; {ok, pid()} | {error, mappers_max}
 </code></pre>
 <br />
-
 
 <a name="terminate-2"></a>
 
@@ -300,15 +255,12 @@ start(Flow::<a href="#type-flow">flow()</a>) -&gt; {ok, pid()} | {error, mappers
 
 `terminate(Reason, State) -> any()`
 
-
 <a name="unregister-1"></a>
 
 ### unregister/1 ###
-
 
 <pre><code>
 unregister(Flow::<a href="#type-flow">flow()</a>) -&gt; true
 </code></pre>
 <br />
-
 

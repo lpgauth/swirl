@@ -1,23 +1,19 @@
--module(swirl_flow_test).
--include_lib("etest/include/etest.hrl").
+-module(swirl_flow_tests).
+-include("test.hrl").
 
--export([
-    after_suite/0,
-    before_suite/0,
-    test_benchmark_emit/0,
-    test_swirl_flow/0
-]).
+-compile(export_all).
 
--define(N, 10000).
+%% runners
+swirl_test_() ->
+    {setup,
+        fun () -> setup() end,
+        fun (_) -> cleanup() end,
+    {inparallel, [
+        ?T(test_benchmark_emit),
+        ?T(test_swirl_flow)
+    ]}}.
 
-%% public
-after_suite() ->
-    ok = application:stop(swirl).
-
-before_suite() ->
-    random:seed(erlang:now()),
-    application:ensure_all_started(swirl).
-
+%% tests
 test_benchmark_emit() ->
     Flows = [new_flow() || _ <- lists:seq(1, 100)],
     timer:sleep(timer:seconds(1)),
@@ -25,7 +21,7 @@ test_benchmark_emit() ->
     Timestamp = os:timestamp(),
     emit_loop(?N),
     Delta = timer:now_diff(os:timestamp(), Timestamp),
-    io:format("~p microseconds~n", [Delta / ?N]),
+    ?debugFmt("~p microseconds~n", [Delta / ?N]),
 
     [swirl_flow:stop(Flow) || Flow <- Flows].
 
@@ -52,15 +48,20 @@ test_swirl_flow() ->
 
     Rows = receive_loop(),
     Expected = [
-        {{start,requests,3,50},{1,10}},
         {{start,delivery,3,1},{1,10}},
-        {{start,delivery,3,10},{1,10}}
+        {{start,delivery,3,10},{1,10}},
+        {{start,requests,3,50},{1,10}}
     ],
 
-    ?assert_equal(Expected, Rows),
+    ?assertEqual(Expected, lists:usort(Rows)),
     swirl_flow:stop(Flow).
 
-%% private
+%% utils
+cleanup() ->
+    error_logger:tty(false),
+    application:stop(swirl),
+    error_logger:tty(true).
+
 emit_loop(0) ->
     ok;
 emit_loop(N) ->
@@ -98,8 +99,15 @@ random_type() ->
 
 receive_loop() ->
     receive
-        [] ->
-            receive_loop();
-        Aggregates ->
-            Aggregates
+        [] -> receive_loop();
+        Aggregates -> Aggregates
     end.
+
+setup() ->
+    error_logger:tty(false),
+    application:stop(swirl),
+    swirl:start(),
+    error_logger:tty(true).
+
+test(Test) ->
+    {atom_to_list(Test), ?MODULE, Test}.

@@ -1,16 +1,11 @@
 PROJECT=swirl
 REBAR=./rebar
 
-.PHONY: deps doc
-
 all: deps compile doc
 
 build-plt: all
 	@dialyzer --build_plt --output_plt ~/.$(PROJECT).plt \
 		--apps erts kernel stdlib crypto public_key ssl
-
-check-plt:
-	@dialyzer --check_plt --plt ~/.$(PROJECT).plt
 
 clean:
 	@$(REBAR) clean
@@ -36,9 +31,6 @@ eunit:
 	@echo "Running EUnit suite..."
 	@$(REBAR) skip_deps=true eunit
 
-etest:
-	@echo "Running ETest suite..."
-	@ERL_LIBS=deps erlc -pa ebin -o test test/*.erl
-	@priv/etest-runner
+test: all eunit
 
-test: all eunit etest
+.PHONY: deps doc
