@@ -36,6 +36,9 @@ eunit:
 	@echo "Running EUnit suite..."
 	@$(REBAR) skip_deps=true eunit
 
-test: all eunit
+test: build-plt dialyze eunit xref
 
-.PHONY: deps doc
+xref:
+	@$(REBAR) skip_deps=true xref
+
+.PHONY: benchmarks deps dialyze doc eunit xref
