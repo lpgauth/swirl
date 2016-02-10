@@ -15,13 +15,19 @@
 ]).
 
 %% callback
--callback map(stream_name(), event(), mapper_opts()) -> list(update()) | update() | ignore.
--callback reduce(flow(), row(), reducer_opts()) -> update() | ignore.
--callback output(flow(), period(), list(row()), output_opts()) -> ok.
+-callback map(stream_name(), event(), mapper_opts()) ->
+    list(update()) | update() | ignore.
+
+-callback reduce(flow(), row(), reducer_opts()) ->
+    update() | ignore.
+
+-callback output(flow(), period(), list(row()), output_opts()) ->
+    ok.
 
 %% public
--spec start(atom(), [flow_opts()], [node()], node()) -> {ok, flow()} |
-    {error, flow_mod_undef | {bad_flow_opts, list()}}.
+-spec start(atom(), [flow_opts()], [node()], node()) ->
+    {ok, flow()} | {error, flow_mod_undef | {bad_flow_opts, list()}}.
+
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     case flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) of
         {ok, Flow} ->
@@ -32,24 +38,32 @@ start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
             {error, Reason}
     end.
 
--spec stop(flow()) -> ok.
+-spec stop(flow()) ->
+    ok.
+
 stop(#flow {} = Flow) ->
     ok = swirl_tracker:stop_mappers(Flow),
     ok = swirl_tracker:stop_reducer(Flow),
     ok.
 
 %% internal
--spec lookup(binary() | flow()) -> undefined | flow().
+-spec lookup(binary() | flow()) ->
+    undefined | flow().
+
 lookup(FlowId) when is_binary(FlowId) ->
     lookup(#flow {id = FlowId});
 lookup(#flow {} = Flow) ->
     swirl_tracker:lookup(?TABLE_NAME_FLOWS, key(Flow)).
 
--spec register(flow()) -> true.
+-spec register(flow()) ->
+    true.
+
 register(#flow {} = Flow) ->
     swirl_tracker:register(?TABLE_NAME_FLOWS, key(Flow), Flow).
 
--spec unregister(flow()) -> true.
+-spec unregister(flow()) ->
+    true.
+
 unregister(#flow {} = Flow) ->
     swirl_tracker:unregister(?TABLE_NAME_FLOWS, key(Flow)).
 
@@ -59,26 +73,8 @@ flow(Module, Options, MapperNodes, ReducerNode) ->
         {ok, ModuleVsn} ->
             case verify_options(Options) of
                 ok ->
-                    Flow = #flow {
-                        id             = swirl_utils:uuid(),
-                        module         = Module,
-                        module_vsn     = ModuleVsn,
-                        start_node     = node(),
-                        heartbeat      = ?L(heartbeat, Options, ?DEFAULT_HEARTBEAT),
-                        window_sync    = ?L(window_sync, Options, ?DEFAULT_WINDOW_SYNC),
-                        mapper_window  = ?L(mapper_window, Options, ?DEFAULT_MAPPER_WINDOW),
-                        mapper_nodes   = MapperNodes,
-                        mapper_opts    = ?L(mapper_opts, Options, []),
-                        reducer_window = ?L(reducer_window, Options, ?DEFAULT_REDUCER_WINDOW),
-                        reducer_node   = ReducerNode,
-                        reducer_opts   = ?L(reducer_opts, Options, []),
-                        reducer_skip   = ?L(reducer_skip, Options, ?DEFAULT_REDUCER_SKIP),
-                        output_opts    = ?L(output_opts, Options, []),
-                        stream_filter  = ?L(stream_filter, Options),
-                        stream_names   = ?L(stream_names, Options, []),
-                        started_at     = os:timestamp()
-                    },
-                    {ok, Flow};
+                    {ok, new_flow_rec(Module, ModuleVsn, Options,
+                        MapperNodes, ReducerNode)};
                 {error, Reason} ->
                     {error, Reason}
             end;
@@ -87,6 +83,29 @@ flow(Module, Options, MapperNodes, ReducerNode) ->
     end.
 
 key(#flow {id = Id}) -> Id.
+
+new_flow_rec(Module, ModuleVsn, Options, MapperNodes,
+    ReducerNode) ->
+
+    #flow {
+        id             = swirl_utils:uuid(),
+        module         = Module,
+        module_vsn     = ModuleVsn,
+        start_node     = node(),
+        heartbeat      = ?L(heartbeat, Options, ?DEFAULT_HEARTBEAT),
+        window_sync    = ?L(window_sync, Options, ?DEFAULT_WINDOW_SYNC),
+        mapper_window  = ?L(mapper_window, Options, ?DEFAULT_MAPPER_WINDOW),
+        mapper_nodes   = MapperNodes,
+        mapper_opts    = ?L(mapper_opts, Options, []),
+        reducer_window = ?L(reducer_window, Options, ?DEFAULT_REDUCER_WINDOW),
+        reducer_node   = ReducerNode,
+        reducer_opts   = ?L(reducer_opts, Options, []),
+        reducer_skip   = ?L(reducer_skip, Options, ?DEFAULT_REDUCER_SKIP),
+        output_opts    = ?L(output_opts, Options, []),
+        stream_filter  = ?L(stream_filter, Options),
+        stream_names   = ?L(stream_names, Options, []),
+        started_at     = os:timestamp()
+    }.
 
 verify_options(FlowOpts) ->
     verify_options(FlowOpts, []).

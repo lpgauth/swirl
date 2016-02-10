@@ -1,9 +1,14 @@
+cache:
+  directories:
+    - $HOME/.cache/rebar3
+    - $TRAVIS_BUILD_DIR/_build
+install: true
 language: erlang
 notifications:
   email: false
 otp_release:
-  - 18.0
-  - 17.5
-  - R16B03-1
-script: "make build-plt dialyze eunit"
+  - 20.1
+  - 19.2
+  - 18.3
+script: "make travis"
 sudo: false

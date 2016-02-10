@@ -22,20 +22,20 @@
 -record(flow, {
     id             :: binary(),
     module         :: module(),
-    module_vsn     :: module_vsn(),
-    stream_filter  :: string(),
-    stream_names   :: stream_names(),
-    mapper_window  :: pos_integer(),
-    mapper_nodes   :: [node()],
+    module_vsn     :: undefined | module_vsn(),
+    stream_filter  :: undefined | string(),
+    stream_names   :: undefined | stream_names(),
+    mapper_window  :: undefined | pos_integer(),
+    mapper_nodes   :: undefined | [node()],
     mapper_opts    :: mapper_opts(),
-    reducer_window :: pos_integer(),
+    reducer_window :: undefined | pos_integer(),
     reducer_node   :: node(),
     reducer_opts   :: reducer_opts(),
-    reducer_skip   :: boolean(),
+    reducer_skip   :: undefined | boolean(),
     output_opts    :: output_opts(),
-    heartbeat      :: pos_integer(),
-    window_sync    :: boolean(),
-    started_at     :: erlang:timestamp(),
+    heartbeat      :: undefined | pos_integer(),
+    window_sync    :: undefined | boolean(),
+    started_at     :: undefined | uerlang:timestamp(),
     start_node     :: node()
 }).
 
@@ -44,7 +44,7 @@
     flow_mod     :: module(),
     flow_mod_vsn :: module_vsn(),
     start_node   :: node(),
-    exp_tree     :: exp_tree(),
+    exp_tree     :: undefined | exp_tree(),
     mapper_opts  :: mapper_opts(),
     table_id     :: ets:tab()
 }).

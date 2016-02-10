@@ -1,44 +1,53 @@
-PROJECT=swirl
-REBAR=./rebar
+CACHEGRIND=qcachegrind
+ELVIS=./bin/elvis
+REBAR3=./bin/rebar3
 
-all: deps compile doc
-
-build-plt: all
-	@dialyzer --build_plt --output_plt ~/.$(PROJECT).plt \
-		--apps erts kernel stdlib crypto public_key ssl
-
-benchmarks:
-	@echo "Running benchmarks..."
-	@erl -pa ebin deps/*/ebin test -noshell \
-		-eval 'swirl_benchmarks:all(), init:stop().'
+all: compile
 
 clean:
-	@$(REBAR) clean
-	@rm -rf deps ebin doc/edoc-info doc/*.md README.md
+	@echo "Running rebar3 clean..."
+	@$(REBAR3) clean -a
 
 compile:
-	@echo "Running rebar compile..."
-	@$(REBAR) compile
+	@echo "Running rebar3 compile..."
+	@$(REBAR3) as compile compile
 
-deps:
-	@echo "Running rebar get-deps..."
-	@$(REBAR) update-deps
+coveralls:
+	@echo "Running rebar3 coveralls send..."
+	@$(REBAR3) as test coveralls send
 
-dialyze:
-	@dialyzer ebin/*.beam --plt ~/.$(PROJECT).plt | \
-	fgrep -v -f ./priv/dialyzer.ignore-warnings
+dialyzer:
+	@echo "Running rebar3 dialyze..."
+	@$(REBAR3) dialyzer
 
-doc:
-	@echo "Running rebar doc..."
-	@$(REBAR) skip_deps=true doc
+edoc:
+	@echo "Running rebar3 edoc..."
+	@$(REBAR3) as edoc edoc
+
+elvis:
+	@echo "Running elvis rock..."
+	@$(ELVIS) rock -c elvis.config
 
 eunit:
-	@echo "Running EUnit suite..."
-	@$(REBAR) skip_deps=true eunit
+	@echo "Running rebar3 eunit..."
+	@$(REBAR3) do eunit -cv, cover -v
 
-test: build-plt dialyze eunit xref
+profile:
+	@echo "Profiling..."
+	@$(REBAR3) as test compile
+	@erl -noshell \
+	     -pa _build/test/lib/*/ebin \
+		 -eval 'swirl_profile:fprofx()' \
+		 -eval 'init:stop()'
+	@_build/test/lib/fprofx/erlgrindx -p fprofx.analysis
+	@$(CACHEGRIND) fprofx.cgrind
+
+test: elvis xref eunit dialyzer
+
+travis: test coveralls
 
 xref:
-	@$(REBAR) skip_deps=true xref
+	@echo "Running rebar3 xref..."
+	@$(REBAR3) xref
 
-.PHONY: benchmarks deps dialyze doc eunit xref
+.PHONY: clean compile coveralls dialyzer edoc elvis eunit profile xref

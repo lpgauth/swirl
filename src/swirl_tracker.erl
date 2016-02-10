@@ -80,10 +80,12 @@ unregister(TableId, Key) ->
 %% gen_server callbacks
 init([]) ->
     process_flag(trap_exit, true),
-    swirl_ets_manager:table(?TABLE_NAME_FLOWS, ?TABLE_OPTS, ?SERVER),
-    swirl_ets_manager:table(?TABLE_NAME_MAPPERS, ?TABLE_OPTS, ?SERVER),
-    swirl_ets_manager:table(?TABLE_NAME_REDUCERS, ?TABLE_OPTS, ?SERVER),
-    swirl_ets_manager:table(?TABLE_NAME_STREAMS, ?TABLE_OPTS, ?SERVER),
+    [swirl_ets_manager:table(Name, ?TABLE_OPTS, ?SERVER) || Name <- [
+        ?TABLE_NAME_FLOWS,
+        ?TABLE_NAME_MAPPERS,
+        ?TABLE_NAME_REDUCERS,
+        ?TABLE_NAME_STREAMS
+    ]],
     {ok, #state {}}.
 
 handle_call(Request, _From, State) ->
@@ -94,7 +96,9 @@ handle_cast(Msg, State) ->
     io:format("unexpected message: ~p~n", [Msg]),
     {noreply, State}.
 
-handle_info({'ETS-TRANSFER', _TableId, _Pid,  {_TableName, _Options, ?SERVER}}, State) ->
+handle_info({'ETS-TRANSFER', _TableId, _Pid,  {_TableName, _Options, ?SERVER}},
+    State) ->
+
     {noreply, State};
 handle_info({'EXIT', _Pid, normal}, State) ->
     {noreply, State};
