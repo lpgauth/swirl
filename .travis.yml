@@ -2,8 +2,6 @@ language: erlang
 notifications:
   email: false
 otp_release:
-  - 18.0
-  - 17.5
-  - R16B03-1
+  - 19.2
 script: "make build-plt dialyze eunit"
 sudo: false

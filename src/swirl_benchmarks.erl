@@ -57,12 +57,12 @@ new_flow() ->
 
 random_event() ->
     Type = random_type(),
-    ExchangeId = random:uniform(1000000),
-    BidderId = random:uniform(100000),
+    ExchangeId = rand:uniform(1000000),
+    BidderId = rand:uniform(100000),
     [{type, Type}, {exchange_id, ExchangeId}, {bidder_id, BidderId}].
 
 random_type() ->
-    lists:nth(random:uniform(11), [
+    lists:nth(rand:uniform(11), [
         complete,
         firstQuartile,
         fullscreen,
