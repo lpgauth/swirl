@@ -20,8 +20,14 @@
 ]).
 
 %% public
+-spec lookup(term(), [{term(), term()}]) ->
+    term().
+
 lookup(Key, List) ->
     lookup(Key, List, undefined).
+
+-spec lookup(term(), [{term(), term()}], term()) ->
+    term().
 
 lookup(Key, List, Default) ->
     case lists:keyfind(Key, 1, List) of
@@ -29,19 +35,31 @@ lookup(Key, List, Default) ->
         {_, Value} -> Value
     end.
 
+-spec maybe_tuple_to_list(tuple() | list()) ->
+    list().
+
 maybe_tuple_to_list(Tuple) when is_tuple(Tuple) ->
     tuple_to_list(Tuple);
 maybe_tuple_to_list(List) when is_list(List) ->
     List.
 
+-spec new_timer(pos_integer(), term()) ->
+    erlang:reference().
+
 new_timer(Time, Msg) ->
     new_timer(Time, Msg, false).
+
+-spec new_timer(pos_integer(), term(), boolean()) ->
+    erlang:reference().
 
 new_timer(Time, Msg, true) ->
     Delta = unix_tstamp_ms() rem Time,
     erlang:send_after(Time - Delta, self(), Msg);
 new_timer(Time, Msg, false) ->
     erlang:send_after(Time, self(), Msg).
+
+-spec proplist_to_record([{atom(), term()}], atom()) ->
+    tuple().
 
 proplist_to_record(Proplist, Record) ->
     Fields = [lookup(Field, Proplist) || Field <- record_info(Record)],

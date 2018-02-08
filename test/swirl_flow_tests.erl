@@ -29,16 +29,20 @@ test_flow() ->
 
     timer:sleep(timer:seconds(1)),
 
-    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 1}, {bidder_id, 10}]),
-    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 1}]),
-    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3}, {bidder_id, 10}]),
-    swirl_stream:emit(requests, [{type, start}, {exchange_id, 3}, {bidder_id, 50}]),
+    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 1},
+        {bidder_id, 10}]),
+    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3},
+        {bidder_id, 1}]),
+    swirl_stream:emit(delivery, [{type, start}, {exchange_id, 3},
+        {bidder_id, 10}]),
+    swirl_stream:emit(requests, [{type, start}, {exchange_id, 3},
+        {bidder_id, 50}]),
 
     Rows = receive_loop(),
     Expected = [
-        {{start,delivery,3,1},{1,10}},
-        {{start,delivery,3,10},{1,10}},
-        {{start,requests,3,50},{1,10}}
+        {{start, delivery, 3, 1}, {1, 10}},
+        {{start, delivery, 3, 10}, {1, 10}},
+        {{start, requests, 3, 50}, {1, 10}}
     ],
 
     ?assertEqual(Expected, lists:usort(Rows)),

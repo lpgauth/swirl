@@ -1,8 +1,7 @@
-.eunit
-.rebar
-deps
 doc/README.md
-ebin
-swirl_ql_lexer.erl
-swirl_ql_parser.erl
+erl_crash.dump
+fprofx.*
+src/swirl_ql_lexer.erl
+src/swirl_ql_parser.erl
 test/*.beam
+_build

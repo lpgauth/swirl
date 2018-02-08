@@ -45,14 +45,14 @@ test_evaluate() ->
     % and
     assert_eval({'and', {comp, '=', bidder_id, 1}, {comp, '=', bidder_id, 1}},
         [{bidder_id, 1}]),
-    assert_not_eval({'and', {comp, '=', bidder_id, 1}, {comp, '=', exchange_id, 1}},
-        [{bidder_id, 1}, {exchange_id, 2}]),
+    assert_not_eval({'and', {comp, '=', bidder_id, 1},
+        {comp, '=', exchange_id, 1}}, [{bidder_id, 1}, {exchange_id, 2}]),
 
     % or
     assert_eval({'or', {comp, '=', bidder_id, 2}, {comp, '=', bidder_id, 1}},
         [{bidder_id, 1}]),
-    assert_not_eval({'or', {comp, '=', bidder_id, 2}, {comp, '=', bidder_id, 3}},
-        [{bidder_id, 1}]).
+    assert_not_eval({'or', {comp, '=', bidder_id, 2},
+        {comp, '=', bidder_id, 3}}, [{bidder_id, 1}]).
 
 test_parse() ->
     assert_parse({comp, '=', bidder_id, 1}, "bidder_id = 1"),
@@ -61,8 +61,10 @@ test_parse() ->
     assert_parse({in, exchange_id, [1, 2, 3]}, "exchange_id IN (1, 2, 3)"),
     assert_parse({in_var, 4, segment_ids}, "4 IN segment_ids"),
     assert_parse({notin_var, 8, segment_ids}, "8 NOT IN segment_ids"),
-    assert_parse({'and', {comp, '=', bidder_id, 1}, {'or', {notin, exchange_id, [1 , 2]},
-      {comp, '=', domain, <<"ebay.ca">>}}}, "bidder_id = 1 AND (exchange_id NOT IN (1, 2) OR domain = 'ebay.ca')").
+    assert_parse({'and', {comp, '=', bidder_id, 1},
+        {'or', {notin, exchange_id, [1 , 2]},
+        {comp, '=', domain, <<"ebay.ca">>}}},
+        "bidder_id = 1 AND (exchange_id NOT IN (1, 2) OR domain = 'ebay.ca')").
 
 %% test_utils
 assert_eval(ExpTree, Vars) ->

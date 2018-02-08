@@ -20,31 +20,46 @@
 
 ### lookup/2 ###
 
-`lookup(Key, List) -> any()`
+<pre><code>
+lookup(Key::term(), List::[{term(), term()}]) -&gt; term()
+</code></pre>
+<br />
 
 <a name="lookup-3"></a>
 
 ### lookup/3 ###
 
-`lookup(Key, List, Default) -> any()`
+<pre><code>
+lookup(Key::term(), List::[{term(), term()}], Default::term()) -&gt; term()
+</code></pre>
+<br />
 
 <a name="new_timer-2"></a>
 
 ### new_timer/2 ###
 
-`new_timer(Time, Msg) -> any()`
+<pre><code>
+new_timer(Time::pos_integer(), Msg::term()) -&gt; <a href="erlang.md#type-reference">erlang:reference()</a>
+</code></pre>
+<br />
 
 <a name="new_timer-3"></a>
 
 ### new_timer/3 ###
 
-`new_timer(Time, Msg, X3) -> any()`
+<pre><code>
+new_timer(Time::pos_integer(), Msg::term(), X3::boolean()) -&gt; <a href="erlang.md#type-reference">erlang:reference()</a>
+</code></pre>
+<br />
 
 <a name="proplist_to_record-2"></a>
 
 ### proplist_to_record/2 ###
 
-`proplist_to_record(Proplist, Record) -> any()`
+<pre><code>
+proplist_to_record(Proplist::[{atom(), term()}], Record::atom()) -&gt; tuple()
+</code></pre>
+<br />
 
 <a name="record_to_proplist-1"></a>
 

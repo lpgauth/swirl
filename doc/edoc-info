@@ -1,7 +1,5 @@
 %% encoding: UTF-8
 {application,swirl}.
-{packages,[]}.
-{modules,[swirl,swirl_benchmarks,swirl_code_server,swirl_config,
-          swirl_ets_manager,swirl_flow,swirl_mapper,swirl_ql,swirl_ql_lexer,
-          swirl_ql_parser,swirl_reducer,swirl_stream,swirl_sup,swirl_tracker,
-          swirl_utils]}.
+{modules,[swirl,swirl_code_server,swirl_config,swirl_ets_manager,swirl_flow,
+          swirl_mapper,swirl_ql,swirl_ql_lexer,swirl_ql_parser,swirl_reducer,
+          swirl_stream,swirl_sup,swirl_tracker,swirl_utils]}.

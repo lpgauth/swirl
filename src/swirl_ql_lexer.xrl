@@ -19,6 +19,8 @@ Rules.
 
 Erlang code.
 
+-dialyzer({nowarn_function, yyrev/2}).
+
 atom(TokenChars) ->
     list_to_atom(string:to_lower(TokenChars)).
 

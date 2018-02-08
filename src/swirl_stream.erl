@@ -2,6 +2,8 @@
 -include("swirl.hrl").
 -compile([native]).
 
+-include_lib("eunit/include/eunit.hrl").
+
 %% public
 -export([
     emit/2
@@ -61,15 +63,15 @@ unregister(#flow {stream_names = StreamNames} = Flow) ->
 %% private
 evaluate(_StreamName, _Event, []) ->
     ok;
-evaluate(StreamName, Event, [{#stream {
+evaluate(StreamName, Event, [#stream {
         exp_tree = undefined
-    } = Stream} | T]) ->
+    } = Stream | T]) ->
 
     swirl_mapper:map(StreamName, Event, Stream),
     evaluate(StreamName, Event, T);
-evaluate(StreamName, Event, [{#stream {
+evaluate(StreamName, Event, [#stream {
         exp_tree = ExpTree
-    } = Stream} | T]) ->
+    } = Stream | T]) ->
 
     case swirl_ql:evaluate(ExpTree, Event) of
         true ->
@@ -89,7 +91,7 @@ key(#flow {id = FlowId}, StreamName) ->
 
 match_lookup_spec(StreamName) ->
     [{{{'$1', '$2'}, '$3'}, [{'orelse', {'=:=', '$2', StreamName},
-        {'=:=', '$2', undefined}}], [{{'$3'}}]}].
+        {'=:=', '$2', undefined}}], ['$3']}].
 
 match_delete_spec(#flow {id = FlowId}, StreamName) ->
     {{FlowId, StreamName}, '_'}.
