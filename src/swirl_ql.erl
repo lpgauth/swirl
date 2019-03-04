@@ -1,6 +1,5 @@
 -module(swirl_ql).
 -include("swirl.hrl").
--compile([native]).
 
 -export([
     evaluate/2,

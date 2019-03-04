@@ -1,6 +1,5 @@
 -module(swirl_stream).
 -include("swirl.hrl").
--compile([native]).
 
 %% public
 -export([
