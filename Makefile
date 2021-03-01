@@ -28,10 +28,6 @@ dialyze:
 	@dialyzer ebin/*.beam --plt ~/.$(PROJECT).plt | \
 	fgrep -v -f ./priv/dialyzer.ignore-warnings
 
-doc:
-	@echo "Running rebar doc..."
-	@$(REBAR) skip_deps=true doc
-
 eunit:
 	@echo "Running EUnit suite..."
 	@$(REBAR) skip_deps=true eunit
