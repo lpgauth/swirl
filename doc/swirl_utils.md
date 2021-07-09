@@ -39,7 +39,7 @@ lookup(Key::term(), List::[{term(), term()}], Default::term()) -&gt; term()
 ### new_timer/2 ###
 
 <pre><code>
-new_timer(Time::pos_integer(), Msg::term()) -&gt; <a href="erlang.md#type-reference">erlang:reference()</a>
+new_timer(Time::pos_integer(), Msg::term()) -&gt; <a href="http://www.erlang.org/doc/man/erlang.html#type-reference">erlang:reference()</a>
 </code></pre>
 <br />
 
@@ -48,7 +48,7 @@ new_timer(Time::pos_integer(), Msg::term()) -&gt; <a href="erlang.md#type-refere
 ### new_timer/3 ###
 
 <pre><code>
-new_timer(Time::pos_integer(), Msg::term(), X3::boolean()) -&gt; <a href="erlang.md#type-reference">erlang:reference()</a>
+new_timer(Time::pos_integer(), Msg::term(), X3::boolean()) -&gt; <a href="http://www.erlang.org/doc/man/erlang.html#type-reference">erlang:reference()</a>
 </code></pre>
 <br />
 

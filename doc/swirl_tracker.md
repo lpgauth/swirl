@@ -18,7 +18,7 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 
 
 <pre><code>
-flow() = #flow{id = undefined | binary(), module = undefined | module(), module_vsn = undefined | <a href="#type-module_vsn">module_vsn()</a>, stream_filter = undefined | string(), stream_names = undefined | <a href="#type-stream_names">stream_names()</a>, mapper_window = undefined | pos_integer(), mapper_nodes = undefined | [node()], mapper_opts = undefined | <a href="#type-mapper_opts">mapper_opts()</a>, reducer_window = undefined | pos_integer(), reducer_node = undefined | node(), reducer_opts = undefined | <a href="#type-reducer_opts">reducer_opts()</a>, reducer_skip = undefined | boolean(), output_opts = undefined | <a href="#type-output_opts">output_opts()</a>, heartbeat = undefined | pos_integer(), window_sync = undefined | boolean(), started_at = undefined | <a href="erlang.md#type-timestamp">erlang:timestamp()</a>, start_node = undefined | node()}
+flow() = #flow{id = binary(), module = module(), module_vsn = undefined | <a href="#type-module_vsn">module_vsn()</a>, stream_filter = undefined | string(), stream_names = undefined | <a href="#type-stream_names">stream_names()</a>, mapper_window = undefined | pos_integer(), mapper_nodes = undefined | [node()], mapper_opts = <a href="#type-mapper_opts">mapper_opts()</a>, reducer_window = undefined | pos_integer(), reducer_node = node(), reducer_opts = <a href="#type-reducer_opts">reducer_opts()</a>, reducer_skip = undefined | boolean(), output_opts = <a href="#type-output_opts">output_opts()</a>, heartbeat = undefined | pos_integer(), window_sync = undefined | boolean(), started_at = undefined | <a href="uerlang.md#type-timestamp">uerlang:timestamp()</a>, start_node = node()}
 </code></pre>
 
 
@@ -128,7 +128,7 @@ stream_names() = [<a href="#type-stream_name">stream_name()</a>]
 ### lookup/2 ###
 
 <pre><code>
-lookup(TableId::<a href="ets.md#type-tab">ets:tab()</a>, Key::term()) -&gt; term()
+lookup(TableId::<a href="http://www.erlang.org/doc/man/ets.html#type-tab">ets:tab()</a>, Key::term()) -&gt; term()
 </code></pre>
 <br />
 
@@ -146,7 +146,7 @@ message(Node::node(), FlowId::binary(), Msg::term()) -&gt; ok
 ### register/3 ###
 
 <pre><code>
-register(TableId::<a href="ets.md#type-tab">ets:tab()</a>, Key::term(), Value::term()) -&gt; true
+register(TableId::<a href="http://www.erlang.org/doc/man/ets.html#type-tab">ets:tab()</a>, Key::term(), Value::term()) -&gt; true
 </code></pre>
 <br />
 
@@ -206,7 +206,7 @@ stop_reducer(Flow::<a href="#type-flow">flow()</a>) -&gt; ok
 ### unregister/2 ###
 
 <pre><code>
-unregister(TableId::<a href="ets.md#type-tab">ets:tab()</a>, Key::term()) -&gt; true
+unregister(TableId::<a href="http://www.erlang.org/doc/man/ets.html#type-tab">ets:tab()</a>, Key::term()) -&gt; true
 </code></pre>
 <br />
 
