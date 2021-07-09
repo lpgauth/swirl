@@ -5,7 +5,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        erlang: [21, 22, 23, 24]
+        erlang: [22, 23, 24]
 
     container:
       image: erlang:${{ matrix.erlang }}
