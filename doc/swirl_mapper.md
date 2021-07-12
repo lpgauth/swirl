@@ -18,7 +18,7 @@ __Behaviours:__ [`gen_server`](gen_server.md).
 
 
 <pre><code>
-boolean_op() = 'and' | 'or'
+boolean_op() = and | or
 </code></pre>
 
 
@@ -28,7 +28,7 @@ boolean_op() = 'and' | 'or'
 
 
 <pre><code>
-comparison_op() = '&lt;' | '&lt;=' | '=' | '&gt;=' | '&gt;' | '&lt;&gt;'
+comparison_op() = &lt; | &lt;= | = | &gt;= | &gt; | &lt;&gt;
 </code></pre>
 
 
@@ -58,7 +58,7 @@ exp_tree() = {<a href="#type-boolean_op">boolean_op()</a>, <a href="#type-exp_tr
 
 
 <pre><code>
-flow() = #flow{id = undefined | binary(), module = undefined | module(), module_vsn = undefined | <a href="#type-module_vsn">module_vsn()</a>, stream_filter = undefined | string(), stream_names = undefined | <a href="#type-stream_names">stream_names()</a>, mapper_window = undefined | pos_integer(), mapper_nodes = undefined | [node()], mapper_opts = undefined | <a href="#type-mapper_opts">mapper_opts()</a>, reducer_window = undefined | pos_integer(), reducer_node = undefined | node(), reducer_opts = undefined | <a href="#type-reducer_opts">reducer_opts()</a>, reducer_skip = undefined | boolean(), output_opts = undefined | <a href="#type-output_opts">output_opts()</a>, heartbeat = undefined | pos_integer(), window_sync = undefined | boolean(), started_at = undefined | <a href="erlang.md#type-timestamp">erlang:timestamp()</a>, start_node = undefined | node()}
+flow() = #flow{id = binary(), module = module(), module_vsn = undefined | <a href="#type-module_vsn">module_vsn()</a>, stream_filter = undefined | string(), stream_names = undefined | <a href="#type-stream_names">stream_names()</a>, mapper_window = undefined | pos_integer(), mapper_nodes = undefined | [node()], mapper_opts = <a href="#type-mapper_opts">mapper_opts()</a>, reducer_window = undefined | pos_integer(), reducer_node = node(), reducer_opts = <a href="#type-reducer_opts">reducer_opts()</a>, reducer_skip = undefined | boolean(), output_opts = <a href="#type-output_opts">output_opts()</a>, heartbeat = undefined | pos_integer(), window_sync = undefined | boolean(), started_at = undefined | <a href="uerlang.md#type-timestamp">uerlang:timestamp()</a>, start_node = node()}
 </code></pre>
 
 
@@ -128,7 +128,7 @@ reducer_opts() = term()
 
 
 <pre><code>
-stream() = #stream{flow_id = undefined | binary(), flow_mod = undefined | module(), flow_mod_vsn = undefined | <a href="#type-module_vsn">module_vsn()</a>, start_node = undefined | node(), exp_tree = undefined | <a href="#type-exp_tree">exp_tree()</a>, mapper_opts = undefined | <a href="#type-mapper_opts">mapper_opts()</a>, table_id = undefined | <a href="ets.md#type-tab">ets:tab()</a>}
+stream() = #stream{flow_id = binary(), flow_mod = module(), flow_mod_vsn = <a href="#type-module_vsn">module_vsn()</a>, start_node = node(), exp_tree = undefined | <a href="#type-exp_tree">exp_tree()</a>, mapper_opts = <a href="#type-mapper_opts">mapper_opts()</a>, table_id = <a href="http://www.erlang.org/doc/man/ets.html#type-tab">ets:tab()</a>}
 </code></pre>
 
 

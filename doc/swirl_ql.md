@@ -16,7 +16,7 @@
 
 
 <pre><code>
-boolean_op() = 'and' | 'or'
+boolean_op() = and | or
 </code></pre>
 
 
@@ -26,7 +26,7 @@ boolean_op() = 'and' | 'or'
 
 
 <pre><code>
-comparison_op() = '&lt;' | '&lt;=' | '=' | '&gt;=' | '&gt;' | '&lt;&gt;'
+comparison_op() = &lt; | &lt;= | = | &gt;= | &gt; | &lt;&gt;
 </code></pre>
 
 
