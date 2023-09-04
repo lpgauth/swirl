@@ -35,7 +35,7 @@
     output_opts    :: output_opts(),
     heartbeat      :: undefined | pos_integer(),
     window_sync    :: undefined | boolean(),
-    started_at     :: undefined | uerlang:timestamp(),
+    started_at     :: undefined | erlang:timestamp(),
     start_node     :: node()
 }).
 
