@@ -1,5 +1,8 @@
 CACHEGRIND=qcachegrind
+REBAR3=$(shell which rebar3)
+ifeq ($(REBAR3),)
 REBAR3=./bin/rebar3
+endif
 
 all: compile
 
@@ -10,10 +13,6 @@ clean:
 compile:
 	@echo "Running rebar3 compile..."
 	@$(REBAR3) as compile compile
-
-coveralls:
-	@echo "Running rebar3 coveralls send..."
-	@$(REBAR3) as test coveralls send
 
 dialyzer:
 	@echo "Running rebar3 dialyze..."
@@ -38,8 +37,6 @@ profile:
 	@$(CACHEGRIND) fprofx.cgrind
 
 test: xref eunit dialyzer
-
-travis: test coveralls
 
 xref:
 	@echo "Running rebar3 xref..."
