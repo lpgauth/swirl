@@ -2,11 +2,9 @@
 
 High Performance Erlang Stream Processor
 
-[![Build Status](https://travis-ci.org/lpgauth/swirl.svg?branch=master)](https://travis-ci.org/lpgauth/swirl)
-
 ### Requirements
 
-* Erlang 16.0 +
+* Erlang 22.0 +
 
 ### Environment variables
 
@@ -146,7 +144,7 @@ make xref
 ```license
 The MIT License (MIT)
 
-Copyright (c) 2013-2016 Louis-Philippe Gauthier
+Copyright (c) 2013-2024 Louis-Philippe Gauthier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in
