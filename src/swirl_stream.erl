@@ -2,8 +2,6 @@
 -include("swirl.hrl").
 -compile([native]).
 
--include_lib("eunit/include/eunit.hrl").
-
 %% public
 -export([
     emit/2
