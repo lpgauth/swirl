@@ -1,8 +1,8 @@
 [{<<"quickrand">>,
   {git,"https://github.com/okeuday/quickrand.git",
-       {ref,"036f1a2037de541302438f7d0a31d5122aae98e2"}},
+       {ref,"98c097d9c367c5f5567c5b6ba74255f2b627d94f"}},
   1},
  {<<"uuid">>,
   {git,"https://github.com/okeuday/uuid.git",
-       {ref,"8e8a34e52817ab9e2a9378cf3b8ddeeed7b3cbae"}},
+       {ref,"00eebcdaa6f595727685046c5cd1d9ff846c5eb9"}},
   0}].
