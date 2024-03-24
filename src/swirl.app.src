@@ -1,6 +1,6 @@
 {application, swirl, [
   {description, "stream processor"},
-  {vsn, "0.2.5"},
+  {vsn, git}
   {registered, [
     swirl_ets_manager,
     swirl_sup,
