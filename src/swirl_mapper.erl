@@ -1,3 +1,5 @@
+%% TODO: add module vsn check to auto-refresh old modules from the code server
+
 -module(swirl_mapper).
 -include("swirl.hrl").
 
