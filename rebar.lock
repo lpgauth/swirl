@@ -4,5 +4,5 @@
   1},
  {<<"uuid">>,
   {git,"https://github.com/okeuday/uuid.git",
-       {ref,"7c2d1320c8e61e0fe25a66ecf4761e4b5b5803d6"}},
+       {ref,"63e32cdad70693495163ab131456905e827a5e36"}},
   0}].
