@@ -1,5 +1,5 @@
 {application, swirl, [
-  {description, "stream processor"},
+  {description, "High Performance Erlang Stream Processor"},
   {vsn, "0.2.9"},
   {registered, [
     swirl_ets_manager,
