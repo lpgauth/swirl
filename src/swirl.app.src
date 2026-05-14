@@ -12,5 +12,8 @@
     uuid
   ]},
   {mod, {swirl, []}},
-  {env, []}
+  {env, []},
+  {licenses, ["MIT"]},
+  {links, [{"GitHub", "https://github.com/lpgauth/swirl"}]},
+  {maintainers, ["Louis-Philippe Gauthier"]}
 ]}.
