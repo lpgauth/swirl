@@ -6,8 +6,12 @@ Pure infrastructure modernization. No source or API changes.
 
 ### Changed
 
-- Pinned `uuid` dep to `okeuday/uuid` tag `v2.0.7.1` (was unpinned
-  `master` branch, which is unsafe for reproducible builds).
+- Switched `uuid` dep from a git ref to the `uuid_erl` hex package
+  (`uuid_erl 2.0.7` — okeuday's Erlang UUID library is published to
+  hex under a renamed slot; the OTP app name stays `uuid`). The
+  previous git ref tracked an unpinned `master` branch, which was
+  unsafe for reproducible builds. The hex move also unblocks
+  publishing swirl itself to hex.
 - `fprofx` test dep moved from `ransomr/fprofx` to `lpgauth/fprofx`
   (`otp_19` branch), matching the rest of the ecosystem.
 - CI matrix bumped from OTP 24-26 to OTP 25-28.
