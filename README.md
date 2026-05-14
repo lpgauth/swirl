@@ -2,9 +2,11 @@
 
 High Performance Erlang Stream Processor
 
+![Build Status](https://github.com/lpgauth/swirl/workflows/Erlang%20CI/badge.svg)
+
 ### Requirements
 
-* Erlang 22.0 +
+* Erlang/OTP 25+
 
 ### Environment variables
 
