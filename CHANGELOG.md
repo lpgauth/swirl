@@ -1,5 +1,27 @@
 # Changelog
 
+## 0.2.9
+
+### Added
+
+- Four telemetry events covering flow lifecycle and window dispatch:
+
+  | Event | Measurements | Metadata |
+  |---|---|---|
+  | `[swirl, flow, start]`    | `count => 1` | `flow_id, module` |
+  | `[swirl, flow, stop]`     | `count => 1` | `flow_id, module` |
+  | `[swirl, mapper, window]` | `row_count` | `flow_id, period` |
+  | `[swirl, reducer, window]` | `row_count` | `flow_id, period` |
+
+  The window events fire per mapper / reducer flush — natural per-batch
+  granularity (not per-event, which would be too high-frequency).
+  Handlers attach via `telemetry:attach/4`.
+
+- `telemetry` (1.4.2) is now a direct dependency.
+
+No source or API changes beyond the instrumentation; behaviour
+unchanged.
+
 ## 0.2.8
 
 Pure infrastructure modernization. No source or API changes.

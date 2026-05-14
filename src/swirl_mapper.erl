@@ -194,6 +194,9 @@ flush_window(#flow {
     Rows = swirl_utils:tab2list(TableId),
     Msg = {mapper_window, Period, Rows},
     swirl_tracker:message(ReducerNode, FlowId, Msg),
+    telemetry:execute([swirl, mapper, window],
+                      #{row_count => length(Rows)},
+                      #{flow_id => FlowId, period => Period}),
     swirl_utils:safe_ets_delete(TableId).
 
 key(#flow {id = Id}) -> Id.

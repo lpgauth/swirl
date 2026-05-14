@@ -1,6 +1,6 @@
 {application, swirl, [
   {description, "stream processor"},
-  {vsn, "0.2.8"},
+  {vsn, "0.2.9"},
   {registered, [
     swirl_ets_manager,
     swirl_sup,
@@ -9,6 +9,7 @@
   {applications, [
     kernel,
     stdlib,
+    telemetry,
     uuid
   ]},
   {mod, {swirl, []}},

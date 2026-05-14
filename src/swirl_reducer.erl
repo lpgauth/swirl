@@ -170,12 +170,16 @@ code_change(_OldVsn, State, _Extra) ->
 flush_window(_Flow, _Period, undefined) ->
     ok;
 flush_window(#flow {
+        id = FlowId,
         reducer_skip = ReducerSkip
     } = Flow, Period, TableId) ->
 
     Rows = swirl_utils:tab2list(TableId),
     true = ets:delete(TableId),
     ReducedRows = reduce_rows(Flow, Rows, ReducerSkip),
+    telemetry:execute([swirl, reducer, window],
+                      #{row_count => length(ReducedRows)},
+                      #{flow_id => FlowId, period => Period}),
     output(Flow, Period, ReducedRows).
 
 key(#flow {id = FlowId}) -> FlowId.

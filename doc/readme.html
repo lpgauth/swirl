@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="x-ua-compatible" content="ie=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="generator" content="ExDoc v0.39.1">
+    <meta name="project" content="swirl v0.2.8">
+
+
+    <title>swirl — swirl v0.2.8</title>
+
+    <link rel="stylesheet" href="dist/html-erlang-7YNYEB7F.css" />
+
+    <script defer src="dist/sidebar_items-F3909FC3.js"></script>
+    <script defer src="docs_config.js"></script>
+    <script defer src="dist/html-HBZYRXZS.js"></script>
+
+  </head>
+  <body>
+    <script>(()=>{var t="ex_doc:settings",e="dark";var o="dark",s="light";var E="sidebar_state",n="closed";var r="sidebar_width";var a="sidebar-open";var i=new URLSearchParams(window.location.search),S=i.get("theme")||JSON.parse(localStorage.getItem(t)||"{}").theme;(S===o||S!==s&&window.matchMedia("(prefers-color-scheme: dark)").matches)&&document.body.classList.add(e);var d=sessionStorage.getItem(E),A=d!==n&&!window.matchMedia(`screen and (max-width: ${768}px)`).matches;document.body.classList.toggle(a,A);var c=sessionStorage.getItem(r);c&&document.body.style.setProperty("--sidebarWidth",`${c}px`);var p=/(Macintosh|iPhone|iPad|iPod)/.test(window.navigator.userAgent);document.documentElement.classList.toggle("apple-os",p);})();
+</script>
+
+<div class="body-wrapper">
+
+<button id="sidebar-menu" class="sidebar-button sidebar-toggle" aria-label="toggle sidebar" aria-controls="sidebar">
+  <i class="ri-menu-line ri-lg" title="Collapse/expand sidebar"></i>
+</button>
+
+<nav id="sidebar" class="sidebar">
+
+  <div class="sidebar-header">
+    <div class="sidebar-projectInfo">
+
+      <div>
+        <a href="readme.html" class="sidebar-projectName" translate="no">
+swirl
+        </a>
+        <div class="sidebar-projectVersion" translate="no">
+          v0.2.8
+        </div>
+      </div>
+    </div>
+    <ul id="sidebar-list-nav" class="sidebar-list-nav" role="tablist" data-extras=""></ul>
+  </div>
+</nav>
+
+<output role="status" id="toast"></output>
+
+<main class="content page-extra" id="main" data-type="extras">
+  <div id="content" class="content-inner">
+    <div class="top-search">
+      <div class="search-settings">
+        <form class="search-bar" action="search.html">
+          <label class="search-label">
+            <span class="sr-only">Search documentation of swirl</span>
+            <div class="search-input-wrapper">
+              <input name="q" type="text" class="search-input" placeholder="Press / to search" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" />
+              <button type="button" tabindex="-1" class="search-close-button" aria-hidden="true">
+                <i class="ri-close-line ri-lg" title="Cancel search"></i>
+              </button>
+            </div>
+          </label>
+        </form>
+        <div class="autocomplete">
+        </div>
+        <div class="engine-selector" data-multiple="false">
+          <button type="button" class="engine-button" aria-label="Select search engine" aria-haspopup="true" aria-expanded="false">
+            <i class="ri-search-2-line" aria-hidden="true"></i>
+            <span class="engine-name">Default</span>
+            <i class="ri-arrow-down-s-line" aria-hidden="true"></i>
+          </button>
+          <div class="engine-dropdown" hidden role="menu">
+
+              <button type="button"
+                      class="engine-option"
+                      data-engine-url="search.html?q="
+                      role="menuitemradio"
+                      aria-checked="true">
+                <span class="name">Default</span>
+                <span class="help">In-browser search</span>
+              </button>
+
+          </div>
+        </div>
+        <button class="icon-settings display-settings">
+          <i class="ri-settings-3-line"></i>
+          <span class="sr-only">Settings</span>
+        </button>
+      </div>
+    </div>
+
+<div id="top-content">
+  <div class="heading-with-actions top-heading">
+    <h1>swirl</h1>
+
+
+      <a href="https://github.com/lpgauth/swirl/blob/0.2.8/README.md#L1" title="View Source" class="icon-action" rel="help">
+        <i class="ri-code-s-slash-line" aria-hidden="true"></i>
+        <span class="sr-only">View Source</span>
+      </a>
+
+  </div>
+
+
+<p>High Performance Erlang Stream Processor</p><p><img src="https://github.com/lpgauth/swirl/workflows/Erlang%20CI/badge.svg" alt="Build Status"/></p><h3 id="requirements" class="section-heading"><a href="#requirements" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Requirements</span></h3><ul><li>Erlang/OTP 25+</li></ul><h3 id="environment-variables" class="section-heading"><a href="#environment-variables" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Environment variables</span></h3><table width="100%">  <theader>
+    <th>Name</th>
+    <th>Type</th>
+    <th>Default</th>
+    <th>Description</th>
+  </theader>
+  <tr>
+    <td>mappers_max</td>
+    <td>pos_integer()</td>
+    <td>100</td>
+    <td>maximum number of mappers</td>
+  </tr>
+  <tr>
+    <td>reducers_max</td>
+    <td>pos_integer()</td>
+    <td>100</td>
+    <td>maximum number of reducers</td>
+  </tr></table><h2 id="examples" class="section-heading"><a href="#examples" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Examples</span></h2><h4>Starting a flow</h4><pre><code class="makeup erlang" translate="no"><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">application</span><span class="p">:</span><span class="nf">start</span><span class="p" data-group-id="2373628213-1">(</span><span class="ss">swirl</span><span class="p" data-group-id="2373628213-1">)</span><span class="p">,</span><span class="w">
+
+</span><span class="n">FlowMod</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">swirl_flow_example</span><span class="p">,</span><span class="w">
+</span><span class="n">FlowOpts</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="2373628213-2">[</span><span class="w">
+    </span><span class="p" data-group-id="2373628213-3">{</span><span class="ss">stream_names</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="2373628213-4">[</span><span class="ss">delivery</span><span class="p" data-group-id="2373628213-4">]</span><span class="p" data-group-id="2373628213-3">}</span><span class="p">,</span><span class="w">
+    </span><span class="p" data-group-id="2373628213-5">{</span><span class="ss">stream_filter</span><span class="p">,</span><span class="w"> </span><span class="s">&quot;exchange_id = 3 AND bidder_id IS NOT NULL&quot;</span><span class="p" data-group-id="2373628213-5">}</span><span class="w">
+</span><span class="p" data-group-id="2373628213-2">]</span><span class="p">,</span><span class="w">
+</span><span class="n">MapperNodes</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="2373628213-6">[</span><span class="nf">node</span><span class="p" data-group-id="2373628213-7">(</span><span class="p" data-group-id="2373628213-7">)</span><span class="p" data-group-id="2373628213-6">]</span><span class="p">,</span><span class="w">
+</span><span class="n">ReducerNode</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nf">node</span><span class="p" data-group-id="2373628213-8">(</span><span class="p" data-group-id="2373628213-8">)</span><span class="p">,</span><span class="w">
+</span><span class="p" data-group-id="2373628213-9">{</span><span class="ss">ok</span><span class="p">,</span><span class="w"> </span><span class="n">Flow</span><span class="p" data-group-id="2373628213-9">}</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">swirl_flow</span><span class="p">:</span><span class="nf">start</span><span class="p" data-group-id="2373628213-10">(</span><span class="n">FlowMod</span><span class="p">,</span><span class="w"> </span><span class="n">FlowOpts</span><span class="p">,</span><span class="w"> </span><span class="n">MapperNodes</span><span class="p">,</span><span class="w"> </span><span class="n">ReducerNode</span><span class="p" data-group-id="2373628213-10">)</span><span class="p">,</span><span class="w">
+
+</span><span class="n">StreamName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="ss">delivery</span><span class="p">,</span><span class="w">
+</span><span class="n">Event</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="2373628213-11">#{</span><span class="ss">exchange_id</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="ss">bidder_id</span><span class="w"> </span><span class="p">=&gt;</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="2373628213-11">}</span><span class="p">,</span><span class="w">
+
+</span><span class="nc">swirl_stream</span><span class="p">:</span><span class="nf">emit</span><span class="p" data-group-id="2373628213-12">(</span><span class="n">StreamName</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span><span class="p" data-group-id="2373628213-12">)</span><span class="p">,</span><span class="w">
+
+</span><span class="ss">ok</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">swirl_flow</span><span class="p">:</span><span class="nf">stop</span><span class="p" data-group-id="2373628213-13">(</span><span class="n">Flow</span><span class="p" data-group-id="2373628213-13">)</span></code></pre><h4>Implementing a flow</h4><pre><code class="makeup erlang" translate="no"><span class="p">-</span><span class="na">module</span><span class="p" data-group-id="1950160781-1">(</span><span class="ss">swirl_flow_example</span><span class="p" data-group-id="1950160781-1">)</span><span class="p">.</span><span class="w">
+</span><span class="p">-</span><span class="na">include_lib</span><span class="p" data-group-id="1950160781-2">(</span><span class="s">&quot;swirl/include/swirl.hrl&quot;</span><span class="p" data-group-id="1950160781-2">)</span><span class="p">.</span><span class="w">
+</span><span class="w">
+</span><span class="p">-</span><span class="na">behavior</span><span class="p" data-group-id="1950160781-3">(</span><span class="ss">swirl_flow</span><span class="p" data-group-id="1950160781-3">)</span><span class="p">.</span><span class="w">
+</span><span class="p">-</span><span class="na">export</span><span class="p" data-group-id="1950160781-4">(</span><span class="p" data-group-id="1950160781-5">[</span><span class="w">
+    </span><span class="ss">map</span><span class="p">/</span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="ss">reduce</span><span class="p">/</span><span class="mi">3</span><span class="p">,</span><span class="w">
+    </span><span class="ss">output</span><span class="p">/</span><span class="mi">4</span><span class="w">
+</span><span class="p" data-group-id="1950160781-5">]</span><span class="p" data-group-id="1950160781-4">)</span><span class="p">.</span><span class="w">
+
+</span><span class="c1">%% swirl_flow callbacks</span><span class="w">
+</span><span class="nf">map</span><span class="p" data-group-id="1950160781-6">(</span><span class="n">StreamName</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="n">MapperOpts</span><span class="p" data-group-id="1950160781-6">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Type</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="n">L</span><span class="p" data-group-id="1950160781-7">(</span><span class="ss">type</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span><span class="p" data-group-id="1950160781-7">)</span><span class="p">,</span><span class="w">
+    </span><span class="n">ExchangeId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="n">L</span><span class="p" data-group-id="1950160781-8">(</span><span class="ss">exchange_id</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span><span class="p" data-group-id="1950160781-8">)</span><span class="p">,</span><span class="w">
+    </span><span class="n">BidderId</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="o">?</span><span class="n">L</span><span class="p" data-group-id="1950160781-9">(</span><span class="ss">bidder_id</span><span class="p">,</span><span class="w"> </span><span class="n">Event</span><span class="p" data-group-id="1950160781-9">)</span><span class="p">,</span><span class="w">
+
+    </span><span class="n">Key</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1950160781-10">{</span><span class="n">Type</span><span class="p">,</span><span class="w"> </span><span class="n">StreamName</span><span class="p">,</span><span class="w"> </span><span class="n">ExchangeId</span><span class="p">,</span><span class="w"> </span><span class="n">BidderId</span><span class="p" data-group-id="1950160781-10">}</span><span class="p">,</span><span class="w">
+    </span><span class="n">CounterIncrements</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="p" data-group-id="1950160781-11">{</span><span class="mi">1</span><span class="p">,</span><span class="w"> </span><span class="mi">10</span><span class="p" data-group-id="1950160781-11">}</span><span class="p">,</span><span class="w">
+
+    </span><span class="p" data-group-id="1950160781-12">{</span><span class="n">Key</span><span class="p">,</span><span class="w"> </span><span class="n">CounterIncrements</span><span class="p" data-group-id="1950160781-12">}</span><span class="p">.</span><span class="w">
+
+</span><span class="nf">reduce</span><span class="p" data-group-id="1950160781-13">(</span><span class="p">_</span><span class="n">Flow</span><span class="p">,</span><span class="w"> </span><span class="n">Row</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="n">ReducerOpts</span><span class="p" data-group-id="1950160781-13">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="n">Row</span><span class="p">.</span><span class="w">
+
+</span><span class="nf">output</span><span class="p" data-group-id="1950160781-14">(</span><span class="p">_</span><span class="n">Flow</span><span class="p">,</span><span class="w"> </span><span class="p">_</span><span class="n">Period</span><span class="p">,</span><span class="w"> </span><span class="n">Rows</span><span class="p">,</span><span class="w"> </span><span class="n">OutputOpts</span><span class="p" data-group-id="1950160781-14">)</span><span class="w"> </span><span class="p">-&gt;</span><span class="w">
+    </span><span class="c1">%% do something with the output</span><span class="w">
+    </span><span class="nc">io</span><span class="p">:</span><span class="nf">format</span><span class="p" data-group-id="1950160781-15">(</span><span class="s">&quot;rows: </span><span class="si">~p</span><span class="si">~n</span><span class="s">&quot;</span><span class="p">,</span><span class="w"> </span><span class="p" data-group-id="1950160781-16">[</span><span class="n">Rows</span><span class="p" data-group-id="1950160781-16">]</span><span class="p" data-group-id="1950160781-15">)</span><span class="p">,</span></code></pre><h4>Stream Filter</h4><pre><code class="makeup erlang" translate="no"><span class="ss">exchange_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">3</span><span class="w"> </span><span class="n">AND</span><span class="w"> </span><span class="ss">bidder_id</span><span class="w"> </span><span class="n">IS</span><span class="w"> </span><span class="n">NOT</span><span class="w"> </span><span class="n">NULL</span><span class="w">
+</span><span class="ss">flight_id</span><span class="w"> </span><span class="nf">in</span><span class="w"> </span><span class="p" data-group-id="0161738532-1">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">12</span><span class="p">,</span><span class="w"> </span><span class="mi">23</span><span class="p" data-group-id="0161738532-1">)</span><span class="w"> </span><span class="n">OR</span><span class="w"> </span><span class="ss">tag_id</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">20</span><span class="w">
+</span><span class="ss">buyer_id</span><span class="w"> </span><span class="ss">notnull</span><span class="w"> </span><span class="n">AND</span><span class="w"> </span><span class="ss">seller_id</span><span class="w"> </span><span class="o">&gt;</span><span class="w"> </span><span class="mi">103</span></code></pre><h4>Swirl QL</h4><p>variables:</p><pre><code class="makeup erlang" translate="no"><span class="nf">atom</span><span class="p" data-group-id="7249829374-1">(</span><span class="p" data-group-id="7249829374-1">)</span></code></pre><p>values:</p><pre><code class="makeup erlang" translate="no"><span class="nf">integer</span><span class="p" data-group-id="2473729139-1">(</span><span class="p" data-group-id="2473729139-1">)</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">float</span><span class="p" data-group-id="2473729139-2">(</span><span class="p" data-group-id="2473729139-2">)</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="nf">binary</span><span class="p" data-group-id="2473729139-3">(</span><span class="p" data-group-id="2473729139-3">)</span></code></pre><p>boolean operators:</p><pre><code class="makeup erlang" translate="no"><span class="ss">&#39;and&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">&#39;or&#39;</span></code></pre><p>comparison operators:</p><pre><code class="makeup erlang" translate="no"><span class="ss">&#39;&lt;&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">&#39;&lt;=&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">&#39;=&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">&#39;&gt;=&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">&#39;&gt;&#39;</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">&#39;&lt;&gt;&#39;</span></code></pre><p>inclusion operators:</p><pre><code class="makeup erlang" translate="no"><span class="ss">in</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">notin</span></code></pre><p>null operators:</p><pre><code class="makeup erlang" translate="no"><span class="ss">null</span><span class="w"> </span><span class="p">|</span><span class="w"> </span><span class="ss">notnull</span></code></pre><h2 id="todo" class="section-heading"><a href="#todo" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">TODO</span></h2><ul><li>node discovery</li><li>boolean expression indexing</li></ul><h2 id="tests" class="section-heading"><a href="#tests" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">Tests</span></h2><pre><code class="makefile">make dialyzer
+make elvis
+make eunit
+make xref</code></pre><h2 id="license" class="section-heading"><a href="#license" class="hover-link"><i class="ri-link-m" aria-hidden="true"></i></a><span class="text">License</span></h2><pre><code class="license">The MIT License (MIT)
+
+Copyright (c) 2013-2024 Louis-Philippe Gauthier
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the &quot;Software&quot;), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of
+the Software, and to permit persons to whom the Software is furnished to do so,
+subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED &quot;AS IS&quot;, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS
+FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER
+IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.</code></pre>
+
+</div>
+
+<div class="bottom-actions" id="bottom-actions">
+  <div class="bottom-actions-item">
+
+  </div>
+  <div class="bottom-actions-item">
+
+      <a href="changelog.html" class="bottom-actions-button" rel="next">
+        <span class="subheader">
+          Next Page →
+        </span>
+        <span class="title">
+Changelog
+        </span>
+      </a>
+
+  </div>
+</div>
+    <footer class="footer">
+      <p>
+
+          <span class="line">
+            <a href="https://hex.pm/packages/swirl/0.2.8" class="footer-hex-package">Hex Package</a>
+
+            <a href="https://preview.hex.pm/preview/swirl/0.2.8">Hex Preview</a>
+
+              (<a href="https://preview.hex.pm/preview/swirl/0.2.8/show/README.md">current file</a>)
+
+          </span>
+
+        <span class="line">
+          <button class="a-main footer-button display-quick-switch" title="Search HexDocs packages">
+            Search HexDocs
+          </button>
+
+            <a href="swirl.epub" title="ePub version">
+              Download ePub version
+            </a>
+
+        </span>
+      </p>
+
+      <p class="built-using">
+        Built using
+        <a href="https://github.com/elixir-lang/ex_doc" title="ExDoc" target="_blank" rel="help noopener" translate="no">ExDoc</a> (v0.39.1) for the
+
+          <a href="https://erlang.org" title="Erlang" target="_blank" translate="no">Erlang programming language</a>
+
+      </p>
+
+    </footer>
+  </div>
+</main>
+</div>
+
+  </body>
+</html>

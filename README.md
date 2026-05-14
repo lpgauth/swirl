@@ -128,6 +128,21 @@ null operators:
 null | notnull
 ```
 
+## Telemetry
+
+swirl emits four telemetry events covering flow lifecycle and window
+dispatch. Attach handlers via `telemetry:attach/4`:
+
+| Event | Measurements | Metadata |
+|---|---|---|
+| `[swirl, flow, start]`     | `count => 1` | `flow_id, module` |
+| `[swirl, flow, stop]`      | `count => 1` | `flow_id, module` |
+| `[swirl, mapper, window]`  | `row_count` | `flow_id, period` |
+| `[swirl, reducer, window]` | `row_count` | `flow_id, period` |
+
+Window events fire per mapper / reducer flush — natural per-batch
+granularity, not per-event.
+
 ## TODO
 * node discovery
 * boolean expression indexing
@@ -135,10 +150,7 @@ null | notnull
 ## Tests
 
 ```makefile
-make dialyzer
-make elvis
-make eunit
-make xref
+make test
 ```
 
 ## License
@@ -146,7 +158,7 @@ make xref
 ```license
 The MIT License (MIT)
 
-Copyright (c) 2013-2024 Louis-Philippe Gauthier
+Copyright (c) 2013-2026 Louis-Philippe Gauthier
 
 Permission is hereby granted, free of charge, to any person obtaining a copy of
 this software and associated documentation files (the "Software"), to deal in

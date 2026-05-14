@@ -30,9 +30,12 @@
 
 start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
     case flow(FlowMod, FlowOpts, MapperNodes, ReducerNode) of
-        {ok, Flow} ->
+        {ok, #flow {id = Id, module = Module} = Flow} ->
             ok = swirl_tracker:start_reducer(Flow),
             ok = swirl_tracker:start_mappers(Flow),
+            telemetry:execute([swirl, flow, start],
+                              #{count => 1},
+                              #{flow_id => Id, module => Module}),
             {ok, Flow};
         {error, Reason} ->
             {error, Reason}
@@ -41,9 +44,12 @@ start(FlowMod, FlowOpts, MapperNodes, ReducerNode) ->
 -spec stop(flow()) ->
     ok.
 
-stop(#flow {} = Flow) ->
+stop(#flow {id = Id, module = Module} = Flow) ->
     ok = swirl_tracker:stop_mappers(Flow),
     ok = swirl_tracker:stop_reducer(Flow),
+    telemetry:execute([swirl, flow, stop],
+                      #{count => 1},
+                      #{flow_id => Id, module => Module}),
     ok.
 
 %% internal
